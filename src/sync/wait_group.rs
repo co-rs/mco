@@ -23,7 +23,7 @@ use crate::sync::{Condvar, Mutex};
 /// # Examples
 ///
 /// ```
-/// use crossbeam_utils::sync::WaitGroup;
+/// use cogo::sync::WaitGroup;
 /// use std::thread;
 ///
 /// // Create a new wait group.
@@ -34,6 +34,17 @@ use crate::sync::{Condvar, Mutex};
 ///     let wg = wg.clone();
 ///
 ///     thread::spawn(move || {
+///         // Do some work.
+///
+///         // Drop the reference to the wait group.
+///         drop(wg);
+///     });
+/// }
+/// for _ in 0..4 {
+///     // Create another reference to the wait group.
+///     let wg = wg.clone();
+///
+///     go!(move || {
 ///         // Do some work.
 ///
 ///         // Drop the reference to the wait group.
@@ -73,7 +84,7 @@ impl WaitGroup {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_utils::sync::WaitGroup;
+    /// use cogo::sync::WaitGroup;
     ///
     /// let wg = WaitGroup::new();
     /// ```
@@ -86,7 +97,7 @@ impl WaitGroup {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_utils::sync::WaitGroup;
+    /// use cogo::sync::WaitGroup;
     /// use std::thread;
     ///
     /// let wg = WaitGroup::new();
