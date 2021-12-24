@@ -531,7 +531,7 @@ pub(crate) fn select_deadline<'a>(
 /// Use [`select`] to receive a message from a list of receivers:
 ///
 /// ```
-/// use crossbeam_channel::{Receiver, RecvError, Select};
+/// use cogo::std::channel::{Receiver, RecvError, Select};
 ///
 /// fn recv_multiple<T>(rs: &[Receiver<T>]) -> Result<T, RecvError> {
 ///     // Build a list of operations.
@@ -550,7 +550,7 @@ pub(crate) fn select_deadline<'a>(
 /// Use [`ready`] to receive a message from a list of receivers:
 ///
 /// ```
-/// use crossbeam_channel::{Receiver, RecvError, Select};
+/// use cogo::std::channel::{Receiver, RecvError, Select};
 ///
 /// fn recv_multiple<T>(rs: &[Receiver<T>]) -> Result<T, RecvError> {
 ///     // Build a list of operations.
@@ -600,7 +600,7 @@ impl<'a> Select<'a> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_channel::Select;
+    /// use cogo::std::channel::Select;
     ///
     /// let mut sel = Select::new();
     ///
@@ -621,7 +621,7 @@ impl<'a> Select<'a> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_channel::{unbounded, Select};
+    /// use cogo::std::channel::{unbounded, Select};
     ///
     /// let (s, r) = unbounded::<i32>();
     ///
@@ -643,7 +643,7 @@ impl<'a> Select<'a> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_channel::{unbounded, Select};
+    /// use cogo::std::channel::{unbounded, Select};
     ///
     /// let (s, r) = unbounded::<i32>();
     ///
@@ -673,7 +673,7 @@ impl<'a> Select<'a> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_channel::{unbounded, Select};
+    /// use cogo::std::channel::{unbounded, Select};
     ///
     /// let (s1, r1) = unbounded::<i32>();
     /// let (_, r2) = unbounded::<i32>();
@@ -728,7 +728,7 @@ impl<'a> Select<'a> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_channel::{unbounded, Select};
+    /// use cogo::std::channel::{unbounded, Select};
     ///
     /// let (s1, r1) = unbounded();
     /// let (s2, r2) = unbounded();
@@ -775,7 +775,7 @@ impl<'a> Select<'a> {
     /// ```
     /// use std::thread;
     /// use std::time::Duration;
-    /// use crossbeam_channel::{unbounded, Select};
+    /// use cogo::std::channel::{unbounded, Select};
     ///
     /// let (s1, r1) = unbounded();
     /// let (s2, r2) = unbounded();
@@ -819,7 +819,7 @@ impl<'a> Select<'a> {
     /// ```
     /// use std::thread;
     /// use std::time::Duration;
-    /// use crossbeam_channel::{unbounded, Select};
+    /// use cogo::std::channel::{unbounded, Select};
     ///
     /// let (s1, r1) = unbounded();
     /// let (s2, r2) = unbounded();
@@ -869,7 +869,7 @@ impl<'a> Select<'a> {
     /// ```
     /// use std::thread;
     /// use std::time::{Instant, Duration};
-    /// use crossbeam_channel::{unbounded, Select};
+    /// use cogo::std::channel::{unbounded, Select};
     ///
     /// let (s1, r1) = unbounded();
     /// let (s2, r2) = unbounded();
@@ -919,7 +919,7 @@ impl<'a> Select<'a> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_channel::{unbounded, Select};
+    /// use cogo::std::channel::{unbounded, Select};
     ///
     /// let (s1, r1) = unbounded();
     /// let (s2, r2) = unbounded();
@@ -966,7 +966,7 @@ impl<'a> Select<'a> {
     /// ```
     /// use std::thread;
     /// use std::time::Duration;
-    /// use crossbeam_channel::{unbounded, Select};
+    /// use cogo::std::channel::{unbounded, Select};
     ///
     /// let (s1, r1) = unbounded();
     /// let (s2, r2) = unbounded();
@@ -1013,7 +1013,7 @@ impl<'a> Select<'a> {
     /// ```
     /// use std::thread;
     /// use std::time::Duration;
-    /// use crossbeam_channel::{unbounded, Select};
+    /// use cogo::std::channel::{unbounded, Select};
     ///
     /// let (s1, r1) = unbounded();
     /// let (s2, r2) = unbounded();
@@ -1057,7 +1057,7 @@ impl<'a> Select<'a> {
     /// ```
     /// use std::thread;
     /// use std::time::{Duration, Instant};
-    /// use crossbeam_channel::{unbounded, Select};
+    /// use cogo::std::channel::{unbounded, Select};
     ///
     /// let deadline = Instant::now() + Duration::from_millis(500);
     ///
@@ -1143,7 +1143,7 @@ impl SelectedOperation<'_> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_channel::{bounded, Select};
+    /// use cogo::std::channel::{bounded, Select};
     ///
     /// let (s1, r1) = bounded::<()>(0);
     /// let (s2, r2) = bounded::<()>(0);
@@ -1178,7 +1178,7 @@ impl SelectedOperation<'_> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_channel::{bounded, Select, SendError};
+    /// use cogo::std::channel::{bounded, Select, SendError};
     ///
     /// let (s, r) = bounded::<i32>(0);
     /// drop(r);
@@ -1212,7 +1212,7 @@ impl SelectedOperation<'_> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_channel::{bounded, Select, RecvError};
+    /// use cogo::std::channel::{bounded, Select, RecvError};
     ///
     /// let (s, r) = bounded::<i32>(0);
     /// drop(s);

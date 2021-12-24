@@ -135,7 +135,7 @@ impl<T> SendError<T> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_channel::unbounded;
+    /// use cogo::std::channel::unbounded;
     ///
     /// let (s, r) = unbounded();
     /// drop(r);
@@ -183,7 +183,7 @@ impl<T> TrySendError<T> {
     /// # Examples
     ///
     /// ```
-    /// use crossbeam_channel::bounded;
+    /// use cogo::std::channel::bounded;
     ///
     /// let (s, r) = bounded(0);
     ///
@@ -247,7 +247,7 @@ impl<T> SendTimeoutError<T> {
     ///
     /// ```
     /// use std::time::Duration;
-    /// use crossbeam_channel::unbounded;
+    /// use cogo::std::channel::unbounded;
     ///
     /// let (s, r) = unbounded();
     ///

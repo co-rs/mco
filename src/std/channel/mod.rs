@@ -5,7 +5,7 @@
 //! # Hello, world!
 //!
 //! ```
-//! use crossbeam_channel::unbounded;
+//! use cogo::std::channel::unbounded;
 //!
 //! // Create a channel of unbounded capacity.
 //! let (s, r) = unbounded();
@@ -33,7 +33,7 @@
 //! Creating a bounded channel:
 //!
 //! ```
-//! use crossbeam_channel::bounded;
+//! use cogo::std::channel::bounded;
 //!
 //! // Create a channel that can hold at most 5 messages at a time.
 //! let (s, r) = bounded(5);
@@ -50,7 +50,7 @@
 //! Creating an unbounded channel:
 //!
 //! ```
-//! use crossbeam_channel::unbounded;
+//! use cogo::std::channel::unbounded;
 //!
 //! // Create an unbounded channel.
 //! let (s, r) = unbounded();
@@ -66,7 +66,7 @@
 //!
 //! ```
 //! use std::thread;
-//! use crossbeam_channel::bounded;
+//! use cogo::std::channel::bounded;
 //!
 //! // Create a zero-capacity channel.
 //! let (s, r) = bounded(0);
@@ -84,7 +84,7 @@
 //!
 //! ```
 //! use std::thread;
-//! use crossbeam_channel::bounded;
+//! use cogo::std::channel::bounded;
 //!
 //! let (s1, r1) = bounded(0);
 //! let (s2, r2) = (s1.clone(), r1.clone());
@@ -104,7 +104,7 @@
 //! create a separate stream of messages in any way:
 //!
 //! ```
-//! use crossbeam_channel::unbounded;
+//! use cogo::std::channel::unbounded;
 //!
 //! let (s1, r1) = unbounded();
 //! let (s2, r2) = (s1.clone(), r1.clone());
@@ -122,7 +122,7 @@
 //! It's also possible to share senders and receivers by reference:
 //!
 //! ```
-//! use crossbeam_channel::bounded;
+//! use cogo::std::channel::bounded;
 //! use crossbeam_utils::thread::scope;
 //!
 //! let (s, r) = bounded(0);
@@ -147,7 +147,7 @@
 //! Send and receive operations on a disconnected channel never block.
 //!
 //! ```
-//! use crossbeam_channel::{unbounded, RecvError};
+//! use cogo::std::channel::{unbounded, RecvError};
 //!
 //! let (s, r) = unbounded();
 //! s.send(1).unwrap();
@@ -181,7 +181,7 @@
 //! A simple example showing the difference between non-blocking and blocking operations:
 //!
 //! ```
-//! use crossbeam_channel::{bounded, RecvError, TryRecvError};
+//! use cogo::std::channel::{bounded, RecvError, TryRecvError};
 //!
 //! let (s, r) = bounded(1);
 //!
@@ -215,7 +215,7 @@
 //!
 //! ```
 //! use std::thread;
-//! use crossbeam_channel::unbounded;
+//! use cogo::std::channel::unbounded;
 //!
 //! let (s, r) = unbounded();
 //!
@@ -237,7 +237,7 @@
 //! messages without blocking:
 //!
 //! ```
-//! use crossbeam_channel::unbounded;
+//! use cogo::std::channel::unbounded;
 //!
 //! let (s, r) = unbounded();
 //! s.send(1).unwrap();
@@ -268,7 +268,7 @@
 //! ```
 //! use std::thread;
 //! use std::time::Duration;
-//! use crossbeam_channel::{select, unbounded};
+//! use cogo::std::channel::{select, unbounded};
 //!
 //! let (s1, r1) = unbounded();
 //! let (s2, r2) = unbounded();
@@ -302,7 +302,7 @@
 //!
 //! ```
 //! use std::time::{Duration, Instant};
-//! use crossbeam_channel::{after, select, tick};
+//! use cogo::std::channel::{after, select, tick};
 //!
 //! let start = Instant::now();
 //! let ticker = tick(Duration::from_millis(50));
@@ -322,50 +322,42 @@
 //! [`try_iter`]: Receiver::try_iter
 
 #![doc(test(
-    no_crate_inject,
-    attr(
-        deny(warnings, rust_2018_idioms),
-        allow(dead_code, unused_assignments, unused_variables)
-    )
+no_crate_inject,
+attr(
+deny(warnings, rust_2018_idioms),
+allow(dead_code, unused_assignments, unused_variables)
+)
 ))]
 #![warn(
-    missing_docs,
-    missing_debug_implementations,
-    rust_2018_idioms,
-    unreachable_pub
+missing_docs,
+missing_debug_implementations,
+rust_2018_idioms,
+unreachable_pub
 )]
-#![cfg_attr(not(feature = "std"), no_std)]
 
-//use cfg_if::cfg_if;
+mod channel;
+mod context;
+mod counter;
+mod err;
+mod flavors;
+mod select;
+mod utils;
+mod waker;
 
-// cfg_if! {
-//     if #[cfg(feature = "std")] {
-        mod channel;
-        mod context;
-        mod counter;
-        mod err;
-        mod flavors;
-        mod select;
-        mod select_macro;
-        mod utils;
-        mod waker;
+/// Crate internals used by the `select!` macro.
+#[doc(hidden)]
+pub mod internal {
+    pub use crate::std::channel::select::SelectHandle;
+    pub use crate::std::channel::select::{select, select_timeout, try_select};
+}
 
-        /// Crate internals used by the `select!` macro.
-        #[doc(hidden)]
-        pub mod internal {
-            pub use crate::std::channel::select::SelectHandle;
-            pub use crate::std::channel::select::{select, select_timeout, try_select};
-        }
+pub use crate::std::channel::channel::{after, at, never, tick};
+pub use crate::std::channel::channel::{bounded, unbounded};
+pub use crate::std::channel::channel::{IntoIter, Iter, TryIter};
+pub use crate::std::channel::channel::{Receiver, Sender};
 
-        pub use crate::std::channel::channel::{after, at, never, tick};
-        pub use crate::std::channel::channel::{bounded, unbounded};
-        pub use crate::std::channel::channel::{IntoIter, Iter, TryIter};
-        pub use crate::std::channel::channel::{Receiver, Sender};
+pub use crate::std::channel::select::{Select, SelectedOperation};
 
-        pub use crate::std::channel::select::{Select, SelectedOperation};
-
-        pub use crate::std::channel::err::{ReadyTimeoutError, SelectTimeoutError, TryReadyError, TrySelectError};
-        pub use crate::std::channel::err::{RecvError, RecvTimeoutError, TryRecvError};
-        pub use crate::std::channel::err::{SendError, SendTimeoutError, TrySendError};
-//     }
-// }
+pub use crate::std::channel::err::{ReadyTimeoutError, SelectTimeoutError, TryReadyError, TrySelectError};
+pub use crate::std::channel::err::{RecvError, RecvTimeoutError, TryRecvError};
+pub use crate::std::channel::err::{SendError, SendTimeoutError, TrySendError};
