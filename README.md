@@ -5,7 +5,7 @@ Cogo is a high-performance library for programming stackful coroutines with whic
 </div>
 
 
-Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Many code improvements
+Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Many code improvements(Inspired by ```Golang``` and [crossbeam](https://github.com/crossbeam-rs/crossbeam))
 
 ----------
 
