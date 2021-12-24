@@ -39,7 +39,7 @@ Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Man
 * x86_64 GNU/Linux, x86_64 Windows, x86_64 Mac, aarch64 Linux OS are supported.
 
 
-* Support High performance channel(3 times better performance), adapted from CrossBeam's channel(from crossbeam);
+* Support High performance channel(3 times better performance, Support the buffer), adapted from CrossBeam's channel(from crossbeam);
 * Support WaitGroup(like golang)
 
 ----------
