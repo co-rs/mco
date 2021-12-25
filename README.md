@@ -8,6 +8,17 @@ Cogo is a high-performance library for programming stackful coroutines with whic
 Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Many code improvements(Inspired by ```Golang``` and [crossbeam](https://github.com/crossbeam-rs/crossbeam))
 
 ----------
+# cogo-std libraray
+* ``` cogo/std/channel ``` An MPMC queues, which support buffering, are also implementations of channel
+* ``` cogo/std/http ``` An HTTP server is available，An HTTP Client(TODO)
+* ``` cogo/std/queue ```
+* ``` cogo/std/sync ```  Includes basic mutex, WaitGroup, and other common synchronization constructs
+
+## Crates based on cogo implementation
+* [cdbc](https://github.com/co-rs/cdbc)  High-performance database drivers include mysql, PG, AND SQLite
+* [fast_log](https://github.com/co-rs/fast_log) an fast log impl
+
+
 
 ## Table of contents
 * [Features](#features)
