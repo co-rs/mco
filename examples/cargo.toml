@@ -77,6 +77,10 @@ path = "src/spawn.rs"
 name = "websocket"
 path = "src/websocket.rs"
 
+[[bin]]
+name = "waitgroup"
+path = "src/wait_group.rs"
+
 [dependencies]
 cogo = {path = "../"}
 generator = "0.7"
