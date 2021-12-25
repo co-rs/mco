@@ -8,7 +8,39 @@ mod bench {
     use std::sync::mpsc::channel;
     use std::sync::Arc;
     use std::thread;
-    use crate::std::queue::test_queue::ScBlockPop;
+    use cogo::std::queue::spsc::Queue;
+
+    #[cfg(test)]
+    mod test_queue {
+        pub trait ScBlockPop<T> {
+            fn block_pop(&self) -> T;
+        }
+
+        macro_rules! block_pop_sc_impl {
+        // `()` indicates that the macro takes no argument.
+        ($queue:path) => {
+            impl<T> ScBlockPop<T> for cogo::std::queue::spsc::Queue<T> {
+                fn block_pop(&self) -> T {
+                    let mut i = 0;
+                    loop {
+                        if let Some(v) = self.pop() {
+                            return v;
+                        }
+
+                        if i > 10 {
+                            i = 0;
+                            ::std::thread::yield_now();
+                        }
+                        i += 1;
+                    }
+                }
+            }
+        };
+     }
+
+        block_pop_sc_impl!(cogo::std::queue::spsc);
+    }
+    use test_queue::ScBlockPop;
 
 
     #[test]

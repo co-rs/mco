@@ -4,9 +4,10 @@ mod bench {
     extern crate test;
     use self::test::Bencher;
 
-    use super::Queue;
+
     use std::sync::mpsc::channel;
     use std::thread;
+    use cogo::std::queue::mpmc_bounded::Queue;
 
     #[bench]
     fn bounded_mpmc(b: &mut Bencher) {
