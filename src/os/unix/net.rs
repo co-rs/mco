@@ -857,7 +857,7 @@ impl UnixDatagram {
             }
         }
 
-        let mut reader = net_impl::SocketRead::new(&self.0, buf, self.read_timeout().unwrap());
+        let mut reader = net_impl::SocketRead::new(&self.0, buf, self.read_timeout()?);
         yield_with(&reader);
         reader.done()
     }
@@ -937,7 +937,7 @@ impl UnixDatagram {
             }
         }
 
-        let mut writer = net_impl::SocketWrite::new(&self.0, buf, self.0.write_timeout().unwrap());
+        let mut writer = net_impl::SocketWrite::new(&self.0, buf, self.0.write_timeout()?);
         yield_with(&writer);
         writer.done()
     }
