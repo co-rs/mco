@@ -510,7 +510,7 @@ pub(crate) fn select_deadline<'a>(
 /// An operation is considered to be ready if it doesn't have to block. Note that it is ready even
 /// when it will simply return an error because the channel is disconnected.
 ///
-/// The [`select!`] macro is a convenience wrapper around `Select`. However, it cannot select over a
+/// The [`cogo::select!`] macro is a convenience wrapper around `Select`. However, it cannot select over a
 /// dynamically created list of channel operations.
 ///
 /// Once a list of operations has been built with `Select`, there are two different ways of

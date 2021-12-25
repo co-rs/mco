@@ -44,7 +44,7 @@ use crate::std::sync::{Condvar, Mutex};
 ///     // Create another reference to the wait group.
 ///     let wg = wg.clone();
 ///
-///     go!(move || {
+///     cogo::go!(move || {
 ///         // Do some work.
 ///
 ///         // Drop the reference to the wait group.

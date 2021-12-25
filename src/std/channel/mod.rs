@@ -253,7 +253,7 @@
 //!
 //! # Selection
 //!
-//! The [`select!`] macro allows you to define a set of channel operations, wait until any one of
+//! The [`cogo::select!`] macro allows you to define a set of channel operations, wait until any one of
 //! them becomes ready, and finally execute it. If multiple operations are ready at the same time,
 //! a random one among them is selected.
 //!
@@ -263,64 +263,6 @@
 //! An operation is considered to be ready if it doesn't have to block. Note that it is ready even
 //! when it will simply return an error because the channel is disconnected.
 //!
-//! An example of receiving a message from two channels:
-//!
-//! ```
-//! use std::thread;
-//! use std::time::Duration;
-//! use cogo::std::channel::{select, unbounded};
-//!
-//! let (s1, r1) = unbounded();
-//! let (s2, r2) = unbounded();
-//!
-//! thread::spawn(move || s1.send(10).unwrap());
-//! thread::spawn(move || s2.send(20).unwrap());
-//!
-//! // At most one of these two receive operations will be executed.
-//! select! {
-//!     recv(r1) -> msg => assert_eq!(msg, Ok(10)),
-//!     recv(r2) -> msg => assert_eq!(msg, Ok(20)),
-//!     default(Duration::from_secs(1)) => println!("timed out"),
-//! }
-//! ```
-//!
-//! If you need to select over a dynamically created list of channel operations, use [`Select`]
-//! instead. The [`select!`] macro is just a convenience wrapper around [`Select`].
-//!
-//! # Extra channels
-//!
-//! Three functions can create special kinds of channels, all of which return just a [`Receiver`]
-//! handle:
-//!
-//! * [`after`] creates a channel that delivers a single message after a certain duration of time.
-//! * [`tick`] creates a channel that delivers messages periodically.
-//! * [`never`](never()) creates a channel that never delivers messages.
-//!
-//! These channels are very efficient because messages get lazily generated on receive operations.
-//!
-//! An example that prints elapsed time every 50 milliseconds for the duration of 1 second:
-//!
-//! ```
-//! use std::time::{Duration, Instant};
-//! use cogo::std::channel::{after, select, tick};
-//!
-//! let start = Instant::now();
-//! let ticker = tick(Duration::from_millis(50));
-//! let timeout = after(Duration::from_secs(1));
-//!
-//! loop {
-//!     select! {
-//!         recv(ticker) -> _ => println!("elapsed: {:?}", start.elapsed()),
-//!         recv(timeout) -> _ => break,
-//!     }
-//! }
-//! ```
-//!
-//! [`send`]: Sender::send
-//! [`recv`]: Receiver::recv
-//! [`iter`]: Receiver::iter
-//! [`try_iter`]: Receiver::try_iter
-
 #![doc(test(
 no_crate_inject,
 attr(
@@ -344,14 +286,14 @@ mod select;
 mod utils;
 mod waker;
 
-/// Crate internals used by the `select!` macro.
+/// Crate internals used by the `cogo::select!` macro.
 #[doc(hidden)]
 pub mod internal {
     pub use crate::std::channel::select::SelectHandle;
     pub use crate::std::channel::select::{select, select_timeout, try_select};
 }
 
-pub use crate::std::channel::channel::{after, at, never, tick};
+pub use crate::std::channel::channel::{tick};
 pub use crate::std::channel::channel::{bounded, unbounded};
 pub use crate::std::channel::channel::{IntoIter, Iter, TryIter};
 pub use crate::std::channel::channel::{Receiver, Sender};
