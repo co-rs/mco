@@ -41,6 +41,7 @@ Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Man
 
 * Support High performance channel(3 times better performance, Support the buffer), adapted from CrossBeam's channel(from crossbeam);
 * Support WaitGroup(like golang)
+* Support Disable stealing and commit directly to the local queue
 
 ----------
 
