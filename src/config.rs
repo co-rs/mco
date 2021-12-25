@@ -95,6 +95,8 @@ impl Config {
         self
     }
 
+    /// default is disable steal
+    /// if you want steal, call set_worker_steal(true);
     pub fn get_worker_steal(&self) -> bool {
         let steal = WORKER_STEAL.load(Ordering::Acquire);
         steal
