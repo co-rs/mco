@@ -9,8 +9,8 @@ use crate::coroutine_impl::{
 };
 use crate::join::JoinHandle;
 use crate::scoped::spawn_unsafe;
-use crate::sync::Mutex;
-use crate::sync::{AtomicOption, Blocker};
+use crate::std::sync::Mutex;
+use crate::std::sync::{AtomicOption, Blocker};
 use crate::yield_now::yield_with;
 
 use crossbeam::queue::SegQueue as Queue;

@@ -10,8 +10,8 @@ use crate::coroutine_impl::{co_cancel_data, run_coroutine, CoroutineImpl, EventS
 use crate::scheduler::get_scheduler;
 use crate::std::queue::spsc;
 use crate::std::queue::spsc::Queue;
-use crate::sync::atomic_dur::AtomicDuration;
-use crate::sync::AtomicOption;
+use crate::std::sync::atomic_dur::AtomicDuration;
+use crate::std::sync::AtomicOption;
 use crate::timeout_list::TimeoutHandle;
 use crate::yield_now::{get_co_para, yield_now, yield_with};
 

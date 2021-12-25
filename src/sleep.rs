@@ -1,4 +1,4 @@
-use crate::sync::AtomicOption;
+use crate::std::sync::AtomicOption;
 use std::sync::Arc;
 use std::thread;
 use std::time::Duration;

@@ -242,8 +242,8 @@ pub fn guard_poison<'a, T: ?Sized>(guard: &MutexGuard<'a, T>) -> &'a poison::Fla
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::sync::mpsc::channel;
-    use crate::sync::Condvar;
+    use crate::std::sync::mpsc::channel;
+    use crate::std::sync::Condvar;
     use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::Arc;
     use std::thread;

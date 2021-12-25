@@ -5,7 +5,7 @@ use std::sync::Arc;
 use std::thread::Result;
 
 use crate::coroutine_impl::Coroutine;
-use crate::sync::{AtomicOption, Blocker};
+use crate::std::sync::{AtomicOption, Blocker};
 use crossbeam::atomic::AtomicCell;
 use generator::Error;
 

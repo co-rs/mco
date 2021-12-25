@@ -6,7 +6,7 @@ use super::super::{co_io_result, EventData};
 use crate::coroutine_impl::{co_cancel_data, CoroutineImpl, EventSource};
 use crate::io::cancel::CancelIoData;
 use crate::scheduler::get_scheduler;
-use crate::sync::delay_drop::DelayDrop;
+use crate::std::sync::delay_drop::DelayDrop;
 use miow::net::TcpStreamExt;
 use winapi::shared::ntdef::*;
 

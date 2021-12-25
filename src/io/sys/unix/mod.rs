@@ -28,7 +28,7 @@ use std::{fmt, io, ptr};
 
 use crate::coroutine_impl::{run_coroutine, CoroutineImpl};
 use crate::scheduler::get_scheduler;
-use crate::sync::AtomicOption;
+use crate::std::sync::AtomicOption;
 use crate::timeout_list::{TimeOutList, TimeoutHandle};
 use crate::yield_now::{get_co_para, set_co_para};
 

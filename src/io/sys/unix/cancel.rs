@@ -4,7 +4,7 @@ use std::sync::Arc;
 use super::EventData;
 use crate::cancel::CancelIo;
 use crate::scheduler::get_scheduler;
-use crate::sync::AtomicOption;
+use crate::std::sync::AtomicOption;
 
 pub struct CancelIoImpl(AtomicOption<Arc<EventData>>);
 

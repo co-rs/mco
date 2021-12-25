@@ -9,7 +9,7 @@ use crate::io::cancel::CancelIoData;
 use crate::io::OptionCell;
 use crate::net::TcpStream;
 use crate::scheduler::get_scheduler;
-use crate::sync::delay_drop::DelayDrop;
+use crate::std::sync::delay_drop::DelayDrop;
 use miow::net::TcpStreamExt;
 use winapi::shared::ntdef::*;
 

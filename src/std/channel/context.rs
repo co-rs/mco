@@ -9,7 +9,7 @@ use std::time::Instant;
 use crossbeam_utils::Backoff;
 
 use crate::std::channel::select::Selected;
-use crate::sync::Blocker;
+use crate::std::sync::Blocker;
 
 /// Thread-local context used in select.
 #[derive(Debug, Clone)]

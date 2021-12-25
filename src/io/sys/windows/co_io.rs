@@ -10,7 +10,7 @@ use std::time::Duration;
 use self::io_impl::co_io_err::Error;
 use super::pipe::{PipeRead, PipeWrite};
 use crate::io as io_impl;
-use crate::sync::atomic_dur::AtomicDuration;
+use crate::std::sync::atomic_dur::AtomicDuration;
 use crate::yield_now::yield_with;
 
 /// Generic wrapper for any type that can be converted to raw `fd/HANDLE`

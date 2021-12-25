@@ -8,7 +8,7 @@ use crate::config::config;
 use crate::coroutine_impl::{run_coroutine, CoroutineImpl};
 use crate::io::{EventLoop, Selector};
 use crate::pool::CoroutinePool;
-use crate::sync::AtomicOption;
+use crate::std::sync::AtomicOption;
 use crate::timeout_list;
 use crate::yield_now::set_co_para;
 use crossbeam::deque;

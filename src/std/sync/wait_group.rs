@@ -3,7 +3,7 @@
 
 use std::fmt;
 use std::sync::Arc;
-use crate::sync::{Condvar, Mutex};
+use crate::std::sync::{Condvar, Mutex};
 
 /// Enables threads to synchronize the beginning or end of some computation.
 ///

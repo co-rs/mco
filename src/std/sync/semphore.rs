@@ -172,7 +172,7 @@ impl fmt::Debug for Semphore {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::sync::mpsc::channel;
+    use crate::std::sync::mpsc::channel;
     use std::sync::Arc;
     use std::thread;
     use std::time::Duration;

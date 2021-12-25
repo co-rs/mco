@@ -205,8 +205,8 @@ impl Default for Condvar {
 
 #[cfg(test)]
 mod tests {
-    use crate::sync::mpsc::channel;
-    use crate::sync::{Condvar, Mutex};
+    use crate::std::sync::mpsc::channel;
+    use crate::std::sync::{Condvar, Mutex};
     use std::sync::Arc;
     use std::thread;
     use std::time::Duration;

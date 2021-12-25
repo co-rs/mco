@@ -6,7 +6,7 @@ use std::thread;
 use crate::coroutine_impl::CoroutineImpl;
 use crate::io::cancel::CancelIoImpl;
 use crate::scheduler::get_scheduler;
-use crate::sync::AtomicOption;
+use crate::std::sync::AtomicOption;
 use crate::yield_now::{get_co_para, set_co_para};
 use generator::Error;
 

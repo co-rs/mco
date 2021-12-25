@@ -1019,7 +1019,7 @@ pub fn channel_bounded<T>(cap: usize) -> (crate::std::channel::Sender<T>, crate:
 //
 //     #[test]
 //     fn stress_mutli_recv() {
-//         use crate::sync::mpsc;
+//         use crate::std::sync::mpsc;
 //         let (tx, rx) = channel();
 //         let (tx1, rx1) = mpsc::channel();
 //         let stress = stress_factor() + 100;

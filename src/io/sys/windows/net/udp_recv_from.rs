@@ -8,7 +8,7 @@ use crate::coroutine_impl::{co_cancel_data, CoroutineImpl, EventSource};
 use crate::io::cancel::CancelIoData;
 use crate::net::UdpSocket;
 use crate::scheduler::get_scheduler;
-use crate::sync::delay_drop::DelayDrop;
+use crate::std::sync::delay_drop::DelayDrop;
 use miow::net::{SocketAddrBuf, UdpSocketExt};
 use winapi::shared::ntdef::*;
 
