@@ -112,35 +112,37 @@ fn cqueue_poll() {
     println!("cqueue finished");
 }
 
-// #[test]
-// fn cqueue_oneshot() {
-//     use cogo::std::sync::mpsc::channel;
-//
-//     let (tx1, rx1) = channel();
-//     let (tx2, rx2) = channel();
-//
-//     cqueue::scope(|cqueue| {
-//         cqueue_add_oneshot!(cqueue, 0, _ = rx1.recv() => println!("rx1 received"));
-//         cqueue_add_oneshot!(cqueue, 1, a = rx2.recv() => println!("rx2 received, a={:?}", a));
-//
-//         tx1.send("hello").unwrap();
-//         match cqueue.poll(None) {
-//             Ok(ev) => println!("ev = {:?}", ev),
-//             _ => unreachable!(),
-//         }
-//
-//         tx2.send(100).unwrap();
-//         match cqueue.poll(None) {
-//             Ok(ev) => println!("ev = {:?}", ev),
-//             _ => unreachable!(),
-//         }
-//
-//         match cqueue.poll(None) {
-//             Err(x) => assert_eq!(x, Finished),
-//             _ => unreachable!(),
-//         }
-//     });
-// }
+#[test]
+fn cqueue_oneshot() {
+    // oneshot only support open set_work_steal true
+    cogo::config().set_work_steal(false);
+    use cogo::std::sync::mpsc::channel;
+
+    let (tx1, rx1) = channel();
+    let (tx2, rx2) = channel();
+
+    cqueue::scope(|cqueue| {
+        cqueue_add_oneshot!(cqueue, 0, _ = rx1.recv() => println!("rx1 received"));
+        cqueue_add_oneshot!(cqueue, 1, a = rx2.recv() => println!("rx2 received, a={:?}", a));
+
+        tx1.send("hello").unwrap();
+        match cqueue.poll(None) {
+            Ok(ev) => println!("ev = {:?}", ev),
+            _ => unreachable!(),
+        }
+
+        tx2.send(100).unwrap();
+        match cqueue.poll(None) {
+            Ok(ev) => println!("ev = {:?}", ev),
+            _ => unreachable!(),
+        }
+
+        match cqueue.poll(None) {
+            Err(x) => assert_eq!(x, Finished),
+            _ => unreachable!(),
+        }
+    });
+}
 
 #[test]
 fn cqueue_select() {
