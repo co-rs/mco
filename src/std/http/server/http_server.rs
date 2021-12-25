@@ -25,7 +25,7 @@ macro_rules! t {
                     return;
                 }
 
-                error!("call = {:?}\nerr = {:?}", stringify!($e), err);
+                //error!("call = {:?}\nerr = {:?}", stringify!($e), err);
                 return;
             }
         }
@@ -37,7 +37,7 @@ macro_rules! t_c {
         match $e {
             Ok(val) => val,
             Err(err) => {
-                error!("call = {:?}\nerr = {:?}", stringify!($e), err);
+                //error!("call = {:?}\nerr = {:?}", stringify!($e), err);
                 continue;
             }
         }
@@ -74,7 +74,7 @@ pub trait HttpServiceFactory: Send + Sized + 'static {
 }
 
 fn internal_error_rsp(e: io::Error, buf: &mut BytesMut) -> Response {
-    error!("error in service: err = {:?}", e);
+    //error!("error in service: err = {:?}", e);
     buf.clear();
     let mut err_rsp = Response::new(buf);
     err_rsp.status_code("500", "Internal Server Error");
@@ -124,7 +124,7 @@ fn each_connection_loop<T: HttpService>(mut stream: TcpStream, mut service: T) {
                         // info!("http server read req: connection closed");
                         return;
                     }
-                    error!("call = {:?}\nerr = {:?}", stringify!($e), err);
+                    //error!("call = {:?}\nerr = {:?}", stringify!($e), err);
                     return;
                 }
             }
@@ -167,7 +167,7 @@ fn each_connection_loop<T: HttpService>(mut stream: TcpStream, mut service: T) {
                             // info!("http server read req: connection closed");
                             return;
                         }
-                        error!("call = {:?}\nerr = {:?}", stringify!($e), err);
+                        //error!("call = {:?}\nerr = {:?}", stringify!($e), err);
                         return;
                     }
                 }

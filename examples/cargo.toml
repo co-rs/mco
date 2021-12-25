@@ -79,7 +79,7 @@ path = "src/websocket.rs"
 
 [dependencies]
 cogo = {path = "../"}
-
+generator = "0.7"
 bytes = "1.0"
 serde = "1.0"
 docopt = "1.0"
