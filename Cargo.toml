@@ -32,6 +32,11 @@ generator = "0.7"
 crossbeam = "0.8"
 crossbeam-utils = {version = "0.8",features = ["std"]}
 
+#http
+bytes = "1.1.0"
+httparse = "1"
+itoa = "0.4"
+
 [target.'cfg(unix)'.dependencies]
 nix = "0.21"
 libc = "0.2"
