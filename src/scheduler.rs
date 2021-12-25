@@ -16,6 +16,7 @@ use crossbeam::utils::Backoff;
 
 #[cfg(nightly)]
 use std::intrinsics::likely;
+
 #[cfg(not(nightly))]
 #[inline]
 fn likely(e: bool) -> bool {
@@ -222,9 +223,14 @@ impl Scheduler {
                     })
                     .find_map(|r| r)
                     // Try stealing a batch of tasks from the global queue.
-                    .or_else(|| steal_global(&self.global_queue, local))
+                    .or_else(||
+                        {
+                            if self.global_queue.len() == 0 {
+                                return None;
+                            }
+                            steal_global(&self.global_queue, local)
+                        })
             });
-
             if let Some(co) = co {
                 run_coroutine(co);
             } else {
@@ -240,9 +246,9 @@ impl Scheduler {
     #[inline]
     pub fn schedule(&self, co: CoroutineImpl) {
         #[cfg(nightly)]
-        let id = WORKER_ID.load(Ordering::Relaxed);
+            let id = WORKER_ID.load(Ordering::Relaxed);
         #[cfg(not(nightly))]
-        let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
+            let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
 
         if id == !1 {
             self.schedule_global(co);

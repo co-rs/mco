@@ -27,10 +27,10 @@ fn yield_bench(b: &mut Bencher) {
 
 #[bench]
 fn spawn_bench(b: &mut Bencher) {
-    //test spawn_bench    ... bench:     735,933 ns/iter (+/- 121,738)
+    //test spawn_bench    ... bench:     657,233 ns/iter (+/- 38,624)
     config().set_worker_steal(false);
 
-    //test spawn_bench    ... bench:   1,803,980 ns/iter (+/- 370,607)
+    //test spawn_bench    ... bench:   1,731,980 ns/iter (+/- 203,088)
     config().set_worker_steal(true);
 
     b.iter(|| {
