@@ -323,6 +323,7 @@ impl<T> TimerThread<T> {
 
 #[cfg(test)]
 mod tests {
+    #![feature(test)]
     use super::*;
     use std::sync::Arc;
     use std::thread;

@@ -205,12 +205,14 @@ impl Default for Condvar {
 
 #[cfg(test)]
 mod tests {
+    #![feature(test)]
     use crate::std::sync::mpsc::channel;
     use crate::std::sync::{Condvar, Mutex};
     use std::sync::Arc;
     use std::thread;
     use std::time::Duration;
     use std::u32;
+    use crate::std::channel::TryRecvError;
 
     #[test]
     fn smoke() {
@@ -315,7 +317,6 @@ mod tests {
 
     #[test]
     fn test_condvar_canceled() {
-        use std::sync::mpsc::TryRecvError;
         const N: usize = 10;
 
         let data = Arc::new((Mutex::new(0), Condvar::new()));

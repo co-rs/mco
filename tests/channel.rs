@@ -1,8 +1,8 @@
 use std::time::Duration;
 use cogo::coroutine::sleep;
 use cogo::go;
-use cogo::sync::mpmc::channel;
-use cogo::sync::WaitGroup;
+use cogo::std::sync::mpmc::channel;
+use cogo::std::sync::WaitGroup;
 
 #[test]
 fn channel_recv() {

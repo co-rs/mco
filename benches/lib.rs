@@ -5,6 +5,9 @@
 extern crate cogo;
 extern crate test;
 
+mod mpmc_bounded;
+mod spsc;
+
 use crate::coroutine::*;
 use cogo::{config, coroutine};
 use test::Bencher;

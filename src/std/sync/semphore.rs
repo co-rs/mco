@@ -24,7 +24,7 @@ use crossbeam::queue::SegQueue as WaitList;
 /// ```rust
 /// use std::sync::Arc;
 /// use cogo::coroutine;
-/// use cogo::sync::Semphore;
+/// use cogo::std::sync::Semphore;
 ///
 /// let sem = Arc::new(Semphore::new(0));
 /// let sem2 = sem.clone();
@@ -171,11 +171,13 @@ impl fmt::Debug for Semphore {
 
 #[cfg(test)]
 mod tests {
+    #![feature(test)]
     use super::*;
     use crate::std::sync::mpsc::channel;
     use std::sync::Arc;
     use std::thread;
     use std::time::Duration;
+    use crate::std::channel::TryRecvError;
 
     #[test]
     fn sanity_1() {
@@ -217,7 +219,6 @@ mod tests {
         // thread::sleep(Duration::from_secs(1));
         // println!("sem={:?}", sem);
 
-        use std::sync::mpsc::TryRecvError;
         assert_eq!(rx.try_recv(), Err(TryRecvError::Empty));
 
         for _i in 0..total - init {

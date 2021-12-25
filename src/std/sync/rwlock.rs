@@ -319,6 +319,7 @@ impl<'a, T: ?Sized> Drop for RwLockWriteGuard<'a, T> {
 
 #[cfg(test)]
 mod tests {
+    #![feature(test)]
     use crate::std::sync::mpsc::channel;
     use crate::std::sync::{Condvar, Mutex, RwLock};
     use std::sync::atomic::{AtomicUsize, Ordering};

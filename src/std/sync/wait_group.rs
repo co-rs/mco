@@ -23,7 +23,7 @@ use crate::std::sync::{Condvar, Mutex};
 /// # Examples
 ///
 /// ```
-/// use cogo::sync::WaitGroup;
+/// use cogo::std::sync::WaitGroup;
 /// use std::thread;
 ///
 /// // Create a new wait group.
@@ -84,7 +84,7 @@ impl WaitGroup {
     /// # Examples
     ///
     /// ```
-    /// use cogo::sync::WaitGroup;
+    /// use cogo::std::sync::WaitGroup;
     ///
     /// let wg = WaitGroup::new();
     /// ```
@@ -97,7 +97,7 @@ impl WaitGroup {
     /// # Examples
     ///
     /// ```
-    /// use cogo::sync::WaitGroup;
+    /// use cogo::std::sync::WaitGroup;
     /// use std::thread;
     ///
     /// let wg = WaitGroup::new();

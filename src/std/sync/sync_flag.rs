@@ -26,7 +26,7 @@ use crossbeam::queue::SegQueue;
 /// ```rust
 /// use std::sync::Arc;
 /// use cogo::coroutine;
-/// use cogo::sync::SyncFlag;
+/// use cogo::std::sync::SyncFlag;
 ///
 /// let flag = Arc::new(SyncFlag::new());
 /// let flag2 = flag.clone();
@@ -152,6 +152,7 @@ impl fmt::Debug for SyncFlag {
 
 #[cfg(test)]
 mod tests {
+    #![feature(test)]
     use super::*;
     use std::sync::Arc;
     use std::thread;

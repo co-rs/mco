@@ -116,6 +116,7 @@ impl<T> Drop for Queue<T> {
 
 #[cfg(test)]
 mod tests {
+    #![feature(test)]
     use super::*;
     use std::sync::mpsc::channel;
     use std::sync::Arc;

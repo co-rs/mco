@@ -233,6 +233,7 @@ impl<T: AsRawFd + Write> Write for CoIo<T> {
 
 #[cfg(test)]
 mod tests {
+    #![feature(test)]
     use super::*;
 
     #[allow(dead_code)]
