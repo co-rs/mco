@@ -1,7 +1,4 @@
-#![cfg_attr(all(nightly, test), feature(test))]
-
 mod block_node;
-
 pub mod mpmc_bounded;
 pub mod mpsc_list;
 pub mod mpsc_list_v1;
