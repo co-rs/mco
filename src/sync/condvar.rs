@@ -1,8 +1,7 @@
 //! compatible with std::sync::condvar except for both thread and coroutine
 //! please ref the doc from std::sync::condvar
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::Arc;
-use std::sync::{LockResult, PoisonError};
+use std::sync::{Arc, LockResult, PoisonError};
 use std::time::Duration;
 
 use crate::cancel::trigger_cancel_panic;
@@ -54,7 +53,7 @@ impl Condvar {
             c.disable_cancel();
         }
 
-        let g = self.to_wake.lock().unwrap();
+        let g = self.to_wake.lock()?;
         g.push(cur.clone());
         drop(g);
 
@@ -153,27 +152,29 @@ impl Condvar {
         }
     }
 
-    pub fn notify_one(&self) {
+    pub fn notify_one(&self) -> Result<(), ParkError> {
         // NOTICE: the following code would not drop the lock!
         // if let Some(w) = self.to_wake.lock().unwrap().pop() {
 
-        let g = self.to_wake.lock().unwrap();
+        let g = self.to_wake.lock()?;
         let w = g.pop();
         drop(g);
 
         if let Some(w) = w {
-            w.unpark();
+            w.unpark()?;
             if w.take_release() {
-                self.notify_one();
+                self.notify_one()?;
             }
         }
+        Ok(())
     }
 
-    pub fn notify_all(&self) {
-        let g = self.to_wake.lock().unwrap();
+    pub fn notify_all(&self) -> Result<(), ParkError> {
+        let g = self.to_wake.lock()?;
         while let Some(w) = g.pop() {
-            w.unpark();
+            w.unpark()?;
         }
+        Ok(())
     }
 
     fn verify(&self, addr: usize) {

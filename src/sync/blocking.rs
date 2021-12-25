@@ -24,12 +24,12 @@ impl ThreadPark {
 
     fn park_timeout(&self, dur: Option<Duration>) -> Result<(), ParkError> {
         let mut result = Ok(());
-        let mut guard = self.lock.lock().unwrap();
+        let mut guard = self.lock.lock()?;
         while !*guard && result.is_ok() {
             let g = match dur {
-                None => self.cvar.wait(guard).unwrap(),
+                None => self.cvar.wait(guard)?,
                 Some(t) => {
-                    let (g, t) = self.cvar.wait_timeout(guard, t).unwrap();
+                    let (g, t) = self.cvar.wait_timeout(guard, t)?;
                     if t.timed_out() {
                         result = Err(ParkError::Timeout);
                     }
@@ -43,12 +43,13 @@ impl ThreadPark {
         result
     }
 
-    fn unpark(&self) {
-        let mut guard = self.lock.lock().unwrap();
+    fn unpark(&self) -> Result<(), ParkError> {
+        let mut guard = self.lock.lock()?;
         if !*guard {
             *guard = true;
             self.cvar.notify_one();
         }
+        Ok(())
     }
 }
 
@@ -86,17 +87,19 @@ impl Blocker {
     #[inline]
     pub fn park(&self, timeout: Option<Duration>) -> Result<(), ParkError> {
         match self.parker {
-            Parker::Coroutine(ref co) => co.park_timeout(timeout),
-            Parker::Thread(ref t) => t.park_timeout(timeout),
+            Parker::Coroutine(ref co) => co.park_timeout(timeout)?,
+            Parker::Thread(ref t) => t.park_timeout(timeout)?,
         }
+        Ok(())
     }
 
     #[inline]
-    pub fn unpark(&self) {
+    pub fn unpark(&self) -> Result<(), ParkError> {
         match self.parker {
             Parker::Coroutine(ref co) => co.unpark(),
-            Parker::Thread(ref t) => t.unpark(),
+            Parker::Thread(ref t) => t.unpark()?,
         }
+        Ok(())
     }
 }
 
@@ -173,8 +176,9 @@ impl SyncBlocker {
     }
 
     #[inline]
-    pub fn unpark(&self) {
-        self.blocker.unpark();
+    pub fn unpark(&self) -> Result<(), ParkError> {
+        self.blocker.unpark()?;
         self.unparked.store(true, Ordering::Release);
+        Ok(())
     }
 }

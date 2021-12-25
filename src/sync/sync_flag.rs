@@ -66,13 +66,14 @@ impl SyncFlag {
     }
 
     #[inline]
-    fn wakeup_all(&self) {
+    fn wakeup_all(&self) -> Result<(),ParkError>{
         while let Some(w) = self.to_wake.pop() {
-            w.unpark();
+            w.unpark()?;
             if w.take_release() {
                 self.fire();
             }
         }
+        Ok(())
     }
 
     // return false if timeout

@@ -2,12 +2,14 @@ use std::fmt;
 use std::io::ErrorKind;
 use std::ptr;
 use std::sync::atomic::{AtomicBool, AtomicPtr, AtomicUsize, Ordering};
-use std::sync::Arc;
+use std::sync::{Arc, PoisonError};
 use std::time::Duration;
 
 use crate::cancel::Cancel;
 use crate::coroutine_impl::{co_cancel_data, run_coroutine, CoroutineImpl, EventSource};
 use crate::scheduler::get_scheduler;
+use crate::std::queue::spsc;
+use crate::std::queue::spsc::Queue;
 use crate::sync::atomic_dur::AtomicDuration;
 use crate::sync::AtomicOption;
 use crate::timeout_list::TimeoutHandle;
@@ -18,6 +20,13 @@ pub enum ParkError {
     Canceled,
     Timeout,
 }
+
+impl <T>From<PoisonError<T>> for ParkError{
+    fn from(_: PoisonError<T>) -> Self {
+        Self::Timeout
+    }
+}
+
 
 pub struct DropGuard<'a>(&'a Park);
 pub struct Park {

@@ -62,7 +62,7 @@ impl Semphore {
         self.to_wake
             .pop()
             .map(|w| {
-                w.unpark();
+                w.unpark().unwrap();
                 if w.take_release() {
                     self.post();
                 }

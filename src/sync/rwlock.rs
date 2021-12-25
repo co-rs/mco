@@ -135,11 +135,12 @@ impl<T: ?Sized> RwLock<T> {
         }
     }
 
-    fn unpark_one(&self, w: &SyncBlocker) {
-        w.unpark();
+    fn unpark_one(&self, w: &SyncBlocker) -> Result<(),ParkError>{
+        w.unpark()?;
         if w.take_release() {
             self.unlock();
         }
+        Ok(())
     }
 
     pub fn read(&self) -> LockResult<RwLockReadGuard<T>> {
