@@ -352,6 +352,9 @@ impl Builder {
         F: FnOnce() -> T + Send + 'static,
         T: Send + 'static,
     {
+        if !config().get_worker_steal() {
+            return Self::spawn_local(self,f);
+        }
         // we will still get optimizations in spawn_impl
         let (co, handle) = self.spawn_impl(f)?;
 

@@ -6,7 +6,7 @@ extern crate cogo;
 extern crate test;
 
 use crate::coroutine::*;
-use cogo::coroutine;
+use cogo::{config, coroutine};
 use test::Bencher;
 use cogo::std::channel::unbounded;
 use cogo::sync::mpsc::channel;
@@ -27,6 +27,12 @@ fn yield_bench(b: &mut Bencher) {
 
 #[bench]
 fn spawn_bench(b: &mut Bencher) {
+    //test spawn_bench    ... bench:     735,933 ns/iter (+/- 121,738)
+    config().set_worker_steal(false);
+
+    //test spawn_bench    ... bench:   1,803,980 ns/iter (+/- 370,607)
+    config().set_worker_steal(true);
+
     b.iter(|| {
         let total_work = 1000;
         let threads = 2;
