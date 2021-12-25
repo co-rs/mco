@@ -1,4 +1,4 @@
-use std::io::{self, Read, Write};
+use std::io::{self, ErrorKind, Read, Write};
 use std::net::{self, Shutdown, SocketAddr, ToSocketAddrs};
 use std::time::Duration;
 
@@ -94,8 +94,8 @@ impl TcpStream {
     #[cfg(not(windows))]
     pub fn try_clone(&self) -> io::Result<TcpStream> {
         let s = self.sys.try_clone().and_then(TcpStream::new)?;
-        s.set_read_timeout(self.read_timeout.get()).unwrap();
-        s.set_write_timeout(self.write_timeout.get()).unwrap();
+        s.set_read_timeout(self.read_timeout.get())?;
+        s.set_write_timeout(self.write_timeout.get())?;
         Ok(s)
     }
 
@@ -339,7 +339,11 @@ impl TcpListener {
     pub fn bind<A: ToSocketAddrs>(addr: A) -> io::Result<TcpListener> {
         use socket2::{Domain, Socket, Type};
         let mut addrs = addr.to_socket_addrs()?;
-        let addr = addrs.next().unwrap();
+        let next = addrs.next();
+        if next.is_none(){
+            return io::Result::Err(io::Error::new(ErrorKind::Other, "addrs.next() is none!"));
+        }
+        let addr = next.unwrap();
         let listener = match &addr {
             SocketAddr::V4(_) => Socket::new(Domain::IPV4, Type::STREAM, None)?,
             SocketAddr::V6(_) => Socket::new(Domain::IPV6, Type::STREAM, None)?,
