@@ -1,7 +1,7 @@
 use crate::std::channel::{bounded, unbounded};
 
-type Sender<T> = crate::std::channel::Sender<T>;
-type Receiver<T> = crate::std::channel::Sender<T>;
+pub type Sender<T> = crate::std::channel::Sender<T>;
+pub type Receiver<T> = crate::std::channel::Sender<T>;
 
 pub fn channel<T>() -> (crate::std::channel::Sender<T>, crate::std::channel::Receiver<T>) {
     unbounded()
