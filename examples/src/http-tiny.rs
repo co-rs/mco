@@ -15,7 +15,7 @@ impl HttpService for HelloWorld {
 }
 
 fn main() {
-    println!("start on http:127.0.0.1:8080");
+    println!("start on http://127.0.0.1:8080");
     let server = HttpServer(HelloWorld).start("0.0.0.0:8080").unwrap();
     server.wait();
 }

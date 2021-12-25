@@ -1,0 +1,90 @@
+[package]
+name = "example"
+version = "0.1.0"
+authors = ["zhuxiujia <zhuxiujia@qq.com>"]
+edition = "2021"
+publish = false
+
+[[bin]]
+name = "channel"
+path = "src/channel.rs"
+
+[[bin]]
+name = "cqueue"
+path = "src/cqueue.rs"
+
+[[bin]]
+name = "echo"
+path = "src/echo.rs"
+
+[[bin]]
+name = "echo_client"
+path = "src/echo_client.rs"
+
+[[bin]]
+name = "echo_udp"
+path = "src/echo_udp.rs"
+
+[[bin]]
+name = "echo_udp_client"
+path = "src/echo_udp_client.rs"
+
+[[bin]]
+name = "echo_udp_client1"
+path = "src/echo_udp_client1.rs"
+
+[[bin]]
+name = "gen"
+path = "src/gen.rs"
+
+[[bin]]
+name = "general_io"
+path = "src/general_io.rs"
+
+[[bin]]
+name = "http"
+path = "src/http.rs"
+
+[[bin]]
+name = "http-tiny"
+path = "src/http-tiny.rs"
+
+[[bin]]
+name = "https"
+path = "src/https.rs"
+
+[[bin]]
+name = "scoped"
+path = "src/scoped.rs"
+
+[[bin]]
+name = "select"
+path = "src/select.rs"
+
+[[bin]]
+name = "single_thread_schedule"
+path = "src/single_thread_schedule.rs"
+
+[[bin]]
+name = "sleep"
+path = "src/sleep.rs"
+
+[[bin]]
+name = "spawn"
+path = "src/spawn.rs"
+
+[[bin]]
+name = "websocket"
+path = "src/websocket.rs"
+
+[dependencies]
+cogo = {path = "../"}
+
+bytes = "1.0"
+serde = "1.0"
+docopt = "1.0"
+tempdir = "0.3"
+httparse = "1.1"
+native-tls = "0.2"
+tungstenite = "0.13"
+serde_derive = "1.0"

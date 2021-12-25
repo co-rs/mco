@@ -1,3 +1,8 @@
+[workspace]
+members = [
+    "examples"
+]
+
 [package]
 name = "cogo"
 version = "0.1.0"
@@ -45,22 +50,8 @@ libc = "0.2"
 miow = "0.3"
 winapi = "0.3"
 
-[dev-dependencies]
-bytes = "1.0"
-serde = "1.0"
-docopt = "1.0"
-tempdir = "0.3"
-httparse = "1.1"
-native-tls = "0.2"
-tungstenite = "0.13"
-serde_derive = "1.0"
-
-
 [profile.release]
 lto = true
 
 [build-dependencies]
 rustversion = "1.0"
-
-[workspace]
-members = []
