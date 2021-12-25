@@ -1,6 +1,6 @@
 //! # A library for programming stackful coroutines in Rust.
 //!
-//! May is a high-performant library for programming stackful coroutines with which
+//! Cogo is a high-performant library for programming stackful coroutines with which
 //! you can easily develop and maintain massive concurrent programs. It can be thought
 //! as the Rust version of the popular Goroutine.
 //!

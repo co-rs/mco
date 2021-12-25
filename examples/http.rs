@@ -24,8 +24,8 @@ fn req_done(buf: &[u8], path: &mut String) -> Option<usize> {
 
 fn main() {
     cogo::config().set_workers(4);
-
-    let listener = TcpListener::bind("127.0.0.1:8080").unwrap();
+    println!("bind http://127.0.0.1:8080");
+    let listener = TcpListener::bind("0.0.0.0:8080").unwrap();
     while let Ok((mut stream, _)) = listener.accept() {
         go!(move || {
             let mut buf = Vec::new();
@@ -34,7 +34,7 @@ fn main() {
             loop {
                 if let Some(i) = req_done(&buf, &mut path) {
                     let response = match &*path {
-                        "/" => "Welcome to May http demo\n",
+                        "/" => "Welcome to Cogo http demo\n",
                         "/hello" => "Hello, World!\n",
                         "/quit" => std::process::exit(1),
                         _ => "Cannot find page\n",
@@ -43,7 +43,7 @@ fn main() {
                     let s = format!(
                         "\
                          HTTP/1.1 200 OK\r\n\
-                         Server: May\r\n\
+                         Server: Cogo\r\n\
                          Content-Length: {}\r\n\
                          Date: 1-1-2000\r\n\
                          \r\n\
