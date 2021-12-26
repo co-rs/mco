@@ -1,6 +1,7 @@
 //! Unbounded channel implemented as a linked list.
 
 use std::cell::UnsafeCell;
+use std::collections::LinkedList;
 use std::marker::PhantomData;
 use std::mem::MaybeUninit;
 use std::ptr;
@@ -66,19 +67,22 @@ struct Block<T> {
     next: AtomicPtr<Block<T>>,
 
     /// Slots for messages.
-    slots: [Slot<T>; BLOCK_CAP],
+    slots: Vec<Slot<T>>,
 }
 
 impl<T> Block<T> {
     /// Creates an empty block.
     fn new() -> Block<T> {
-        // SAFETY: This is safe because:
-        //  [1] `Block::next` (AtomicPtr) may be safely zero initialized.
-        //  [2] `Block::slots` (Array) may be safely zero initialized because of [3, 4].
-        //  [3] `Slot::msg` (UnsafeCell) may be safely zero initialized because it
-        //       holds a MaybeUninit.
-        //  [4] `Slot::state` (AtomicUsize) may be safely zero initialized.
-        unsafe { MaybeUninit::zeroed().assume_init() }
+        let mut vec = Vec::with_capacity(BLOCK_CAP);
+        unsafe {
+            for _ in 0..BLOCK_CAP {
+                vec.push(MaybeUninit::zeroed().assume_init());
+            }
+        }
+        Block {
+            next: Default::default(),
+            slots: vec,
+        }
     }
 
     /// Waits until the next pointer is set.
@@ -98,7 +102,7 @@ impl<T> Block<T> {
         // It is not necessary to set the `DESTROY` bit in the last slot because that slot has
         // begun destruction of the block.
         for i in start..BLOCK_CAP - 1 {
-            let slot = (*this).slots.get_unchecked(i);
+            let slot = &(*this).slots[i];
 
             // Mark the `DESTROY` bit if a thread is still using the slot.
             if slot.state.load(Ordering::Acquire) & READ == 0
