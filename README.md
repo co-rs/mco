@@ -15,7 +15,7 @@ Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Man
 * ``` cogo/std/sync ```  Includes basic mutex, WaitGroup, and other common synchronization constructs
 
 ## Crates based on cogo implementation
-* [cdbc](https://github.com/co-rs/cdbc)  High-performance database drivers include mysql, PG, AND SQLite
+* [cdbc](https://github.com/co-rs/cdbc)  High-performance database drivers include mysql, Postgres, AND SQLite
 * [fast_log](https://github.com/co-rs/fast_log) an fast log impl
 
 
