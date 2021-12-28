@@ -159,7 +159,7 @@ impl Selector {
             // check the status
             match overlapped.Internal as u32 {
                 ERROR_OPERATION_ABORTED | STATUS_CANCELLED_U32 => {
-                    warn!("coroutine timeout, stat=0x{:x}", overlapped.Internal);
+                    //warn!("coroutine timeout, stat=0x{:x}", overlapped.Internal);
                     set_co_para(&mut co, io::Error::new(io::ErrorKind::TimedOut, "timeout"));
                     // timer data is popped already
                 }
