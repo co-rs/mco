@@ -108,7 +108,7 @@ impl Selector {
         timeout: Option<u64>,
     ) -> io::Result<Option<u64>> {
         let timeout = timeout.map(ns_to_dur);
-        // info!("select; timeout={:?}", timeout);
+        // //info!("select; timeout={:?}", timeout);
         let mask = 1 << id;
         let single_selector = unsafe { self.vec.get_unchecked(id) };
         let scheduler = get_scheduler();
@@ -153,7 +153,7 @@ impl Selector {
             });
 
             let overlapped = unsafe { &*overlapped };
-            // info!("select got overlapped, status = {}", overlapped.Internal);
+            // //info!("select got overlapped, status = {}", overlapped.Internal);
 
             const STATUS_CANCELLED_U32: u32 = STATUS_CANCELLED as u32;
             // check the status
@@ -218,7 +218,7 @@ impl Selector {
     #[inline]
     pub fn add_io_timer(&self, io: &mut EventData, timeout: Duration) {
         let id = (io.handle as usize % self.vec.len()) >> 2;
-        // info!("io timeout = {:?}", dur);
+        // //info!("io timeout = {:?}", dur);
         let (h, b_new) = unsafe { self.vec.get_unchecked(id) }
             .timer_list
             .add_timer(timeout, io.timer_data());

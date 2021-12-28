@@ -87,7 +87,7 @@ impl Selector {
         let timeout_ms = timeout
             .map(|to| cmp::min(ns_to_ms(to), isize::MAX as u64) as isize)
             .unwrap_or(-1);
-        // info!("select; timeout={:?}", timeout_ms);
+        // //info!("select; timeout={:?}", timeout_ms);
 
         // Wait for epoll events for at most timeout_ms milliseconds
         let mask = 1 << id;
@@ -109,12 +109,12 @@ impl Selector {
                     let mut buf = [0u8; 8];
                     // clear the eventfd, ignore the result
                     read(single_selector.evfd, &mut buf).ok();
-                    // info!("got wakeup event in select, id={}", id);
+                    // //info!("got wakeup event in select, id={}", id);
                     continue;
                 }
             }
             let data = unsafe { &mut *(event.data() as *mut EventData) };
-            // info!("select got event, data={:p}", data);
+            // //info!("select got event, data={:p}", data);
             data.io_flag.store(true, Ordering::Release);
 
             // first check the atomic co, this may be grab by the worker first
@@ -156,7 +156,7 @@ impl Selector {
     pub fn wakeup(&self, id: usize) {
         let buf = unsafe { ::std::slice::from_raw_parts(&1u64 as *const u64 as _, 8) };
         let ret = write(unsafe { self.vec.get_unchecked(id) }.evfd, buf);
-        info!("wakeup id={:?}, ret={:?}", id, ret);
+        //info!("wakeup id={:?}, ret={:?}", id, ret);
     }
 
     // register io event to the selector
@@ -174,7 +174,7 @@ impl Selector {
         let id = fd as usize % self.vec.len();
         let single_selector = unsafe { self.vec.get_unchecked(id) };
         let epfd = single_selector.epfd;
-        info!("add fd to epoll select, fd={:?}", fd);
+        //info!("add fd to epoll select, fd={:?}", fd);
         epoll_ctl(epfd, EpollOp::EpollCtlAdd, fd, &mut info)
             .map_err(from_nix_error)
             .map(|_| io_data)
@@ -200,7 +200,7 @@ impl Selector {
         let id = fd as usize % self.vec.len();
         let single_selector = unsafe { self.vec.get_unchecked(id) };
         let epfd = single_selector.epfd;
-        info!("del fd from epoll select, fd={:?}", fd);
+        //info!("del fd from epoll select, fd={:?}", fd);
         epoll_ctl(epfd, EpollOp::EpollCtlDel, fd, &mut info).ok();
 
         // after EpollCtlDel push the unused event data
@@ -219,7 +219,7 @@ impl Selector {
     #[inline]
     pub fn add_io_timer(&self, io: &IoData, timeout: Duration) {
         let id = io.fd as usize % self.vec.len();
-        // info!("io timeout = {:?}", dur);
+        // //info!("io timeout = {:?}", dur);
         let (h, b_new) = unsafe { self.vec.get_unchecked(id) }
             .timer_list
             .add_timer(timeout, io.timer_data());

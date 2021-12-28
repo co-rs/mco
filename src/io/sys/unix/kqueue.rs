@@ -108,7 +108,7 @@ impl Selector {
             .as_ref()
             .map(|s| s as *const _)
             .unwrap_or(ptr::null_mut());
-        // info!("select; timeout={:?}", timeout_ms);
+        // //info!("select; timeout={:?}", timeout_ms);
 
         let mask = 1 << id;
         let single_selector = unsafe { self.vec.get_unchecked(id) };
@@ -144,11 +144,11 @@ impl Selector {
                 // let mut buf = [0u8; 8];
                 // clear the eventfd, ignore the result
                 // read(self.vec[id].evfd, &mut buf).ok();
-                info!("got wakeup event in select, id={}", id);
+                //info!("got wakeup event in select, id={}", id);
                 continue;
             }
             let data = unsafe { &mut *(event.udata as *mut EventData) };
-            // info!("select got event, data={:p}", data);
+            // //info!("select got event, data={:p}", data);
             data.io_flag.store(true, Ordering::Release);
 
             // first check the atomic co, this may be grab by the worker first
@@ -200,7 +200,7 @@ impl Selector {
 
         let ret = unsafe { libc::kevent(kqfd, &kev, 1, ptr::null_mut(), 0, ptr::null()) };
 
-        info!("wakeup id={:?}, ret={:?}", id, ret);
+        //info!("wakeup id={:?}, ret={:?}", id, ret);
     }
 
     // register io event to the selector
@@ -209,7 +209,7 @@ impl Selector {
         let fd = io_data.fd;
         let id = fd as usize % self.vec.len();
         let kqfd = unsafe { self.vec.get_unchecked(id) }.kqfd;
-        info!("add fd to kqueue select, fd={:?}", fd);
+        //info!("add fd to kqueue select, fd={:?}", fd);
 
         let flags = libc::EV_ADD | libc::EV_CLEAR;
         let udata = io_data.as_ref() as *const _;
@@ -253,7 +253,7 @@ impl Selector {
         let id = fd as usize % self.vec.len();
         let single_selector = unsafe { self.vec.get_unchecked(id) };
         let kqfd = single_selector.kqfd;
-        info!("del fd from kqueue select, fd={:?}", fd);
+        //info!("del fd from kqueue select, fd={:?}", fd);
 
         let filter = libc::EV_DELETE;
         let changes = [
@@ -288,7 +288,7 @@ impl Selector {
     #[inline]
     pub fn add_io_timer(&self, io: &IoData, timeout: Duration) {
         let id = io.fd as usize % self.vec.len();
-        // info!("io timeout = {:?}", dur);
+        // //info!("io timeout = {:?}", dur);
         let (h, b_new) = unsafe { self.vec.get_unchecked(id) }
             .timer_list
             .add_timer(timeout, io.timer_data());
