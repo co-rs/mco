@@ -453,6 +453,16 @@ pub fn current() -> Coroutine {
     }
 }
 
+/// Gets a handle to the coroutine that invokes it.
+/// it will panic if you call it in a thead context
+#[inline]
+pub fn try_current() -> Result<Coroutine,crate::std::errors::Error> {
+    match get_co_local_data() {
+        None => Err(crate::std::errors::Error::from("no current coroutine, did you call `current()` in thread context?")),
+        Some(local) => Ok(unsafe { local.as_ref() }.get_co().clone()),
+    }
+}
+
 /// if current context is coroutine
 #[inline]
 pub fn is_coroutine() -> bool {
