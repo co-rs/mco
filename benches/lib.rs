@@ -11,7 +11,7 @@ mod spsc;
 use crate::coroutine::*;
 use cogo::{config, coroutine};
 use test::Bencher;
-use cogo::std::channel::unbounded;
+
 use cogo::std::sync::mpsc::channel;
 
 #[bench]
@@ -187,7 +187,7 @@ fn smoke_bench_3(b: &mut Bencher) {
 #[bench]
 fn bench_channel(b: &mut Bencher) {
     b.iter(|| {
-        let (s,r) = unbounded();
+        let (s,r) = channel();
         for _ in 0..1000{
             s.send(1);
         }
