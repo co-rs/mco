@@ -15,7 +15,6 @@ use winapi::shared::ntstatus::STATUS_CANCELLED;
 use winapi::shared::winerror::*;
 use winapi::um::ioapiset::{CancelIoEx, GetOverlappedResult};
 use winapi::um::minwinbase::OVERLAPPED;
-use crate::std::sync::mpsc::Sender;
 
 // the timeout data
 pub struct TimerData {
@@ -86,28 +85,12 @@ impl SingleSelector {
 pub struct Selector {
     // 128 should be fine for max io threads
     vec: SmallVec<[SingleSelector; 128]>,
-    sender: crossbeam::channel::Sender<CoroutineImpl>
 }
 
 impl Selector {
     pub fn new(io_workers: usize) -> io::Result<Self> {
-
-        let (s,r)= crossbeam::channel::bounded(10000);
-        for _ in 0..io_workers{
-            let new_r=r.clone();
-            std::thread::spawn(move ||{
-                loop{
-                    if let Ok(v)=new_r.recv(){
-                        run_coroutine(v);
-                    }
-                }
-            });
-        }
-
-
         let mut s = Selector {
             vec: SmallVec::new(),
-            sender: s
         };
 
         for _ in 0..io_workers {
@@ -199,9 +182,9 @@ impl Selector {
             }
 
             // schedule the coroutine
-            // run_coroutine(co);
-            self.sender.send(co);
+            run_coroutine(co);
         }
+
         // run all the local tasks
         scheduler.run_queued_tasks(id);
 
