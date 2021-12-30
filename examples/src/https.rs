@@ -26,8 +26,6 @@ fn req_done(buf: &[u8], path: &mut String) -> Option<usize> {
 }
 
 fn main() {
-    cogo::config().set_workers(4);
-
     let mut file = File::open("examples/cert/mycert.pfx").unwrap();
     let mut identity = vec![];
     file.read_to_end(&mut identity).unwrap();
