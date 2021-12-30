@@ -115,7 +115,6 @@ fn cqueue_poll() {
 #[test]
 fn cqueue_oneshot() {
     // oneshot only support open set_work_steal true
-    cogo::config().set_work_steal(true);
     use cogo::std::sync::mpsc::channel;
 
     let (tx1, rx1) = channel();
