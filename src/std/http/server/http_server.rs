@@ -61,7 +61,7 @@ pub trait HttpServiceFactory: Send + Sized + 'static {
     fn start<L: ToSocketAddrs>(self, addr: L) -> io::Result<coroutine::JoinHandle<()>> {
         let listener = TcpListener::bind(addr)?;
         go!(
-            coroutine::Builder::new().name("TcpServerFac".to_owned()),
+            coroutine::Builder::new(),
             move || {
                 for stream in listener.incoming() {
                     let stream = t_c!(stream);
@@ -230,7 +230,7 @@ impl<T: HttpService + Clone + Send + Sync + 'static> HttpServer<T> {
         let listener = TcpListener::bind(addr)?;
         let service = self.0;
         go!(
-            coroutine::Builder::new().name("TcpServer".to_owned()),
+            coroutine::Builder::new(),
             move || {
                 for stream in listener.incoming() {
                     let stream = t_c!(stream);
