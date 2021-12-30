@@ -9,7 +9,6 @@ Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Man
 
 ----------
 # cogo-std libraray
-* ``` cogo/std/channel ``` An MPMC queues, which support buffering, are also implementations of channel
 * ``` cogo/std/http ``` An HTTP server is available，An HTTP Client(TODO)
 * ``` cogo/std/queue ```
 * ``` cogo/std/sync ```  Includes basic mutex, WaitGroup, and other common synchronization constructs
