@@ -23,7 +23,6 @@ fn req_done(buf: &[u8], path: &mut String) -> Option<usize> {
 }
 
 fn main() {
-    cogo::config().set_workers(4);
     println!("bind http://127.0.0.1:8080");
     let listener = TcpListener::bind("0.0.0.0:8080").unwrap();
     while let Ok((mut stream, _)) = listener.accept() {
