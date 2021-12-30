@@ -66,7 +66,7 @@ pub trait HttpServiceFactory: Send + Sized + 'static {
                 for stream in listener.incoming() {
                     let stream = t_c!(stream);
                     let service = self.new_service();
-                    each_connection_loop(stream, service);
+                    go!(move ||  each_connection_loop(stream, service));
                 }
             }
         )
