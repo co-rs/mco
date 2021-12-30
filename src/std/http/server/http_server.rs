@@ -21,11 +21,11 @@ macro_rules! t {
                 if err.kind() == io::ErrorKind::ConnectionReset
                     || err.kind() == io::ErrorKind::UnexpectedEof
                 {
-                    // info!("http server read req: connection closed");
+                    error!("http server read req: connection closed");
                     return;
                 }
 
-                //error!("call = {:?}\nerr = {:?}", stringify!($e), err);
+                error!("call = {:?}\nerr = {:?}", stringify!($e), err);
                 return;
             }
         }
@@ -37,7 +37,7 @@ macro_rules! t_c {
         match $e {
             Ok(val) => val,
             Err(err) => {
-                //error!("call = {:?}\nerr = {:?}", stringify!($e), err);
+                error!("call = {:?}\nerr = {:?}", stringify!($e), err);
                 continue;
             }
         }
@@ -121,10 +121,10 @@ fn each_connection_loop<T: HttpService>(mut stream: TcpStream, mut service: T) {
                     } else if err.kind() == io::ErrorKind::ConnectionReset
                         || err.kind() == io::ErrorKind::UnexpectedEof
                     {
-                        // info!("http server read req: connection closed");
+                        error!("http server read req: connection closed");
                         return;
                     }
-                    //error!("call = {:?}\nerr = {:?}", stringify!($e), err);
+                    error!("call = {:?}\nerr = {:?}", stringify!($e), err);
                     return;
                 }
             }
@@ -164,10 +164,10 @@ fn each_connection_loop<T: HttpService>(mut stream: TcpStream, mut service: T) {
                         } else if err.kind() == io::ErrorKind::ConnectionReset
                             || err.kind() == io::ErrorKind::UnexpectedEof
                         {
-                            // info!("http server read req: connection closed");
+                            error!("http server read req: connection closed");
                             return;
                         }
-                        //error!("call = {:?}\nerr = {:?}", stringify!($e), err);
+                        error!("call = {:?}\nerr = {:?}", stringify!($e), err);
                         return;
                     }
                 }
