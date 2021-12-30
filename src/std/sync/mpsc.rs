@@ -7,15 +7,15 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::sync::mpsc::{RecvError, RecvTimeoutError, SendError, TryRecvError};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
+use crossbeam::queue::SegQueue;
 
 use super::{AtomicOption, Blocker};
-use crate::std::queue::mpsc_list::Queue as WaitList;
 // TODO: SyncSender
 /// /////////////////////////////////////////////////////////////////////////////
 /// InnerQueue
 /// /////////////////////////////////////////////////////////////////////////////
 struct InnerQueue<T> {
-    queue: WaitList<T>,
+    queue: SegQueue<T>,
     // thread/coroutine for wake up
     to_wake: AtomicOption<Arc<Blocker>>,
     // The number of tx channels which are currently using this queue.
@@ -27,7 +27,7 @@ struct InnerQueue<T> {
 impl<T> InnerQueue<T> {
     pub fn new() -> InnerQueue<T> {
         InnerQueue {
-            queue: WaitList::new(),
+            queue: SegQueue::new(),
             to_wake: AtomicOption::none(),
             channels: AtomicUsize::new(1),
             port_dropped: AtomicBool::new(false),
