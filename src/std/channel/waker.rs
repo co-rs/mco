@@ -276,12 +276,5 @@ impl Drop for SyncWaker {
 /// Returns the id of the current thread.
 #[inline]
 fn current_thread_id() -> ThreadId {
-    thread_local! {
-        /// Cached thread-local id.
-        static THREAD_ID: ThreadId = thread::current().id();
-    }
-
-    THREAD_ID
-        .try_with(|id| *id)
-        .unwrap_or_else(|_| thread::current().id())
+    thread::current().id()
 }
