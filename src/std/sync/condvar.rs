@@ -209,10 +209,11 @@ mod tests {
     use crate::std::sync::mpsc::channel;
     use crate::std::sync::{Condvar, Mutex};
     use std::sync::Arc;
+    use std::sync::mpsc::TryRecvError;
     use std::thread;
     use std::time::Duration;
     use std::u32;
-    use crate::std::channel::TryRecvError;
+
 
     #[test]
     fn smoke() {

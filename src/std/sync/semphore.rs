@@ -173,11 +173,12 @@ impl fmt::Debug for Semphore {
 mod tests {
     #![feature(test)]
     use super::*;
-    use crate::std::sync::mpsc::channel;
     use std::sync::Arc;
+    use std::sync::mpsc::TryRecvError;
     use std::thread;
     use std::time::Duration;
-    use crate::std::channel::TryRecvError;
+    use crate::std::sync::mpsc::channel;
+
 
     #[test]
     fn sanity_1() {

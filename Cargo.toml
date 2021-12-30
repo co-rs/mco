@@ -45,6 +45,7 @@ itoa = "0.4"
 [target.'cfg(unix)'.dependencies]
 nix = "0.21"
 libc = "0.2"
+tempdir = "0.3.7"
 
 [target.'cfg(windows)'.dependencies]
 miow = "0.3"

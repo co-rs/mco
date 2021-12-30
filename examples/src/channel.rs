@@ -1,10 +1,11 @@
 use std::time::Duration;
 use cogo::coroutine::sleep;
 use cogo::go;
-use cogo::std::channel::unbounded;
+use cogo::std::sync::mpsc::channel;
+
 
 fn main() {
-    let (s,r) = unbounded();
+    let (s,r) = channel();
     go!(move ||{
          println!("will sleep 1s");
          sleep(Duration::from_secs(1));
