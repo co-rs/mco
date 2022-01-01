@@ -41,6 +41,8 @@ crossbeam-utils = {version = "0.8",features = ["std"]}
 bytes = "1.1.0"
 httparse = "1"
 itoa = "0.4"
+lazy_static = "1.4.0"
+httpdate = "1.0"
 
 [target.'cfg(unix)'.dependencies]
 nix = "0.21"

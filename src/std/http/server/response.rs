@@ -97,15 +97,15 @@ impl<'a> Response<'a> {
 
 pub fn encode(mut msg: Response, mut buf: &mut BytesMut) {
     if msg.status_message.msg == "Ok" {
-        buf.extend_from_slice(b"HTTP/1.1 200 Ok\r\nServer: may\r\nDate: ");
+        buf.extend_from_slice(b"HTTP/1.1 200 Ok\r\nServer: cogo\r\nDate: ");
     } else {
         buf.extend_from_slice(b"HTTP/1.1 ");
         buf.extend_from_slice(msg.status_message.code.as_bytes());
         buf.extend_from_slice(b" ");
         buf.extend_from_slice(msg.status_message.msg.as_bytes());
-        buf.extend_from_slice(b"\r\nServer: may\r\nDate: ");
+        buf.extend_from_slice(b"\r\nServer: cogo\r\nDate: ");
     }
-    //crate::std::http::server::date::set_date(buf);
+    crate::std::http::server::date::set_date(buf);
     buf.extend_from_slice(b"\r\nContent-Length: ");
     itoa::fmt(&mut buf, msg.body_len()).unwrap();
 
