@@ -8,10 +8,6 @@ use lazy_static::lazy_static;
 
 // Sat, 01 Jan 2022 16:01:09 GMT
 const DATE_VALUE_LENGTH_HDR: usize = 29;
-const DATE_VALUE_DEFAULT: [u8; DATE_VALUE_LENGTH_HDR] = [b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0',
-    b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0',
-    b'0', b'0', b'0', b'0', b'0', b'0', b'0'
-];
 
 lazy_static! {
     static ref CURRENT_DATE: Arc<DataWrap> = {
@@ -105,7 +101,7 @@ impl Date {
         write!(
             self,
             "{}",
-            httpdate::HttpDate::from(std::time::SystemTime::now())
+            time::OffsetDateTime::now_utc().format("%a, %d %b %Y %H:%M:%S GMT")
         )
             .unwrap();
         self.cnt.store(id, Ordering::Relaxed);
