@@ -33,7 +33,7 @@ fn main() {
             loop {
                 if let Some(i) = req_done(&buf, &mut path) {
                     let response = match &*path {
-                        "/" => "Welcome to Cogo http demo\n",
+                        "/" => "Hello, World!\n",
                         "/hello" => "Hello, World!\n",
                         "/quit" => std::process::exit(1),
                         _ => "Cannot find page\n",
