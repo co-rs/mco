@@ -30,8 +30,10 @@ struct DataWrap(UnsafeCell<Date>);
 unsafe impl Sync for DataWrap {}
 
 #[doc(hidden)]
+#[inline]
 pub fn set_date(dst: &mut BytesMut) {
-    let date = unsafe { &*CURRENT_DATE.0.get() };
+    //let date = unsafe { &*CURRENT_DATE.0.get() };
+    let date = httpdate::HttpDate::from(std::time::SystemTime::now()).to_string();
     dst.extend_from_slice(date.as_bytes());
 }
 
