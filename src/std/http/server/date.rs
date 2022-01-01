@@ -7,10 +7,10 @@ use bytes::BytesMut;
 use lazy_static::lazy_static;
 
 // Sat, 01 Jan 2022 16:01:09 GMT
-const DATE_VALUE_LENGTH_HDR: usize = 33;
+const DATE_VALUE_LENGTH_HDR: usize = 29;
 const DATE_VALUE_DEFAULT: [u8; DATE_VALUE_LENGTH_HDR] = [b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0',
     b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0',
-    b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'\r', b'\n', b'\r', b'\n',
+    b'0', b'0', b'0', b'0', b'0', b'0', b'0'
 ];
 
 lazy_static! {
@@ -40,35 +40,86 @@ pub fn set_date(dst: &mut BytesMut) {
 }
 
 
+// struct Date {
+//     inner:String,
+// }
+//
+// impl Date {
+//     fn new() -> Date {
+//         let mut s=Date{
+//             inner: String::from_utf8(DATE_VALUE_DEFAULT.to_vec()).unwrap_or_default(),
+//         };
+//         s.update();
+//         s
+//     }
+//
+//     #[inline]
+//     fn as_bytes(&self) -> &[u8] {
+//         self.inner.as_bytes()
+//     }
+//
+//     fn update(&mut self) {
+//         let dt = httpdate::HttpDate::from(std::time::SystemTime::now()).to_string();
+//         if !dt.is_empty(){
+//             self.inner = dt;
+//         }
+//     }
+// }
+//
+// impl fmt::Write for Date {
+//     fn write_str(&mut self, s: &str) -> fmt::Result {
+//         self.inner = s.to_string();
+//         Ok(())
+//     }
+// }
+
 struct Date {
-    inner:String,
+    bytes: [[u8; DATE_VALUE_LENGTH_HDR]; 2],
+    pos: [usize; 2],
+    cnt: AtomicUsize,
 }
 
 impl Date {
     fn new() -> Date {
-        let mut s=Date{
-            inner: String::from_utf8(DATE_VALUE_DEFAULT.to_vec()).unwrap_or_default(),
+        let mut date = Date {
+            bytes: [[0; DATE_VALUE_LENGTH_HDR], [0; DATE_VALUE_LENGTH_HDR]],
+            pos: [0; 2],
+            cnt: AtomicUsize::new(0),
         };
-        s.update();
-        s
+        date.update();
+        date.cnt.store(1, Ordering::Relaxed);
+        date.update();
+        date
     }
 
     #[inline]
     fn as_bytes(&self) -> &[u8] {
-        self.inner.as_bytes()
+        let id = self.cnt.load(Ordering::Relaxed) & 1;
+        unsafe { self.bytes.get_unchecked(id) }
     }
 
     fn update(&mut self) {
-        let dt = httpdate::HttpDate::from(std::time::SystemTime::now()).to_string();
-        if !dt.is_empty(){
-            self.inner = dt;
-        }
+        let id = self.cnt.load(Ordering::Relaxed) + 1;
+        let idx = id & 1;
+        self.pos[idx] = 0;
+        write!(
+            self,
+            "{}",
+            httpdate::HttpDate::from(std::time::SystemTime::now())
+        )
+            .unwrap();
+        self.cnt.store(id, Ordering::Relaxed);
     }
 }
 
 impl fmt::Write for Date {
     fn write_str(&mut self, s: &str) -> fmt::Result {
-        self.inner = s.to_string();
+        let id = self.cnt.load(Ordering::Relaxed) + 1;
+        let idx = id & 1;
+        let len = s.len();
+        self.bytes[idx][self.pos[idx]..self.pos[idx] + len].copy_from_slice(s.as_bytes());
+        self.pos[idx] += len;
         Ok(())
     }
 }
+
