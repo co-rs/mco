@@ -212,17 +212,14 @@ impl Scheduler {
 
     pub fn run_queued_tasks(&self, id: usize) {
         let local = unsafe { self.local_queues.get_unchecked(id) };
-        let mut stealers = None;
+        let stealers = unsafe { self.stealers.get_unchecked(id) };
         loop {
             // Pop a task from the local queue
             let co = local.pop().or_else(|| {
                 if self.is_steal {
                     // Try stealing a of task from other local queues.
                     let parked_threads = self.workers.parked.load(Ordering::Relaxed);
-                    if stealers.is_none(){
-                        stealers = Some(unsafe { self.stealers.get_unchecked(id) });
-                    }
-                    stealers.unwrap()
+                    stealers
                         .iter()
                         .map(|s| {
                             if parked_threads & (1 << s.0) != 0 {
