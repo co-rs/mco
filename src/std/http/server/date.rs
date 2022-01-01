@@ -63,7 +63,10 @@ impl Date {
         let mut bytes = DATE_VALUE_DEFAULT;
         let dt = httpdate::HttpDate::from(std::time::SystemTime::now()).to_string();
         bytes[6..35].copy_from_slice(dt.as_ref());
-        self.inner = String::from_utf8(bytes.to_vec()).unwrap_or_default().trim().to_string();
+        let date = String::from_utf8(bytes.to_vec()).unwrap_or_default().trim().to_string();
+        if !date.is_empty(){
+            self.inner = date;
+        }
     }
 }
 
