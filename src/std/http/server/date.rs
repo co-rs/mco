@@ -7,9 +7,8 @@ use bytes::BytesMut;
 use lazy_static::lazy_static;
 
 // Sat, 01 Jan 2022 16:01:09 GMT
-const DATE_VALUE_LENGTH_HDR: usize = 39;
-const DATE_VALUE_DEFAULT: [u8; DATE_VALUE_LENGTH_HDR] = [
-    b'd', b'a', b't', b'e', b':', b' ', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0',
+const DATE_VALUE_LENGTH_HDR: usize = 33;
+const DATE_VALUE_DEFAULT: [u8; DATE_VALUE_LENGTH_HDR] = [b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0',
     b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'0',
     b'0', b'0', b'0', b'0', b'0', b'0', b'0', b'\r', b'\n', b'\r', b'\n',
 ];
@@ -60,12 +59,9 @@ impl Date {
     }
 
     fn update(&mut self) {
-        let mut bytes = DATE_VALUE_DEFAULT;
         let dt = httpdate::HttpDate::from(std::time::SystemTime::now()).to_string();
-        bytes[6..35].copy_from_slice(dt.as_ref());
-        let date = String::from_utf8(bytes.to_vec()).unwrap_or_default().trim().to_string();
-        if !date.is_empty(){
-            self.inner = date;
+        if !dt.is_empty(){
+            self.inner = dt;
         }
     }
 }
