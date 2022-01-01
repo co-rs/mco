@@ -88,7 +88,7 @@ impl ParkStatus {
 #[inline(never)]
 fn init_scheduler() {
     let workers = config().get_workers();
-    let b: Box<Scheduler> = Scheduler::new(workers);
+    let b: Box<Scheduler> = Scheduler::new(workers, config().get_work_steal());
     unsafe {
         SCHED = Box::into_raw(b);
     }
@@ -136,6 +136,9 @@ pub fn get_scheduler() -> &'static Scheduler {
 
 #[inline]
 fn steal_global<T>(global: &deque::Injector<T>, local: &deque::Worker<T>) -> Option<T> {
+    if global.is_empty() {
+        return None;
+    }
     static GLOBABLE_LOCK: AtomicUsize = AtomicUsize::new(0);
     if GLOBABLE_LOCK
         .compare_exchange(0, 1, Ordering::Relaxed, Ordering::Relaxed)
@@ -176,11 +179,12 @@ pub struct Scheduler {
     local_queues: Vec<deque::Worker<CoroutineImpl>>,
     pub(crate) workers: ParkStatus,
     timer_thread: TimerThread,
+    is_steal: bool,
     stealers: Vec<Vec<(usize, deque::Stealer<CoroutineImpl>)>>,
 }
 
 impl Scheduler {
-    pub fn new(workers: usize) -> Box<Self> {
+    pub fn new(workers: usize, is_steal: bool) -> Box<Self> {
         let mut local_queues = Vec::with_capacity(workers);
         (0..workers).for_each(|_| local_queues.push(deque::Worker::new_fifo()));
         let mut stealers = Vec::with_capacity(workers);
@@ -202,34 +206,40 @@ impl Scheduler {
             timer_thread: TimerThread::new(),
             workers: ParkStatus::new(workers),
             stealers,
+            is_steal,
         })
     }
 
     pub fn run_queued_tasks(&self, id: usize) {
         let local = unsafe { self.local_queues.get_unchecked(id) };
-        let stealers = unsafe { self.stealers.get_unchecked(id) };
+        let mut stealers = None;
         loop {
             // Pop a task from the local queue
             let co = local.pop().or_else(|| {
-                // Try stealing a of task from other local queues.
-                let parked_threads = self.workers.parked.load(Ordering::Relaxed);
-                stealers
-                    .iter()
-                    .map(|s| {
-                        if parked_threads & (1 << s.0) != 0 {
-                            return None;
-                        }
-                        steal_local(&s.1, local)
-                    })
-                    .find_map(|r| r)
-                    // Try stealing a batch of tasks from the global queue.
-                    .or_else(||
-                        {
-                            if self.global_queue.len() == 0 {
+                if self.is_steal {
+                    // Try stealing a of task from other local queues.
+                    let parked_threads = self.workers.parked.load(Ordering::Relaxed);
+                    if stealers.is_none(){
+                        stealers = Some(unsafe { self.stealers.get_unchecked(id) });
+                    }
+                    stealers.unwrap()
+                        .iter()
+                        .map(|s| {
+                            if parked_threads & (1 << s.0) != 0 {
                                 return None;
                             }
-                            steal_global(&self.global_queue, local)
+                            steal_local(&s.1, local)
                         })
+                        .find_map(|r| r)
+                        // Try stealing a batch of tasks from the global queue.
+                        .or_else(||
+                            {
+                                steal_global(&self.global_queue, local)
+                            })
+                } else {
+                    //only steal global
+                    steal_global(&self.global_queue, local)
+                }
             });
             if let Some(co) = co {
                 run_coroutine(co);
