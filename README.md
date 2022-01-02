@@ -2,7 +2,6 @@
 cogo coroutine for rust
 
 Cogo is a high-performance library for programming stackful coroutines with which you can easily develop and maintain massive concurrent programs. It can be thought as the Rust version of the popular [Goroutine][go].
-</div>
 
 
 Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Many code improvements(Inspired by ```Golang``` and [crossbeam](https://github.com/crossbeam-rs/crossbeam))
@@ -17,18 +16,6 @@ Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Man
 * [cdbc](https://github.com/co-rs/cdbc)  High-performance database drivers include mysql, Postgres, AND SQLite
 * [fast_log](https://github.com/co-rs/fast_log) an fast log impl
 
-
-
-## Table of contents
-* [Features](#features)
-* [Usage](#usage)
-* [More examples](#more-examples)
-    * [The CPU heavy load examples](#the-cpu-heavy-load-examples)
-    * [The I/O heavy bound examples](#the-io-heavy-bound-examples)
-* [Performance](#performance)
-* [Caveat](#caveat)
-* [How to tune a stack size](#how-to-tune-a-stack-size)
-* [License](#license)
 
 ----------
 
@@ -85,23 +72,21 @@ fn main() {
 
 ## More examples
 
-### The CPU heavy load examples
-* [The "Quick Sort" algorithm][sort]
-* [A prime number generator][prime]
-
 ### The I/O heavy bound examples
-* [An echo server][echo_server]
-* [An echo client][echo_client]
-* [A simple HTTP][http_sever]
-* [A simple HTTPS][https_sever]
-* [WebSockets][websocket]
+* [An echo server](examples/src/echo.rs)
+* [An echo client](examples/src/echo_client.rs)
+* [simple HTTP](examples/src/http.rs)
+* [simple HTTPS](examples/src/https.rs)
+* [tiny  HTTP](examples/src/http-tiny.rs)
+* [WebSockets](examples/src/websocket.rs)
 
 
 ----------
 
 ## Performance
 
-* test platform(16CPU/32 threads,32GB mem,Os:Unbutu-20.04)
+* platform(16CPU/32 threads,32GB mem,Os:Unbutu-20.04)
+* [TechEmpowerBench fork project](https://github.com/zhuxiujia/FrameworkBenchmarks)
 
 ![per](docs/629a066aaa37b4c295fa794c5ebdf31.png)
 
