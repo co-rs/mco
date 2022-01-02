@@ -100,7 +100,10 @@ fn main() {
 ----------
 
 ## Performance
-You can refer to https://tfb-status.techempower.com/ to get the latest [may_minihttp][may_minihttp] comparisons with other most popular frameworks.
+
+* test platform(16CPU/32 threads,32GB mem,Os:Unbutu-20.04)
+
+![per](docs/629a066aaa37b4c295fa794c5ebdf31.png)
 
 ----------
 
@@ -127,6 +130,9 @@ There is a detailed [document][caveat] that describes Cogo's main restrictions. 
 ----------
 
 ## How to tune a stack size
-If you want to tune your coroutine stack size, please check out [this document][stack].
+
+```rust
+cogo::config().set_stack_size(8*1024);//default is 4k=4*1024
+```
 
 ----------
