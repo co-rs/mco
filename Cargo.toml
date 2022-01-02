@@ -42,7 +42,6 @@ bytes = "1.1.0"
 httparse = "1"
 itoa = "0.4"
 httpdate = "1.0"
-time = "0.2"
 
 [target.'cfg(unix)'.dependencies]
 nix = "0.21"
