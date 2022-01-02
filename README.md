@@ -26,7 +26,8 @@ Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Man
 ## Crates based on cogo implementation
 * [cdbc](https://github.com/co-rs/cdbc)  High-performance database drivers include mysql, Postgres, AND SQLite
 * [fast_log](https://github.com/co-rs/fast_log) an fast log impl
-
+* [cogo-redis](https://github.com/co-rs/cogo-redis) TODO: an redis client
+* [cogo-grpc](https://github.com/co-rs/cogo-grpc) TODO: an grpc server/client
 
 ## Features
 * The stackful coroutine implementation is based on [generator][generator];
