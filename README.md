@@ -3,10 +3,7 @@ cogo coroutine for rust
 
 Cogo is a high-performance library for programming stackful coroutines with which you can easily develop and maintain massive concurrent programs. It can be thought as the Rust version of the popular [Goroutine][go].
 
-
 Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Many improvements(Inspired by ```Golang``` and [crossbeam](https://github.com/crossbeam-rs/crossbeam))
-
-----------
 
 ## Performance
 
@@ -15,19 +12,16 @@ Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Man
 
 ![per](docs/629a066aaa37b4c295fa794c5ebdf31.png)
 
-----------
-
-----------
 # cogo-std libraray
 * ``` cogo/std/http ``` An HTTP server is available，An HTTP Client(TODO)
 * ``` cogo/std/queue ```
 * ``` cogo/std/sync ```  Includes basic mutex, WaitGroup, and other common synchronization constructs
 
 ## Crates based on cogo implementation
-* [cdbc](https://github.com/co-rs/cdbc)  High-performance database drivers include mysql, Postgres, AND SQLite
-* [fast_log](https://github.com/co-rs/fast_log) an fast log impl
-* [cogo-redis](https://github.com/co-rs/cogo-redis) TODO: an redis client
-* [cogo-grpc](https://github.com/co-rs/cogo-grpc) TODO: an grpc server/client
+* [cdbc](https://github.com/co-rs/cdbc) Database Drivers include mysql, Postgres, AND SQLite
+* [fast_log](https://github.com/co-rs/fast_log) High-performance log impl
+* [cogo-redis](https://github.com/co-rs/cogo-redis) TODO: an redis client.
+* [cogo-grpc](https://github.com/co-rs/cogo-grpc) TODO: an grpc server/client.
 
 ## Features
 * The stackful coroutine implementation is based on [generator][generator];
@@ -50,7 +44,6 @@ Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Man
 * Support WaitGroup(like golang)
 * Support Disable stealing and commit directly to the local queue(3 times better go!()/spawn() performance)
 
-----------
 
 ## Usage
 A naive echo server implemented with Cogo:
@@ -77,8 +70,6 @@ fn main() {
 }
 
 ```
-
-----------
 
 ## More examples
 
@@ -111,12 +102,9 @@ There is a detailed [document][caveat] that describes Cogo's main restrictions. 
 **Note:**
 > The first three rules are common when using cooperative asynchronous libraries in Rust. Even using a futures-based system also have these limitations. So what you should really focus on is a coroutine stack size, make sure it's big enough for your applications.
 
-----------
-
 ## How to tune a stack size
 
 ```rust
 cogo::config().set_stack_size(8*1024);//default is 4k=4*1024
 ```
 
-----------
