@@ -7,6 +7,17 @@ Cogo is a high-performance library for programming stackful coroutines with whic
 Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Many code improvements(Inspired by ```Golang``` and [crossbeam](https://github.com/crossbeam-rs/crossbeam))
 
 ----------
+
+## Performance
+
+* platform(16CPU/32 threads,32GB mem,Os:Unbutu-20.04)
+* [TechEmpowerBench fork project](https://github.com/zhuxiujia/FrameworkBenchmarks)
+
+![per](docs/629a066aaa37b4c295fa794c5ebdf31.png)
+
+----------
+
+----------
 # cogo-std libraray
 * ``` cogo/std/http ``` An HTTP server is available，An HTTP Client(TODO)
 * ``` cogo/std/queue ```
@@ -16,8 +27,6 @@ Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Man
 * [cdbc](https://github.com/co-rs/cdbc)  High-performance database drivers include mysql, Postgres, AND SQLite
 * [fast_log](https://github.com/co-rs/fast_log) an fast log impl
 
-
-----------
 
 ## Features
 * The stackful coroutine implementation is based on [generator][generator];
@@ -80,17 +89,6 @@ fn main() {
 * [tiny  HTTP](examples/src/http-tiny.rs)
 * [WebSockets](examples/src/websocket.rs)
 
-
-----------
-
-## Performance
-
-* platform(16CPU/32 threads,32GB mem,Os:Unbutu-20.04)
-* [TechEmpowerBench fork project](https://github.com/zhuxiujia/FrameworkBenchmarks)
-
-![per](docs/629a066aaa37b4c295fa794c5ebdf31.png)
-
-----------
 
 ## Caveat
 There is a detailed [document][caveat] that describes Cogo's main restrictions. In general, there are four things you should follow when writing programs that use coroutines:
