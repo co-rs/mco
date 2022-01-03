@@ -182,14 +182,29 @@ impl<T: Send> UnwindSafe for Sender<T> {}
 
 impl<T: Send> RefUnwindSafe for Sender<T> {}
 
+/// Create an unbounded channel. if If you want to limit the number of messages, use bounded channel_buf()
 pub fn channel<T>() -> (Sender<T>, Receiver<T>) {
     channel_buf(usize::MAX)
 }
 
+/// Create a bounded channel
 pub fn channel_buf<T>(buf: usize) -> (Sender<T>, Receiver<T>) {
     let a = Arc::new(InnerQueue::new_buffer(buf));
     (Sender::new(a.clone()), Receiver::new(a))
 }
+
+/// Create an unbounded channel. if If you want to limit the number of messages, use bounded channel_buf()
+pub fn unbounded<T>() -> (Sender<T>, Receiver<T>) {
+    channel_buf(usize::MAX)
+}
+
+/// Create a bounded channel
+pub fn bounded<T>(buf: usize) -> (Sender<T>, Receiver<T>) {
+    let a = Arc::new(InnerQueue::new_buffer(buf));
+    (Sender::new(a.clone()), Receiver::new(a))
+}
+
+
 
 /// /////////////////////////////////////////////////////////////////////////////
 /// Sender
