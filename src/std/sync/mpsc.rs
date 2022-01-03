@@ -34,7 +34,7 @@ impl<T> InnerQueue<T> {
     }
 
     pub fn new_buf(mut buf: usize) -> InnerQueue<T> {
-        if buf <= 0 {
+        if buf <= 1 {
             buf = 1;
         }
         InnerQueue {
