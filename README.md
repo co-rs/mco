@@ -107,6 +107,6 @@ There is a detailed [document][caveat] that describes Cogo's main restrictions. 
 ## How to tune a stack size
 
 ```rust
-cogo::config().set_stack_size(8*1024);//default is 4k=4*1024
+cogo::config().set_stack_size(8*1024);//default is 4k=4*1024,Multiple of 4kb is recommended
 ```
 
