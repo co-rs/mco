@@ -1,4 +1,3 @@
-
 //! mpmc synchronized channel implementation
 //! support an unbounded mpmc queue, senders would not block
 //! receivers would block if there is no data until sender send data
@@ -24,7 +23,8 @@ struct InnerQueue<T> {
     wake_recv: Semphore,
     // thread/coroutine for wake up
     wake_sender: Semphore,
-    buf: usize,
+    // chan buffer length
+    buffer_len: usize,
     // The number of tx channels which are currently using this queue.
     tx_ports: AtomicUsize,
     // if rx is dropped
@@ -36,12 +36,12 @@ impl<T> InnerQueue<T> {
         InnerQueue::new_buf(usize::MAX)
     }
 
-    pub fn new_buf(mut buf:usize) -> InnerQueue<T> {
+    pub fn new_buf(mut buffer: usize) -> InnerQueue<T> {
         InnerQueue {
             queue: SegQueue::new(),
             wake_recv: Semphore::new(0),
             wake_sender: Semphore::new(0),
-            buf: buf,
+            buffer_len: buffer,
             tx_ports: AtomicUsize::new(1),
             rx_ports: AtomicUsize::new(1),
         }
@@ -53,7 +53,7 @@ impl<T> InnerQueue<T> {
         }
         self.queue.push(t);
         self.wake_recv.post();
-        if self.queue.len() >= self.buf {
+        if self.queue.len() >= self.buffer_len {
             self.wake_sender.wait();
         }
         Ok(())
@@ -61,7 +61,7 @@ impl<T> InnerQueue<T> {
 
     #[inline]
     fn wake_sender(&self) {
-        if self.queue.len() >= self.buf {
+        if self.queue.len() >= self.buffer_len {
             self.wake_sender.post();
         }
     }
@@ -86,7 +86,7 @@ impl<T> InnerQueue<T> {
             Some(data) => {
                 self.wake_sender();
                 Ok(data)
-            },
+            }
             None => match self.tx_ports.load(Ordering::Acquire) {
                 0 => Err(RecvTimeoutError::Disconnected),
                 _n => unreachable!("mpmc recv found no data"),
@@ -106,7 +106,7 @@ impl<T> InnerQueue<T> {
             Some(data) => {
                 self.wake_sender();
                 Ok(data)
-            },
+            }
             None => match self.tx_ports.load(Ordering::Acquire) {
                 0 => Err(TryRecvError::Disconnected),
                 _ => unreachable!("mpmc try_recv found no data"),
@@ -570,7 +570,7 @@ mod tests {
             drop(tx);
             rx.recv().unwrap();
         })
-        .join();
+            .join();
         // What is our res?
         assert!(res.is_err());
     }
@@ -651,7 +651,7 @@ mod tests {
         let res = thread::spawn(move || {
             assert!(*rx.recv().unwrap() == 10);
         })
-        .join();
+            .join();
         assert!(res.is_err());
     }
 
@@ -676,7 +676,7 @@ mod tests {
             let _ = thread::spawn(move || {
                 tx.send(1).unwrap();
             })
-            .join();
+                .join();
         }
     }
 
@@ -688,7 +688,7 @@ mod tests {
                 let res = thread::spawn(move || {
                     rx.recv().unwrap();
                 })
-                .join();
+                    .join();
                 assert!(res.is_err());
             });
             let _t = thread::spawn(move || {

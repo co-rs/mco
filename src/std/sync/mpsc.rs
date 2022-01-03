@@ -21,8 +21,8 @@ struct InnerQueue<T> {
     wake_recv: AtomicOption<Arc<Blocker>>,
     // thread/coroutine for wake up
     wake_sender: Semphore,
-
-    buf: usize,
+    // chan buffer length
+    buffer_len: usize,
     // The number of tx channels which are currently using this queue.
     channels: AtomicUsize,
     // if rx is dropped
@@ -30,16 +30,18 @@ struct InnerQueue<T> {
 }
 
 impl<T> InnerQueue<T> {
+    /// default is an Unbounded buffer
     pub fn new() -> InnerQueue<T> {
         Self::new_buf(usize::MAX)
     }
 
+    /// buf
     pub fn new_buf(mut buf: usize) -> InnerQueue<T> {
         InnerQueue {
             queue: SegQueue::new(),
             wake_recv: AtomicOption::none(),
             wake_sender: Semphore::new(0),
-            buf: buf,
+            buffer_len: buf,
             channels: AtomicUsize::new(1),
             port_dropped: AtomicBool::new(false),
         }
@@ -53,7 +55,7 @@ impl<T> InnerQueue<T> {
         if let Some(w) = self.wake_recv.take(Ordering::Acquire) {
             w.unpark();
         }
-        if self.queue.len() >= self.buf {
+        if self.queue.len() >= self.buffer_len {
             self.wake_sender.wait();
         }
         Ok(())
@@ -89,7 +91,7 @@ impl<T> InnerQueue<T> {
 
     #[inline]
     fn wake_sender(&self) {
-        if self.queue.len() >= self.buf {
+        if self.queue.len() >= self.buffer_len {
             self.wake_sender.post();
         }
     }
