@@ -31,7 +31,7 @@ struct InnerQueue<T> {
 
 impl<T> InnerQueue<T> {
     pub fn new() -> InnerQueue<T> {
-        Self::new_buf(0)
+        Self::new_buf(usize::MAX)
     }
 
     pub fn new_buf(mut buf: usize) -> InnerQueue<T> {
@@ -181,7 +181,7 @@ impl<T: Send> UnwindSafe for Sender<T> {}
 impl<T: Send> RefUnwindSafe for Sender<T> {}
 
 pub fn channel<T>() -> (Sender<T>, Receiver<T>) {
-    channel_buf(0)
+    channel_buf(usize::MAX)
 }
 
 pub fn channel_buf<T>(buf: usize) -> (Sender<T>, Receiver<T>) {

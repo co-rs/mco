@@ -33,7 +33,7 @@ struct InnerQueue<T> {
 
 impl<T> InnerQueue<T> {
     pub fn new() -> InnerQueue<T> {
-        InnerQueue::new_buf(0)
+        InnerQueue::new_buf(usize::MAX)
     }
 
     pub fn new_buf(mut buf:usize) -> InnerQueue<T> {
