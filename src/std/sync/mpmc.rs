@@ -14,6 +14,30 @@ use std::time::Duration;
 use super::Semphore;
 use crossbeam::queue::SegQueue;
 
+/// Create an unbounded channel. if If you want to limit the number of messages, use bounded channel_buf()
+pub fn channel<T>() -> (Sender<T>, Receiver<T>) {
+    let a = Arc::new(InnerQueue::new());
+    (Sender::new(a.clone()), Receiver::new(a))
+}
+
+/// Create a bounded mpmc channel(More producers, more consumers)
+pub fn channel_buf<T>(buf: usize) -> (Sender<T>, Receiver<T>) {
+    let a = Arc::new(InnerQueue::new_buffer(buf));
+    (Sender::new(a.clone()), Receiver::new(a))
+}
+
+/// Create an unbounded channel. if If you want to limit the number of messages, use bounded channel_buf()
+pub fn unbounded<T>() -> (Sender<T>, Receiver<T>) {
+    channel_buf(usize::MAX)
+}
+
+/// Create a bounded channel
+pub fn bounded<T>(buf: usize) -> (Sender<T>, Receiver<T>) {
+    let a = Arc::new(InnerQueue::new_buffer(buf));
+    (Sender::new(a.clone()), Receiver::new(a))
+}
+
+
 /// /////////////////////////////////////////////////////////////////////////////
 /// InnerQueue
 /// /////////////////////////////////////////////////////////////////////////////
@@ -201,29 +225,6 @@ impl<T> Sender<T> {
 
 unsafe impl<T: Send> Send for Sender<T> {}
 // impl<T> !Sync for Sender<T> {}
-
-/// Create an unbounded channel. if If you want to limit the number of messages, use bounded channel_buf()
-pub fn channel<T>() -> (Sender<T>, Receiver<T>) {
-    let a = Arc::new(InnerQueue::new());
-    (Sender::new(a.clone()), Receiver::new(a))
-}
-
-/// Create a bounded mpmc channel(More producers, more consumers)
-pub fn channel_buf<T>(buf: usize) -> (Sender<T>, Receiver<T>) {
-    let a = Arc::new(InnerQueue::new_buffer(buf));
-    (Sender::new(a.clone()), Receiver::new(a))
-}
-
-/// Create an unbounded channel. if If you want to limit the number of messages, use bounded channel_buf()
-pub fn unbounded<T>() -> (Sender<T>, Receiver<T>) {
-    channel_buf(usize::MAX)
-}
-
-/// Create a bounded channel
-pub fn bounded<T>(buf: usize) -> (Sender<T>, Receiver<T>) {
-    let a = Arc::new(InnerQueue::new_buffer(buf));
-    (Sender::new(a.clone()), Receiver::new(a))
-}
 
 
 /// /////////////////////////////////////////////////////////////////////////////
