@@ -18,7 +18,7 @@ Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Man
 > STD standard library
 * ``` cogo/std/http/server ``` An HTTP server is available(Body parsing upcoming)
 * ``` cogo/std/http/client ``` An HTTP Client(TODO) upcoming
-* ``` cogo/std/queue ```
+* ``` cogo/std/queue ``` Basic queue data structures
 * ``` cogo/std/sync ```  Includes basic Mutex/RwLock/WaitGroup/Semphore/channel(Bounded, unbounded)...and more..
 
 > Crates based on cogo implementation
