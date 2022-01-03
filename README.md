@@ -13,13 +13,15 @@ Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Man
 
 ![per](docs/629a066aaa37b4c295fa794c5ebdf31.png)
 
-# cogo-std libraray
+# cogo crates
+
+> STD standard library
 * ``` cogo/std/http/server ``` An HTTP server is available(Body parsing upcoming)
 * ``` cogo/std/http/client ``` An HTTP Client(TODO) upcoming
 * ``` cogo/std/queue ```
 * ``` cogo/std/sync ```  Includes basic Mutex/RwLock/WaitGroup/Semphore/channel(Bounded, unbounded)...and more..
 
-## Crates based on cogo implementation
+> Crates based on cogo implementation
 * [cdbc](https://github.com/co-rs/cdbc) Database Drivers include mysql, Postgres, AND SQLite
 * [fast_log](https://github.com/co-rs/fast_log) High-performance log impl
 * [cogo-redis](https://github.com/co-rs/cogo-redis) TODO: an redis client.
