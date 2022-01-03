@@ -32,11 +32,11 @@ struct InnerQueue<T> {
 impl<T> InnerQueue<T> {
     /// default is an Unbounded buffer
     pub fn new() -> InnerQueue<T> {
-        Self::new_buf(usize::MAX)
+        Self::new_buffer(usize::MAX)
     }
 
-    /// buf
-    pub fn new_buf(mut buf: usize) -> InnerQueue<T> {
+    /// have buffer channel. If the buffered message exceeds the limit, the sender blocks until the message is consumed
+    pub fn new_buffer(mut buf: usize) -> InnerQueue<T> {
         InnerQueue {
             queue: SegQueue::new(),
             wake_recv: AtomicOption::none(),
@@ -187,7 +187,7 @@ pub fn channel<T>() -> (Sender<T>, Receiver<T>) {
 }
 
 pub fn channel_buf<T>(buf: usize) -> (Sender<T>, Receiver<T>) {
-    let a = Arc::new(InnerQueue::new_buf(buf));
+    let a = Arc::new(InnerQueue::new_buffer(buf));
     (Sender::new(a.clone()), Receiver::new(a))
 }
 

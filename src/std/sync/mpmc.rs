@@ -32,11 +32,14 @@ struct InnerQueue<T> {
 }
 
 impl<T> InnerQueue<T> {
+
+    /// default is an Unbounded buffer
     pub fn new() -> InnerQueue<T> {
-        InnerQueue::new_buf(usize::MAX)
+        InnerQueue::new_buffer(usize::MAX)
     }
 
-    pub fn new_buf(mut buffer: usize) -> InnerQueue<T> {
+    /// have buffer channel. If the buffered message exceeds the limit, the sender blocks until the message is consumed
+    pub fn new_buffer(mut buffer: usize) -> InnerQueue<T> {
         InnerQueue {
             queue: SegQueue::new(),
             wake_recv: Semphore::new(0),
