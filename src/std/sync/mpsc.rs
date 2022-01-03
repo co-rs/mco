@@ -19,7 +19,7 @@ struct InnerQueue<T> {
     // thread/coroutine for wake up
     to_wake: AtomicOption<Arc<Blocker>>,
 
-    wake_caller: SegQueue<Arc<Blocker>>,
+    wake_sender: SegQueue<Arc<Blocker>>,
 
     buf: usize,
     // The number of tx channels which are currently using this queue.
@@ -40,7 +40,7 @@ impl<T> InnerQueue<T> {
         InnerQueue {
             queue: SegQueue::new(),
             to_wake: AtomicOption::none(),
-            wake_caller: SegQueue::new(),
+            wake_sender: SegQueue::new(),
             buf: buf,
             channels: AtomicUsize::new(1),
             port_dropped: AtomicBool::new(false),
@@ -57,7 +57,7 @@ impl<T> InnerQueue<T> {
         }
         //push current
         let current = Blocker::current();
-        self.wake_caller.push(current.clone());
+        self.wake_sender.push(current.clone());
         if self.queue.len() >= self.buf {
             current.park(None);
         }
@@ -94,7 +94,7 @@ impl<T> InnerQueue<T> {
 
     fn wake_sender(&self) {
         loop {
-            match self.wake_caller.pop() {
+            match self.wake_sender.pop() {
                 None => { break; }
                 Some(v) => {
                     v.unpark();
