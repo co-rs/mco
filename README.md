@@ -1,4 +1,7 @@
 # cogo
+
+<img style="width: 100px;height: 100px;" width="200" height="140" src="docs/logo.png" />
+
 cogo coroutine for rust
 
 Cogo is a high-performance library for programming stackful coroutines with which you can easily develop and maintain massive concurrent programs. It can be thought as the Rust version of the popular [Goroutine][go].
