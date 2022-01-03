@@ -1,6 +1,6 @@
 # cogo
 
-<img style="width: 100px;height: 100px;" width="200" height="140" src="docs/logo.png" />
+<img style="width: 100px;height: 100px;" width="100" height="100" src="docs/logo.png" />
 
 cogo coroutine for rust
 
