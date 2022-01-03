@@ -61,7 +61,9 @@ impl<T> InnerQueue<T> {
 
     #[inline]
     fn wake_sender(&self) {
-        self.wake_sender.post();
+        if self.queue.len() >= self.buf {
+            self.wake_sender.post();
+        }
     }
 
     pub fn recv(&self, dur: Option<Duration>) -> Result<T, RecvTimeoutError> {
@@ -82,9 +84,7 @@ impl<T> InnerQueue<T> {
 
         match self.queue.pop() {
             Some(data) => {
-                if self.queue.len() < self.buf {
-                    self.wake_sender();
-                }
+                self.wake_sender();
                 Ok(data)
             },
             None => match self.tx_ports.load(Ordering::Acquire) {
@@ -104,9 +104,7 @@ impl<T> InnerQueue<T> {
 
         match self.queue.pop() {
             Some(data) => {
-                if self.queue.len() < self.buf {
-                    self.wake_sender();
-                }
+                self.wake_sender();
                 Ok(data)
             },
             None => match self.tx_ports.load(Ordering::Acquire) {

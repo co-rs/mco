@@ -89,15 +89,15 @@ impl<T> InnerQueue<T> {
 
     #[inline]
     fn wake_sender(&self) {
-        self.wake_sender.post();
+        if self.queue.len() >= self.buf {
+            self.wake_sender.post();
+        }
     }
 
     pub fn try_recv(&self) -> Result<T, TryRecvError> {
         match self.queue.pop() {
             Some(data) => {
-                if self.queue.len() < self.buf {
-                    self.wake_sender();
-                }
+                self.wake_sender();
                 Ok(data)
             }
             None => {
@@ -107,9 +107,7 @@ impl<T> InnerQueue<T> {
                         match self.queue.pop() {
                             None => { Err(TryRecvError::Disconnected) }
                             Some(v) => {
-                                if self.queue.len() < self.buf {
-                                    self.wake_sender();
-                                }
+                                self.wake_sender();
                                 Ok(v)
                             }
                         }

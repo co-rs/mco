@@ -27,10 +27,10 @@ fn main() {
          s3.send(1);
          println!("send3 done:{:?}",t.elapsed());
     });
-    sleep(Duration::from_secs(5));
+    sleep(Duration::from_secs(2));
     let rv = r.recv().unwrap();
     println!("recv = {}", rv);
     let rv = r.recv().unwrap();
     println!("recv = {}", rv);
-    sleep(Duration::from_secs(5));
+    sleep(Duration::from_secs(2));
 }
