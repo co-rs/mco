@@ -143,7 +143,6 @@ impl<T> InnerQueue<T> {
         self.port_dropped.store(true, Ordering::Release);
         // clear all the data
         while self.queue.pop().is_some() {}
-        self.wake_sender();
     }
 }
 

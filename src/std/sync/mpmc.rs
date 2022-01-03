@@ -144,7 +144,6 @@ impl<T> InnerQueue<T> {
             1 => {
                 // there is no receiver any more, clear the data
                 while self.queue.pop().is_some() {}
-                self.wake_sender();
             }
             n if n > 1 => {}
             n => panic!("bad number of rx_ports left {}", n),
