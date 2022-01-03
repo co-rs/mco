@@ -2,21 +2,37 @@ use std::fmt::{self, Debug, Display};
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Debug)]
 pub struct Error {
-    pub inner: String,
+    pub inner: Box<dyn std::error::Error>,
 }
 
 impl Error {
     pub fn error(&self) -> String {
-        self.inner.clone()
+        self.inner.to_string()
     }
 }
+
+impl Clone for Error {
+    fn clone(&self) -> Self {
+        Error {
+            inner: self.to_string().into()
+        }
+    }
+}
+
+impl PartialEq<Self> for Error {
+    fn eq(&self, other: &Self) -> bool {
+        self.inner.to_string().eq(&other.to_string())
+    }
+}
+
+impl Eq for Error {}
 
 ///new error
 pub fn new(text: String) -> Error {
     Error {
-        inner: text
+        inner: text.into()
     }
 }
 
@@ -26,7 +42,7 @@ pub trait FromError<T>: Sized {
 
 impl ToString for Error {
     fn to_string(&self) -> String {
-        self.inner.clone()
+        self.inner.to_string()
     }
 }
 
@@ -57,7 +73,9 @@ impl From<&dyn std::error::Error> for Error {
 
 impl From<Box<dyn std::error::Error>> for Error {
     fn from(arg: Box<dyn std::error::Error>) -> Self {
-        return new(arg.to_string());
+        return Self {
+            inner: arg
+        };
     }
 }
 
