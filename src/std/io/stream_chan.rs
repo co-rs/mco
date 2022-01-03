@@ -3,7 +3,7 @@ use crate::std::errors::Error;
 use crate::std::io::{Stream, TryStream};
 use crate::std::sync::mpsc::{Receiver, Sender};
 
-/// ChanStream,based on mpsc channel.when send None data stop next
+/// ChanStream,based on mpsc channel.when send Err data stop next
 pub struct ChanStream<T> {
     pub recv: Receiver<Result<T, Error>>,
     pub send: Sender<Result<T, Error>>,
