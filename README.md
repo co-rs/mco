@@ -13,9 +13,10 @@ Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Man
 ![per](docs/629a066aaa37b4c295fa794c5ebdf31.png)
 
 # cogo-std libraray
-* ``` cogo/std/http ``` An HTTP server is available，An HTTP Client(TODO)
+* ``` cogo/std/http/server ``` An HTTP server is available(Body parsing upcoming)
+* ``` cogo/std/http/client ``` An HTTP Client(TODO) upcoming
 * ``` cogo/std/queue ```
-* ``` cogo/std/sync ```  Includes basic mutex, WaitGroup, and other common synchronization constructs
+* ``` cogo/std/sync ```  Includes basic Mutex/RwLock/WaitGroup/Semphore...and more..
 
 ## Crates based on cogo implementation
 * [cdbc](https://github.com/co-rs/cdbc) Database Drivers include mysql, Postgres, AND SQLite
