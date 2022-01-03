@@ -1,4 +1,3 @@
-
 //! compatible with std::sync::mpsc except for both thread and coroutine
 //! please ref the doc from std::sync::mpsc
 use std::fmt;
@@ -8,8 +7,10 @@ use std::sync::mpsc::{RecvError, RecvTimeoutError, SendError, TryRecvError};
 use std::sync::Arc;
 use std::time::{Duration, Instant};
 use crossbeam::queue::SegQueue;
+use crate::coroutine::yield_now;
 
 use super::{AtomicOption, Blocker};
+
 // TODO: SyncSender
 /// /////////////////////////////////////////////////////////////////////////////
 /// InnerQueue
@@ -18,6 +19,10 @@ struct InnerQueue<T> {
     queue: SegQueue<T>,
     // thread/coroutine for wake up
     to_wake: AtomicOption<Arc<Blocker>>,
+
+    wake_caller: SegQueue<Arc<Blocker>>,
+
+    buf: usize,
     // The number of tx channels which are currently using this queue.
     channels: AtomicUsize,
     // if rx is dropped
@@ -26,9 +31,18 @@ struct InnerQueue<T> {
 
 impl<T> InnerQueue<T> {
     pub fn new() -> InnerQueue<T> {
+        Self::new_buf(1)
+    }
+
+    pub fn new_buf(mut buf: usize) -> InnerQueue<T> {
+        if buf <= 0 {
+            buf = 1;
+        }
         InnerQueue {
             queue: SegQueue::new(),
             to_wake: AtomicOption::none(),
+            wake_caller: SegQueue::new(),
+            buf: buf,
             channels: AtomicUsize::new(1),
             port_dropped: AtomicBool::new(false),
         }
@@ -41,6 +55,12 @@ impl<T> InnerQueue<T> {
         self.queue.push(t);
         if let Some(w) = self.to_wake.take(Ordering::Acquire) {
             w.unpark();
+        }
+        //push current
+        let current = Blocker::current();
+        self.wake_caller.push(current.clone());
+        if self.queue.len() >= self.buf {
+            current.park(None);
         }
         Ok(())
     }
@@ -73,13 +93,39 @@ impl<T> InnerQueue<T> {
         self.try_recv()
     }
 
+    fn wake_sender(&self) {
+        loop {
+            match self.wake_caller.pop() {
+                None => { break; }
+                Some(v) => {
+                    v.unpark();
+                }
+            }
+        }
+    }
+
     pub fn try_recv(&self) -> Result<T, TryRecvError> {
         match self.queue.pop() {
-            Some(data) => Ok(data),
+            Some(data) => {
+                if self.queue.len() < self.buf {
+                    self.wake_sender();
+                }
+                Ok(data)
+            }
             None => {
                 match self.channels.load(Ordering::Acquire) {
                     // there is no sender any more, should re-check
-                    0 => self.queue.pop().ok_or(TryRecvError::Disconnected),
+                    0 => {
+                        match self.queue.pop() {
+                            None => { Err(TryRecvError::Disconnected) }
+                            Some(v) => {
+                                if self.queue.len() < self.buf {
+                                    self.wake_sender();
+                                }
+                                Ok(v)
+                            }
+                        }
+                    }
                     _ => Err(TryRecvError::Empty),
                 }
             }
@@ -97,7 +143,7 @@ impl<T> InnerQueue<T> {
                     .to_wake
                     .take(Ordering::Relaxed)
                     .map(|w| w.unpark());
-            },
+            }
             n if n > 1 => {}
             n => panic!("bad number of channels left {}", n),
         }
@@ -141,12 +187,18 @@ pub struct Sender<T> {
 }
 
 unsafe impl<T: Send> Send for Sender<T> {}
+
 // impl<T> !Sync for Sender<T> {}
 impl<T: Send> UnwindSafe for Sender<T> {}
+
 impl<T: Send> RefUnwindSafe for Sender<T> {}
 
 pub fn channel<T>() -> (Sender<T>, Receiver<T>) {
-    let a = Arc::new(InnerQueue::new());
+    channel_buf(0)
+}
+
+pub fn channel_buf<T>(buf: usize) -> (Sender<T>, Receiver<T>) {
+    let a = Arc::new(InnerQueue::new_buf(buf));
     (Sender::new(a.clone()), Receiver::new(a))
 }
 
@@ -546,7 +598,7 @@ mod tests {
             drop(tx);
             rx.recv().unwrap();
         })
-        .join();
+            .join();
         // What is our res?
         assert!(res.is_err());
     }
@@ -627,7 +679,7 @@ mod tests {
         let res = thread::spawn(move || {
             assert!(*rx.recv().unwrap() == 10);
         })
-        .join();
+            .join();
         assert!(res.is_err());
     }
 
@@ -652,7 +704,7 @@ mod tests {
             let _ = thread::spawn(move || {
                 tx.send(1).unwrap();
             })
-            .join();
+                .join();
         }
     }
 
@@ -664,7 +716,7 @@ mod tests {
                 let res = thread::spawn(move || {
                     rx.recv().unwrap();
                 })
-                .join();
+                    .join();
                 assert!(res.is_err());
             });
             let _t = thread::spawn(move || {
