@@ -4,13 +4,13 @@ use crate::std::io::{Stream, TryStream};
 use crate::std::sync::mpsc::{Receiver, Sender};
 
 /// ChanStream,based on mpsc channel.when send Err data stop next
-pub struct ChanStream<T> {
-    pub recv: Receiver<Result<T, Error>>,
-    pub send: Sender<Result<T, Error>>,
+pub struct ChanStream<T,E> {
+    pub recv: Receiver<Result<T, E>>,
+    pub send: Sender<Result<T, E>>,
 }
 
-impl<T> Stream for ChanStream<T> {
-    type Item = Result<T, crate::std::errors::Error>;
+impl<T,E> Stream for ChanStream<T,E> {
+    type Item = Result<T, E>;
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.recv.recv() {
