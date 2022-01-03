@@ -1,11 +1,14 @@
 use std::time::Duration;
 use cogo::coroutine::sleep;
 use cogo::go;
-use cogo::std::sync::mpsc::{channel, channel_buf};
+use cogo::std::sync::mpsc::{bounded, channel, channel_buf, unbounded};
 
 
 fn main() {
-    let (s, r) = channel_buf(3);
+    // let (s, r) = unbounded();//unbounded
+    // let (s, r) = bounded(3); //bounded
+    // let (s, r) = channel_buf(3);//bounded
+    let (s, r) = channel();//unbounded
     let s1=s.clone();
     go!(move ||{
          let t=std::time::Instant::now();
