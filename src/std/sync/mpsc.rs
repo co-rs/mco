@@ -8,6 +8,7 @@ use std::sync::Arc;
 use std::time::{Duration, Instant};
 use crossbeam::queue::SegQueue;
 use crate::coroutine::yield_now;
+use crate::std::sync::Semphore;
 
 use super::{AtomicOption, Blocker};
 
@@ -19,7 +20,7 @@ struct InnerQueue<T> {
     // thread/coroutine for wake up
     to_wake: AtomicOption<Arc<Blocker>>,
 
-    wake_sender: SegQueue<Arc<Blocker>>,
+    wake_sender: Semphore,
 
     buf: usize,
     // The number of tx channels which are currently using this queue.
@@ -40,7 +41,7 @@ impl<T> InnerQueue<T> {
         InnerQueue {
             queue: SegQueue::new(),
             to_wake: AtomicOption::none(),
-            wake_sender: SegQueue::new(),
+            wake_sender: Semphore::new(0),
             buf: buf,
             channels: AtomicUsize::new(1),
             port_dropped: AtomicBool::new(false),
@@ -55,12 +56,7 @@ impl<T> InnerQueue<T> {
         if let Some(w) = self.to_wake.take(Ordering::Acquire) {
             w.unpark();
         }
-        //push current
-        let current = Blocker::current();
-        self.wake_sender.push(current.clone());
-        if self.queue.len() >= self.buf {
-            current.park(None);
-        }
+        self.wake_sender.wait();
         Ok(())
     }
 
@@ -92,15 +88,9 @@ impl<T> InnerQueue<T> {
         self.try_recv()
     }
 
+    #[inline]
     fn wake_sender(&self) {
-        loop {
-            match self.wake_sender.pop() {
-                None => { break; }
-                Some(v) => {
-                    v.unpark();
-                }
-            }
-        }
+        self.wake_sender.post();
     }
 
     pub fn try_recv(&self) -> Result<T, TryRecvError> {
@@ -142,6 +132,7 @@ impl<T> InnerQueue<T> {
                     .to_wake
                     .take(Ordering::Relaxed)
                     .map(|w| w.unpark());
+                self.wake_sender();
             }
             n if n > 1 => {}
             n => panic!("bad number of channels left {}", n),
@@ -152,6 +143,7 @@ impl<T> InnerQueue<T> {
         self.port_dropped.store(true, Ordering::Release);
         // clear all the data
         while self.queue.pop().is_some() {}
+        self.wake_sender();
     }
 }
 

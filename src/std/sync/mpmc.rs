@@ -22,6 +22,8 @@ struct InnerQueue<T> {
     queue: SegQueue<T>,
     // thread/coroutine for wake up
     sem: Semphore,
+    wake_sender: Semphore,
+    buf: usize,
     // The number of tx channels which are currently using this queue.
     tx_ports: AtomicUsize,
     // if rx is dropped
@@ -30,9 +32,18 @@ struct InnerQueue<T> {
 
 impl<T> InnerQueue<T> {
     pub fn new() -> InnerQueue<T> {
+        InnerQueue::new_buf(1)
+    }
+
+    pub fn new_buf(mut buf:usize) -> InnerQueue<T> {
+        if buf <= 1 {
+            buf = 1;
+        }
         InnerQueue {
             queue: SegQueue::new(),
             sem: Semphore::new(0),
+            wake_sender: Semphore::new(0),
+            buf: buf,
             tx_ports: AtomicUsize::new(1),
             rx_ports: AtomicUsize::new(1),
         }
@@ -45,7 +56,13 @@ impl<T> InnerQueue<T> {
 
         self.queue.push(t);
         self.sem.post();
+        self.wake_sender.wait();
         Ok(())
+    }
+
+    #[inline]
+    fn wake_sender(&self) {
+        self.wake_sender.post();
     }
 
     pub fn recv(&self, dur: Option<Duration>) -> Result<T, RecvTimeoutError> {
@@ -65,7 +82,12 @@ impl<T> InnerQueue<T> {
         }
 
         match self.queue.pop() {
-            Some(data) => Ok(data),
+            Some(data) => {
+                if self.queue.len() < self.buf {
+                    self.wake_sender();
+                }
+                Ok(data)
+            },
             None => match self.tx_ports.load(Ordering::Acquire) {
                 0 => Err(RecvTimeoutError::Disconnected),
                 _n => unreachable!("mpmc recv found no data"),
@@ -82,7 +104,12 @@ impl<T> InnerQueue<T> {
         }
 
         match self.queue.pop() {
-            Some(data) => Ok(data),
+            Some(data) => {
+                if self.queue.len() < self.buf {
+                    self.wake_sender();
+                }
+                Ok(data)
+            },
             None => match self.tx_ports.load(Ordering::Acquire) {
                 0 => Err(TryRecvError::Disconnected),
                 _ => unreachable!("mpmc try_recv found no data"),
@@ -117,6 +144,7 @@ impl<T> InnerQueue<T> {
             1 => {
                 // there is no receiver any more, clear the data
                 while self.queue.pop().is_some() {}
+                self.wake_sender();
             }
             n if n > 1 => {}
             n => panic!("bad number of rx_ports left {}", n),
