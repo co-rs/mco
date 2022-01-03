@@ -18,8 +18,8 @@ use super::{AtomicOption, Blocker};
 struct InnerQueue<T> {
     queue: SegQueue<T>,
     // thread/coroutine for wake up
-    to_wake: AtomicOption<Arc<Blocker>>,
-
+    wake_recv: AtomicOption<Arc<Blocker>>,
+    // thread/coroutine for wake up
     wake_sender: Semphore,
 
     buf: usize,
@@ -31,16 +31,13 @@ struct InnerQueue<T> {
 
 impl<T> InnerQueue<T> {
     pub fn new() -> InnerQueue<T> {
-        Self::new_buf(1)
+        Self::new_buf(0)
     }
 
     pub fn new_buf(mut buf: usize) -> InnerQueue<T> {
-        if buf <= 1 {
-            buf = 1;
-        }
         InnerQueue {
             queue: SegQueue::new(),
-            to_wake: AtomicOption::none(),
+            wake_recv: AtomicOption::none(),
             wake_sender: Semphore::new(0),
             buf: buf,
             channels: AtomicUsize::new(1),
@@ -53,10 +50,12 @@ impl<T> InnerQueue<T> {
             return Err(t);
         }
         self.queue.push(t);
-        if let Some(w) = self.to_wake.take(Ordering::Acquire) {
+        if let Some(w) = self.wake_recv.take(Ordering::Acquire) {
             w.unpark();
         }
-        self.wake_sender.wait();
+        if self.queue.len() >= self.buf {
+            self.wake_sender.wait();
+        }
         Ok(())
     }
 
@@ -68,7 +67,7 @@ impl<T> InnerQueue<T> {
 
         let cur = Blocker::current();
         // register the waiter
-        self.to_wake.swap(cur.clone(), Ordering::Release);
+        self.wake_recv.swap(cur.clone(), Ordering::Release);
         // re-check the queue
         match self.try_recv() {
             Err(TryRecvError::Empty) => {
@@ -76,7 +75,7 @@ impl<T> InnerQueue<T> {
             }
             data => {
                 // no need to park, contention with send
-                if let Some(w) = self.to_wake.take(Ordering::Acquire) {
+                if let Some(w) = self.wake_recv.take(Ordering::Acquire) {
                     w.unpark();
                 }
                 cur.park(dur).ok();
@@ -129,7 +128,7 @@ impl<T> InnerQueue<T> {
         match self.channels.fetch_sub(1, Ordering::AcqRel) {
             1 => {
                 self
-                    .to_wake
+                    .wake_recv
                     .take(Ordering::Relaxed)
                     .map(|w| w.unpark());
                 self.wake_sender();
@@ -149,7 +148,7 @@ impl<T> InnerQueue<T> {
 impl<T> Drop for InnerQueue<T> {
     fn drop(&mut self) {
         assert_eq!(self.channels.load(Ordering::Acquire), 0);
-        assert!(self.to_wake.is_none());
+        assert!(self.wake_recv.is_none());
     }
 }
 

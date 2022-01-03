@@ -21,7 +21,8 @@ use crossbeam::queue::SegQueue;
 struct InnerQueue<T> {
     queue: SegQueue<T>,
     // thread/coroutine for wake up
-    sem: Semphore,
+    wake_recv: Semphore,
+    // thread/coroutine for wake up
     wake_sender: Semphore,
     buf: usize,
     // The number of tx channels which are currently using this queue.
@@ -32,16 +33,13 @@ struct InnerQueue<T> {
 
 impl<T> InnerQueue<T> {
     pub fn new() -> InnerQueue<T> {
-        InnerQueue::new_buf(1)
+        InnerQueue::new_buf(0)
     }
 
     pub fn new_buf(mut buf:usize) -> InnerQueue<T> {
-        if buf <= 1 {
-            buf = 1;
-        }
         InnerQueue {
             queue: SegQueue::new(),
-            sem: Semphore::new(0),
+            wake_recv: Semphore::new(0),
             wake_sender: Semphore::new(0),
             buf: buf,
             tx_ports: AtomicUsize::new(1),
@@ -53,10 +51,11 @@ impl<T> InnerQueue<T> {
         if self.rx_ports.load(Ordering::Acquire) == 0 {
             return Err(SendError(t));
         }
-
         self.queue.push(t);
-        self.sem.post();
-        self.wake_sender.wait();
+        self.wake_recv.post();
+        if self.queue.len() >= self.buf {
+            self.wake_sender.wait();
+        }
         Ok(())
     }
 
@@ -73,9 +72,9 @@ impl<T> InnerQueue<T> {
         }
 
         match dur {
-            None => self.sem.wait(),
+            None => self.wake_recv.wait(),
             Some(t) => {
-                if !self.sem.wait_timeout(t) {
+                if !self.wake_recv.wait_timeout(t) {
                     return Err(RecvTimeoutError::Timeout);
                 }
             }
@@ -96,7 +95,7 @@ impl<T> InnerQueue<T> {
     }
 
     pub fn try_recv(&self) -> Result<T, TryRecvError> {
-        if !self.sem.try_wait() {
+        if !self.wake_recv.try_wait() {
             return match self.tx_ports.load(Ordering::Acquire) {
                 0 => Err(TryRecvError::Disconnected),
                 _ => Err(TryRecvError::Empty),
@@ -126,8 +125,8 @@ impl<T> InnerQueue<T> {
             1 => {
                 // there is no tx port any more
                 // should tell all the waited rx to come back
-                while self.sem.get_value() == 0 {
-                    self.sem.post();
+                while self.wake_recv.get_value() == 0 {
+                    self.wake_recv.post();
                 }
             }
             n if n > 1 => {}
@@ -204,7 +203,7 @@ impl<T> Sender<T> {
 
     /// return how many elements in the queue that are not consumed by receivers
     pub fn pressure(&self) -> usize {
-        self.inner.sem.get_value()
+        self.inner.wake_recv.get_value()
     }
 }
 
