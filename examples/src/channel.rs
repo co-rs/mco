@@ -35,5 +35,6 @@ fn main() {
     println!("recv = {}", rv);
     let rv = r.recv().unwrap();
     println!("recv = {}", rv);
+    println!("chan buffer remain num: {}",r.remain());
     sleep(Duration::from_secs(2));
 }

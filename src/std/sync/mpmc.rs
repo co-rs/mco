@@ -32,7 +32,6 @@ struct InnerQueue<T> {
 }
 
 impl<T> InnerQueue<T> {
-
     /// default is an Unbounded buffer
     pub fn new() -> InnerQueue<T> {
         InnerQueue::new_buffer(usize::MAX)
@@ -149,6 +148,11 @@ impl<T> InnerQueue<T> {
             n => panic!("bad number of rx_ports left {}", n),
         }
     }
+
+    /// return remain msg len
+    pub fn remain(&self) -> usize {
+        self.queue.len()
+    }
 }
 
 impl<T> Drop for InnerQueue<T> {
@@ -160,6 +164,13 @@ impl<T> Drop for InnerQueue<T> {
 
 pub struct Receiver<T> {
     inner: Arc<InnerQueue<T>>,
+}
+
+impl<T> Receiver<T> {
+    /// return remain msg len
+    pub fn remain(&self) -> usize {
+        self.inner.remain()
+    }
 }
 
 unsafe impl<T: Send> Send for Receiver<T> {}
@@ -179,6 +190,13 @@ pub struct IntoIter<T> {
 
 pub struct Sender<T> {
     inner: Arc<InnerQueue<T>>,
+}
+
+impl<T> Sender<T> {
+    /// return remain msg len
+    pub fn remain(&self) -> usize {
+        self.inner.remain()
+    }
 }
 
 unsafe impl<T: Send> Send for Sender<T> {}
@@ -206,7 +224,6 @@ pub fn bounded<T>(buf: usize) -> (Sender<T>, Receiver<T>) {
     let a = Arc::new(InnerQueue::new_buffer(buf));
     (Sender::new(a.clone()), Receiver::new(a))
 }
-
 
 
 /// /////////////////////////////////////////////////////////////////////////////

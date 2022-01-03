@@ -143,6 +143,11 @@ impl<T> InnerQueue<T> {
         // clear all the data
         while self.queue.pop().is_some() {}
     }
+
+    /// return remain msg len
+    pub fn remain(&self) -> usize {
+        self.queue.len()
+    }
 }
 
 impl<T> Drop for InnerQueue<T> {
@@ -175,6 +180,13 @@ pub struct Sender<T> {
     inner: Arc<InnerQueue<T>>,
 }
 
+impl<T> Sender<T> {
+    /// return remain msg len
+    pub fn remain(&self) -> usize {
+        self.inner.remain()
+    }
+}
+
 unsafe impl<T: Send> Send for Sender<T> {}
 
 // impl<T> !Sync for Sender<T> {}
@@ -203,7 +215,6 @@ pub fn bounded<T>(buf: usize) -> (Sender<T>, Receiver<T>) {
     let a = Arc::new(InnerQueue::new_buffer(buf));
     (Sender::new(a.clone()), Receiver::new(a))
 }
-
 
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -294,6 +305,11 @@ impl<T> Receiver<T> {
 
     pub fn try_iter(&self) -> TryIter<T> {
         TryIter { rx: self }
+    }
+
+    /// return remain msg len
+    pub fn remain(&self) -> usize {
+        self.inner.remain()
     }
 }
 
