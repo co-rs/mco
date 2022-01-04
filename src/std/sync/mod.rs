@@ -11,7 +11,9 @@ mod wait_group;
 pub(crate) mod atomic_dur;
 #[cfg(not(unix))]
 pub(crate) mod delay_drop;
+#[macro_use]
 pub mod mpmc;
+#[macro_use]
 pub mod mpsc;
 pub use self::atomic_option::AtomicOption;
 pub use self::blocking::{Blocker, FastBlocker};

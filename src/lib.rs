@@ -49,6 +49,7 @@ pub mod cqueue;
 pub mod io;
 pub mod net;
 pub mod os;
+#[macro_use]
 pub mod std;
 pub use crate::config::{config, Config};
 pub use crate::local::LocalKey;
