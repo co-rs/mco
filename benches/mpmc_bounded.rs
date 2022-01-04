@@ -1,3 +1,4 @@
+#![feature(test)]
 #[cfg(all(nightly, test))]
 mod bench {
     #![cfg(nightly)]
