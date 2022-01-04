@@ -8,9 +8,6 @@ use cogo::std::sync::mpsc::{bounded, channel, channel_buf, unbounded};
 
 
 fn main() {
-    // let (s, r) = unbounded();//unbounded
-    // let (s, r) = bounded(3); //bounded
-    //let (s, r) = chan!(2);//bounded
     let (s, r) = chan!();//unbounded
     let s1 = s.clone();
     go!(move ||{
