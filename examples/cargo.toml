@@ -85,6 +85,10 @@ path = "src/wait_group.rs"
 name = "set_work_steal"
 path = "src/set_work_steal.rs"
 
+[[bin]]
+name = "defer"
+path = "src/defer.rs"
+
 [dependencies]
 cogo = {path = "../"}
 generator = "0.7"
