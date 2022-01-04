@@ -9,32 +9,20 @@ use cogo::std::sync::mpsc::{bounded, channel, channel_buf, unbounded};
 
 fn main() {
     let (s, r) = chan!();//unbounded
-    let s1 = s.clone();
-    go!(move ||{
+    for i in 0..2 {
+        let s_clone = s.clone();
+        go!(move ||{
          let t=std::time::Instant::now();
-         println!("send1");
-         s1.send(1);
-         println!("send1 done:{:?}",t.elapsed());
-    });
-    let s2 = s.clone();
-    go!(move ||{
-         let t=std::time::Instant::now();
-         println!("send2");
-         s2.send(1);
-         println!("send2 done:{:?}",t.elapsed());
-    });
-    let s3 = s.clone();
-    go!(move ||{
-         let t=std::time::Instant::now();
-         println!("send3");
-         s3.send(1);
-         println!("send3 done:{:?}",t.elapsed());
-    });
+         println!("send{}",i);
+         s_clone.send(1);
+         println!("send{} done:{:?}",i,t.elapsed());
+      });
+    }
     sleep(Duration::from_secs(2));
-    let rv = r.recv().unwrap();
-    println!("recv = {}", rv);
-    let rv = r.recv().unwrap();
-    println!("recv = {}", rv);
+    for _ in 0..1 {
+        let rv = r.recv().unwrap();
+        println!("recv = {}", rv);
+    }
     println!("chan buffer remain num: {}", r.remain());
     sleep(Duration::from_secs(2));
 }
