@@ -49,6 +49,9 @@ macro_rules! chan {
     ($num:expr) => {
         $crate::std::sync::mpsc::bounded($num)
     };
+    ($num:expr,$t:path) => {
+        $crate::std::sync::mpsc::bounded::<$t>($num)
+    };
 }
 
 
@@ -93,15 +96,16 @@ impl<T> InnerQueue<T> {
         }
         self.queue.push(t);
         self.wake_recv.post();
-        if self.queue.len() >= self.buffer_len {
+        if self.queue.len() > self.buffer_len {
             self.wake_sender.wait();
         }
         Ok(())
     }
 
+    /// wake one sender
     #[inline]
     fn wake_sender(&self) {
-        if self.queue.len() >= self.buffer_len {
+        if (self.queue.len() + 1) > self.buffer_len {
             self.wake_sender.post();
         }
     }
