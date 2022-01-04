@@ -1,13 +1,18 @@
 
 use cogo::coroutine::sleep;
-use cogo::defer;
+use cogo::{defer, go};
 
 fn main(){
-    defer! {
+    defer!(||{
         println!("guard: 1");
-    }
-    defer! {
+    });
+    defer!(||{
         println!("guard: 2");
-    }
-    panic!("None Exception!");
+    });
+    defer!(||{
+        go!(||{
+            println!("defer in go!");
+        });
+    });
+    //panic!("None Exception!");
 }
