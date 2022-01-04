@@ -44,10 +44,10 @@ pub fn bounded<T>(buf: usize) -> (Sender<T>, Receiver<T>) {
 #[macro_export]
 macro_rules! chan {
     () => {
-        bounded(usize::MAX)
+        $crate::std::sync::mpsc::bounded(usize::MAX)
     };
     ($num:expr) => {
-        bounded($num)
+        $crate::std::sync::mpsc::bounded($num)
     };
 }
 
