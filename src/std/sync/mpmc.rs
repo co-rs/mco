@@ -35,6 +35,12 @@ pub fn bounded<T>(buf: usize) -> (Sender<T>, Receiver<T>) {
     (Sender::new(a.clone()), Receiver::new(a))
 }
 
+/// create an channel(mpmc)
+///  for example:
+///   //bounded
+///   let (sender, receiver) = chan!(2);
+///   //unbounded
+///   let (sender, receiver) = chan!();
 #[macro_export]
 macro_rules! chan {
     () => {

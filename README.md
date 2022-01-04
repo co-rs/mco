@@ -21,7 +21,7 @@ Cogo is a high-performance library for programming stackful coroutines with whic
 * ``` cogo/std/http/server ``` An HTTP server is available(Body parsing upcoming)
 * ``` cogo/std/http/client ``` An HTTP Client(TODO) upcoming
 * ``` cogo/std/queue ``` Basic queue data structures
-* ``` cogo/std/sync ```  Includes basic Mutex/RwLock/WaitGroup/Semphore/channel(Bounded, unbounded)...and more..
+* ``` cogo/std/sync ```  Includes basic Mutex/RwLock/WaitGroup/Semphore/channel(Bounded, unbounded, chan!())...and more..
 
 > Crates based on cogo implementation
 * [cdbc](https://github.com/co-rs/cdbc) Database Drivers include mysql, Postgres, AND SQLite
