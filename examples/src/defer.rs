@@ -11,8 +11,8 @@ fn main(){
     });
     defer!(||{
         go!(||{
-            println!("defer in go!");
+            println!("---------------defer in go!-------------");
         });
     });
-    //panic!("None Exception!");
+    panic!("None Exception!");
 }
