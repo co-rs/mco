@@ -56,7 +56,6 @@ mod bench {
     }
 
     //test bench::multi_1p1c_test     ... bench:  12,646,720 ns/iter (+/- 1,005,163)
-    //test bench::multi_1p1c_test     ... bench:  12,767,660 ns/iter (+/- 2,000,283)
     #[bench]
     fn bulk_pop_1p1c_bench(b: &mut Bencher) {
         b.iter(|| {
