@@ -249,9 +249,9 @@ impl Builder {
     /// The join handle can be used to block on
     /// termination of the child coroutine, including recovering its panics.
     fn spawn_impl<F, T>(self, f: F) -> io::Result<(CoroutineImpl, JoinHandle<T>)>
-    where
-        F: FnOnce() -> T + Send + 'static,
-        T: Send + 'static,
+        where
+            F: FnOnce() -> T + Send + 'static,
+            T: Send + 'static,
     {
         static DONE: Done = Done {};
 
@@ -347,11 +347,15 @@ impl Builder {
     /// [`TLS`]: ./index.html#TLS
     /// [`go!`]: ../macro.go.html
     /// [`spawn`]: ./fn.spawn.html
+    #[inline]
     pub unsafe fn spawn<F, T>(self, f: F) -> io::Result<JoinHandle<T>>
-    where
-        F: FnOnce() -> T + Send + 'static,
-        T: Send + 'static,
+        where
+            F: FnOnce() -> T + Send + 'static,
+            T: Send + 'static,
     {
+        if !config().get_work_steal() {
+            return self.spawn_local(f);
+        }
         // we will still get optimizations in spawn_impl
         let (co, handle) = self.spawn_impl(f)?;
         // put the coroutine to ready list
@@ -367,10 +371,11 @@ impl Builder {
     /// Cancel would drop all the resource of the coroutine.
     /// Normally this is safe but for some cases you should
     /// take care of the side effect
+    #[inline]
     pub unsafe fn spawn_local<F, T>(self, f: F) -> io::Result<JoinHandle<T>>
-    where
-        F: FnOnce() -> T + Send + 'static,
-        T: Send + 'static,
+        where
+            F: FnOnce() -> T + Send + 'static,
+            T: Send + 'static,
     {
         // we will still get optimizations in spawn_impl
         let (co, handle) = self.spawn_impl(f)?;
@@ -431,9 +436,9 @@ impl Builder {
 /// [`Builder::spawn`]: struct.Builder.html#method.spawn
 /// [`Builder`]: struct.Builder.html
 pub unsafe fn spawn<F, T>(f: F) -> JoinHandle<T>
-where
-    F: FnOnce() -> T + Send + 'static,
-    T: Send + 'static,
+    where
+        F: FnOnce() -> T + Send + 'static,
+        T: Send + 'static,
 {
     Builder::new().spawn(f).unwrap()
 }
@@ -451,7 +456,7 @@ pub fn current() -> Coroutine {
 /// Gets a handle to the coroutine that invokes it.
 /// it will panic if you call it in a thead context
 #[inline]
-pub fn try_current() -> Result<Coroutine,crate::std::errors::Error> {
+pub fn try_current() -> Result<Coroutine, crate::std::errors::Error> {
     match get_co_local_data() {
         None => Err(crate::std::errors::Error::from("no current coroutine, did you call `current()` in thread context?")),
         Some(local) => Ok(unsafe { local.as_ref() }.get_co().clone()),
