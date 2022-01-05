@@ -164,6 +164,9 @@ fn steal_global<T>(global: &deque::Injector<T>, local: &deque::Worker<T>) -> Opt
 
 #[inline]
 fn steal_local<T>(stealer: &deque::Stealer<T>, local: &deque::Worker<T>) -> Option<T> {
+    if local.is_empty(){
+        return None;
+    }
     let backoff = Backoff::new();
     loop {
         match stealer.steal_batch_and_pop(local) {
