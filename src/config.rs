@@ -88,14 +88,16 @@ impl Config {
     }
 
 
-    /// set worker steal
+    /// set worker steal。
+    /// If enabled, stealing global and local queues is used, which increases fairness but increases lock time.
+    /// If this function is disabled, tasks are evenly allocated to the local queue based on the last executed task, eliminating theft and improving efficiency
     pub fn set_work_steal(&self, steal: bool) -> &Self {
         info!("set worker steal={:?}", steal);
         WORK_STEAL.store(steal, Ordering::Release);
         self
     }
 
-    /// default is disable steal
+    /// default is disable steal.
     /// if you want steal, call set_work_steal(true);
     pub fn get_work_steal(&self) -> bool {
         let steal = WORK_STEAL.load(Ordering::Acquire);
