@@ -220,22 +220,26 @@ impl Scheduler {
         loop {
             // Pop a task from the local queue
             let co = local.pop().or_else(|| {
-                // Try stealing a of task from other local queues.
-                let parked_threads = self.workers.parked.load(Ordering::Relaxed);
-                stealers
-                    .iter()
-                    .map(|s| {
-                        if parked_threads & (1 << s.0) != 0 {
-                            return None;
-                        }
-                        steal_local(&s.1, local)
-                    })
-                    .find_map(|r| r)
-                    // Try stealing a batch of tasks from the global queue.
-                    .or_else(||
-                        {
-                            steal_global(&self.global_queue, local)
+                if self.is_steal {
+                    // Try stealing a of task from other local queues.
+                    let parked_threads = self.workers.parked.load(Ordering::Relaxed);
+                    stealers
+                        .iter()
+                        .map(|s| {
+                            if parked_threads & (1 << s.0) != 0 {
+                                return None;
+                            }
+                            steal_local(&s.1, local)
                         })
+                        .find_map(|r| r)
+                        // Try stealing a batch of tasks from the global queue.
+                        .or_else(||
+                            {
+                                steal_global(&self.global_queue, local)
+                            })
+                } else {
+                    steal_global(&self.global_queue, local)
+                }
             });
             if let Some(co) = co {
                 run_coroutine(co);
@@ -252,9 +256,9 @@ impl Scheduler {
     #[inline]
     pub fn schedule(&self, co: CoroutineImpl) {
         #[cfg(nightly)]
-        let id = WORKER_ID.load(Ordering::Relaxed);
+            let id = WORKER_ID.load(Ordering::Relaxed);
         #[cfg(not(nightly))]
-        let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
+            let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
 
         if id == !1 {
             self.schedule_global(co);
