@@ -41,7 +41,7 @@ type TimerThread = timeout_list::TimerThread<TimerData>;
 fn filter_cancel_panic() {
     use generator::Error;
     use std::panic;
-    if thread::panicking(){
+    if thread::panicking() {
         return;
     }
     let old = panic::take_hook();
@@ -184,6 +184,7 @@ pub struct Scheduler {
     timer_thread: TimerThread,
     is_steal: bool,
     stealers: Vec<Vec<(usize, deque::Stealer<CoroutineImpl>)>>,
+    last_local: AtomicUsize,
 }
 
 impl Scheduler {
@@ -210,6 +211,7 @@ impl Scheduler {
             workers: ParkStatus::new(workers),
             stealers,
             is_steal,
+            last_local: AtomicUsize::new(0),
         })
     }
 
@@ -237,16 +239,21 @@ impl Scheduler {
                                 steal_global(&self.global_queue, local)
                             })
                 } else {
-                    //only steal global
-                    steal_global(&self.global_queue, local)
+                    None
                 }
             });
             if let Some(co) = co {
                 run_coroutine(co);
             } else {
-                // do a re-check
-                if self.global_queue.is_empty() {
-                    break;
+                if self.is_steal {
+                    // do a re-check
+                    if self.global_queue.is_empty() {
+                        break;
+                    }
+                } else {
+                    if self.local_queues.is_empty() {
+                        break;
+                    }
                 }
             }
         }
@@ -261,7 +268,19 @@ impl Scheduler {
             let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
 
         if id == !1 {
-            self.schedule_global(co);
+            if self.is_steal {
+                self.schedule_global(co);
+            } else {
+                //Save them to other work queues in sequence to avoid putting them into global queues and reduce locking
+                let mut last_id = self.last_local.load(Ordering::Relaxed);
+                if last_id + 1 > self.local_queues.len() {
+                    last_id = 0;
+                } else {
+                    last_id += 1;
+                }
+                unsafe { self.local_queues.get_unchecked(last_id) }.push(co);
+                self.last_local.store(last_id, Ordering::Release);
+            }
         } else {
             unsafe { self.local_queues.get_unchecked(id) }.push(co);
         }
