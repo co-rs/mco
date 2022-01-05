@@ -271,31 +271,33 @@ impl Scheduler {
             let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
 
         if id == !1 {
-            if self.is_steal {
-                self.schedule_global(co);
-            } else {
-                //Save them to other work queues in sequence to avoid putting them into global queues and reduce locking
-                //Here we use atomic variables to store the worker thread ID of the last execution to ensure that the coroutine for this execution is evenly distributed to each worker thread
-                let mut last_id = self.last_local.load(Ordering::Relaxed);
-                if last_id + 1 >= self.local_queues.len() {
-                    last_id = 0;
-                } else {
-                    last_id += 1;
-                }
-                unsafe { self.local_queues.get_unchecked(last_id) }.push(co);
-                self.last_local.store(last_id, Ordering::Release);
-            }
+            self.schedule_global(co);
         } else {
             unsafe { self.local_queues.get_unchecked(id) }.push(co);
         }
     }
 
-    /// put the coroutine to global queue so that next time it can be scheduled
+    /// put the coroutine to global queue(if is_steal) so that next time it can be scheduled
+    /// pub the coroutine to any local_queues(if !is_steal) so that next time it can be scheduled
     #[inline]
     pub fn schedule_global(&self, co: CoroutineImpl) {
-        self.global_queue.push(co);
-        // signal one waiting thread if any
-        self.workers.wake_one(self);
+        if self.is_steal {
+            self.global_queue.push(co);
+            // signal one waiting thread if any
+            self.workers.wake_one(self);
+        } else {
+            //Save them to other work queues in sequence to avoid putting them into global queues and reduce locking
+            //Here we use atomic variables to store the worker thread ID of the last execution to ensure that the coroutine for this execution is evenly distributed to each worker thread
+            let mut last_id = self.last_local.load(Ordering::Relaxed);
+            if last_id + 1 >= self.local_queues.len() {
+                last_id = 0;
+            } else {
+                last_id += 1;
+            }
+            unsafe { self.local_queues.get_unchecked(last_id) }.push(co);
+            self.last_local.store(last_id, Ordering::Release);
+            self.get_selector().wakeup(last_id);
+        }
     }
 
     #[inline]
