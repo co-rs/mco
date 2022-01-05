@@ -139,9 +139,6 @@ pub fn get_scheduler() -> &'static Scheduler {
 
 #[inline]
 fn steal_global<T>(global: &deque::Injector<T>, local: &deque::Worker<T>) -> Option<T> {
-    if global.is_empty() {
-        return None;
-    }
     static GLOBABLE_LOCK: AtomicUsize = AtomicUsize::new(0);
     if GLOBABLE_LOCK
         .compare_exchange(0, 1, Ordering::Relaxed, Ordering::Relaxed)
@@ -164,9 +161,6 @@ fn steal_global<T>(global: &deque::Injector<T>, local: &deque::Worker<T>) -> Opt
 
 #[inline]
 fn steal_local<T>(stealer: &deque::Stealer<T>, local: &deque::Worker<T>) -> Option<T> {
-    if local.is_empty(){
-        return None;
-    }
     let backoff = Backoff::new();
     loop {
         match stealer.steal_batch_and_pop(local) {
