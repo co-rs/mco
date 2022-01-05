@@ -251,8 +251,7 @@ impl Scheduler {
         } else {
             loop {
                 // Pop a task from the local queue
-                let co = local.pop();
-                if let Some(co) = co {
+                if let Some(co) = local.pop() {
                     run_coroutine(co);
                 } else {
                     break;
