@@ -217,11 +217,11 @@ impl Scheduler {
 
     pub fn run_queued_tasks(&self, id: usize) {
         let local = unsafe { self.local_queues.get_unchecked(id) };
-        let stealers = unsafe { self.stealers.get_unchecked(id) };
-        loop {
-            // Pop a task from the local queue
-            let co = local.pop().or_else(|| {
-                if self.is_steal {
+        if self.is_steal {
+            let stealers = unsafe { self.stealers.get_unchecked(id) };
+            loop {
+                // Pop a task from the local queue
+                let co = local.pop().or_else(|| {
                     // Try stealing a of task from other local queues.
                     let parked_threads = self.workers.parked.load(Ordering::Relaxed);
                     stealers
@@ -238,22 +238,24 @@ impl Scheduler {
                             {
                                 steal_global(&self.global_queue, local)
                             })
+                });
+                if let Some(co) = co {
+                    run_coroutine(co);
                 } else {
-                    None
-                }
-            });
-            if let Some(co) = co {
-                run_coroutine(co);
-            } else {
-                if self.is_steal {
                     // do a re-check
                     if self.global_queue.is_empty() {
                         break;
                     }
+                }
+            }
+        } else {
+            loop {
+                // Pop a task from the local queue
+                let co = local.pop();
+                if let Some(co) = co {
+                    run_coroutine(co);
                 } else {
-                    if self.local_queues.is_empty() {
-                        break;
-                    }
+                    break;
                 }
             }
         }
