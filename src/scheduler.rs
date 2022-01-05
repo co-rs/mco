@@ -8,7 +8,6 @@ use crate::config::config;
 use crate::coroutine_impl::{run_coroutine, CoroutineImpl};
 use crate::io::{EventLoop, Selector};
 use crate::pool::CoroutinePool;
-use crate::std::sync::AtomicOption;
 use crate::timeout_list;
 use crate::yield_now::set_co_para;
 use crossbeam::deque;
@@ -16,6 +15,7 @@ use crossbeam::utils::Backoff;
 
 #[cfg(nightly)]
 use std::intrinsics::likely;
+use crate::std::sync::AtomicOption;
 
 #[cfg(not(nightly))]
 #[inline]
@@ -219,46 +219,32 @@ impl Scheduler {
 
     pub fn run_queued_tasks(&self, id: usize) {
         let local = unsafe { self.local_queues.get_unchecked(id) };
-        if self.is_steal {
-            let stealers = unsafe { self.stealers.get_unchecked(id) };
-            loop {
-                // Pop a task from the local queue
-                let co = local.pop().or_else(|| {
-                    // Try stealing a of task from other local queues.
-                    let parked_threads = self.workers.parked.load(Ordering::Relaxed);
-                    stealers
-                        .iter()
-                        .map(|s| {
-                            if parked_threads & (1 << s.0) != 0 {
-                                return None;
-                            }
-                            steal_local(&s.1, local)
+        let stealers = unsafe { self.stealers.get_unchecked(id) };
+        loop {
+            // Pop a task from the local queue
+            let co = local.pop().or_else(|| {
+                // Try stealing a of task from other local queues.
+                let parked_threads = self.workers.parked.load(Ordering::Relaxed);
+                stealers
+                    .iter()
+                    .map(|s| {
+                        if parked_threads & (1 << s.0) != 0 {
+                            return None;
+                        }
+                        steal_local(&s.1, local)
+                    })
+                    .find_map(|r| r)
+                    // Try stealing a batch of tasks from the global queue.
+                    .or_else(||
+                        {
+                            steal_global(&self.global_queue, local)
                         })
-                        .find_map(|r| r)
-                        // Try stealing a batch of tasks from the global queue.
-                        .or_else(||
-                            {
-                                steal_global(&self.global_queue, local)
-                            })
-                });
-                if let Some(co) = co {
-                    run_coroutine(co);
-                } else {
-                    // do a re-check
-                    if self.global_queue.is_empty() {
-                        break;
-                    }
-                }
-            }
-        } else {
-            loop {
-                // Pop a task from the local queue
-                if let Some(co) = local.pop().or_else(||
-                    {
-                        steal_global(&self.global_queue, local)
-                    }) {
-                    run_coroutine(co);
-                } else {
+            });
+            if let Some(co) = co {
+                run_coroutine(co);
+            } else {
+                // do a re-check
+                if self.global_queue.is_empty() {
                     break;
                 }
             }
@@ -269,9 +255,9 @@ impl Scheduler {
     #[inline]
     pub fn schedule(&self, co: CoroutineImpl) {
         #[cfg(nightly)]
-            let id = WORKER_ID.load(Ordering::Relaxed);
+        let id = WORKER_ID.load(Ordering::Relaxed);
         #[cfg(not(nightly))]
-            let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
+        let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
 
         if id == !1 {
             self.schedule_global(co);
