@@ -178,7 +178,9 @@ fn steal_local<T>(stealer: &deque::Stealer<T>, local: &deque::Worker<T>) -> Opti
 pub struct Scheduler {
     pub pool: CoroutinePool,
     event_loop: EventLoop,
+    /// FIFO deque
     global_queue: deque::Injector<CoroutineImpl>,
+    /// FIFO deque
     local_queues: Vec<deque::Worker<CoroutineImpl>>,
     pub(crate) workers: ParkStatus,
     timer_thread: TimerThread,
