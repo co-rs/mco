@@ -273,7 +273,7 @@ impl Scheduler {
             } else {
                 //Save them to other work queues in sequence to avoid putting them into global queues and reduce locking
                 let mut last_id = self.last_local.load(Ordering::Relaxed);
-                if last_id + 1 > self.local_queues.len() {
+                if last_id + 1 >= self.local_queues.len() {
                     last_id = 0;
                 } else {
                     last_id += 1;
