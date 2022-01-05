@@ -42,15 +42,6 @@ fn filter_cancel_panic() {
     use generator::Error;
     use std::panic;
     if thread::panicking(){
-        for _ in 0..100{
-            crate::coroutine::yield_now();
-            if !thread::panicking(){
-                break
-            }
-        }
-    }
-    if thread::panicking(){
-        // cancel take_hook
         return;
     }
     let old = panic::take_hook();
