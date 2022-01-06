@@ -28,6 +28,8 @@
 
 #[macro_use]
 extern crate log;
+#[macro_use]
+extern crate lazy_static;
 
 mod cancel;
 mod config;
@@ -51,5 +53,6 @@ pub mod net;
 pub mod os;
 #[macro_use]
 pub mod std;
+
 pub use crate::config::{config, Config};
 pub use crate::local::LocalKey;
