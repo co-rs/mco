@@ -12,10 +12,10 @@ fn main(){
     defer!{
         println!("guard: 3");
     }
-    defer!({
+    defer!{
         go!(||{
             println!("go spawn!");
         });
-    });
+    };
     panic!("None Exception!");
 }
