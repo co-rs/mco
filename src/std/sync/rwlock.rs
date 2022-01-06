@@ -56,7 +56,7 @@ pub struct RwLockWriteGuard<'a, T: ?Sized + 'a> {
 impl<T> RwLock<T> {
     pub fn new(t: T) -> RwLock<T> {
         RwLock {
-            to_wake: SegQueue::new(),
+            to_wake: WaitList::new(),
             cnt: AtomicUsize::new(0),
             rlock: Mutex::new(0),
             poison: poison::Flag::new(),
