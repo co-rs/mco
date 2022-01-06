@@ -225,7 +225,13 @@ impl Scheduler {
                     })
                     .find_map(|r| r)
                     // Try stealing a batch of tasks from the global queue.
-                    .or_else(|| steal_global(&self.global_queue, local))
+                    .or_else(|| {
+                        if self.global_queue.is_empty(){
+                            None
+                        }else{
+                            steal_global(&self.global_queue, local)
+                        }
+                    })
             });
 
             if let Some(co) = co {
