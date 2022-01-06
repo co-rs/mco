@@ -196,7 +196,7 @@ impl fmt::Debug for Coroutine {
 /// # Examples
 ///
 /// ```
-/// use may::coroutine;
+/// use cogo::coroutine;
 ///
 /// let builder = coroutine::Builder::new();
 /// let code = || {

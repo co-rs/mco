@@ -82,10 +82,6 @@ name = "waitgroup"
 path = "src/wait_group.rs"
 
 [[bin]]
-name = "set_work_steal"
-path = "src/set_work_steal.rs"
-
-[[bin]]
 name = "defer"
 path = "src/defer.rs"
 
