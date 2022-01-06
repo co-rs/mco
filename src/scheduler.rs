@@ -8,6 +8,7 @@ use crate::config::config;
 use crate::coroutine_impl::{run_coroutine, CoroutineImpl};
 use crate::io::{EventLoop, Selector};
 use crate::pool::CoroutinePool;
+use crate::std::sync::AtomicOption;
 use crate::timeout_list;
 use crate::yield_now::set_co_para;
 use crossbeam::deque;
@@ -15,8 +16,6 @@ use crossbeam::utils::Backoff;
 
 #[cfg(nightly)]
 use std::intrinsics::likely;
-use crate::std::sync::AtomicOption;
-
 #[cfg(not(nightly))]
 #[inline]
 fn likely(e: bool) -> bool {
@@ -91,7 +90,7 @@ impl ParkStatus {
 #[inline(never)]
 fn init_scheduler() {
     let workers = config().get_workers();
-    let b: Box<Scheduler> = Scheduler::new(workers, config().get_work_steal());
+    let b: Box<Scheduler> = Scheduler::new(workers);
     unsafe {
         SCHED = Box::into_raw(b);
     }
@@ -175,19 +174,15 @@ fn steal_local<T>(stealer: &deque::Stealer<T>, local: &deque::Worker<T>) -> Opti
 pub struct Scheduler {
     pub pool: CoroutinePool,
     event_loop: EventLoop,
-    /// FIFO deque
     global_queue: deque::Injector<CoroutineImpl>,
-    /// FIFO deque
     local_queues: Vec<deque::Worker<CoroutineImpl>>,
     pub(crate) workers: ParkStatus,
     timer_thread: TimerThread,
-    is_steal: bool,
     stealers: Vec<Vec<(usize, deque::Stealer<CoroutineImpl>)>>,
-    last_local: AtomicUsize,
 }
 
 impl Scheduler {
-    pub fn new(workers: usize, is_steal: bool) -> Box<Self> {
+    pub fn new(workers: usize) -> Box<Self> {
         let mut local_queues = Vec::with_capacity(workers);
         (0..workers).for_each(|_| local_queues.push(deque::Worker::new_fifo()));
         let mut stealers = Vec::with_capacity(workers);
@@ -209,8 +204,6 @@ impl Scheduler {
             timer_thread: TimerThread::new(),
             workers: ParkStatus::new(workers),
             stealers,
-            is_steal,
-            last_local: AtomicUsize::new(0),
         })
     }
 
@@ -232,11 +225,9 @@ impl Scheduler {
                     })
                     .find_map(|r| r)
                     // Try stealing a batch of tasks from the global queue.
-                    .or_else(||
-                        {
-                            steal_global(&self.global_queue, local)
-                        })
+                    .or_else(|| steal_global(&self.global_queue, local))
             });
+
             if let Some(co) = co {
                 run_coroutine(co);
             } else {
@@ -252,9 +243,9 @@ impl Scheduler {
     #[inline]
     pub fn schedule(&self, co: CoroutineImpl) {
         #[cfg(nightly)]
-            let id = WORKER_ID.load(Ordering::Relaxed);
+        let id = WORKER_ID.load(Ordering::Relaxed);
         #[cfg(not(nightly))]
-            let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
+        let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
 
         if id == !1 {
             self.schedule_global(co);

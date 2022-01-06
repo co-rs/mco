@@ -196,7 +196,7 @@ impl fmt::Debug for Coroutine {
 /// # Examples
 ///
 /// ```
-/// use cogo::coroutine;
+/// use may::coroutine;
 ///
 /// let builder = coroutine::Builder::new();
 /// let code = || {
@@ -249,9 +249,9 @@ impl Builder {
     /// The join handle can be used to block on
     /// termination of the child coroutine, including recovering its panics.
     fn spawn_impl<F, T>(self, f: F) -> io::Result<(CoroutineImpl, JoinHandle<T>)>
-        where
-            F: FnOnce() -> T + Send + 'static,
-            T: Send + 'static,
+    where
+        F: FnOnce() -> T + Send + 'static,
+        T: Send + 'static,
     {
         static DONE: Done = Done {};
 
@@ -347,7 +347,6 @@ impl Builder {
     /// [`TLS`]: ./index.html#TLS
     /// [`go!`]: ../macro.go.html
     /// [`spawn`]: ./fn.spawn.html
-    #[inline]
     pub unsafe fn spawn<F, T>(self, f: F) -> io::Result<JoinHandle<T>>
         where
             F: FnOnce() -> T + Send + 'static,
@@ -358,8 +357,10 @@ impl Builder {
         }
         // we will still get optimizations in spawn_impl
         let (co, handle) = self.spawn_impl(f)?;
+
         // put the coroutine to ready list
         get_scheduler().schedule_global(co);
+
         Ok(handle)
     }
 
@@ -371,7 +372,6 @@ impl Builder {
     /// Cancel would drop all the resource of the coroutine.
     /// Normally this is safe but for some cases you should
     /// take care of the side effect
-    #[inline]
     pub unsafe fn spawn_local<F, T>(self, f: F) -> io::Result<JoinHandle<T>>
         where
             F: FnOnce() -> T + Send + 'static,
