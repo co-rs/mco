@@ -9,8 +9,6 @@ use crate::coroutine::*;
 use cogo::{config, coroutine};
 use test::Bencher;
 
-use cogo::std::sync::mpsc::channel;
-
 #[bench]
 fn yield_bench(b: &mut Bencher) {
     // don't print any panic info
@@ -174,36 +172,6 @@ fn smoke_bench_3(b: &mut Bencher) {
         }
         for j in vec {
             j.join().ok();
-        }
-    });
-}
-
-
-// improve performance  from 39,294 ns/iter to 12,207 ns/iter (my computer)
-//test bench_channel  ... bench:      12,207 ns/iter (+/- 118)
-#[bench]
-fn bench_channel(b: &mut Bencher) {
-    b.iter(|| {
-        let (s,r) = channel();
-        for _ in 0..1000{
-            s.send(1);
-        }
-        for _ in 0..1000{
-            let r=r.recv().unwrap();
-        }
-    });
-}
-
-//test bench_channel2 ... bench:      39,294 ns/iter (+/- 639)
-#[bench]
-fn bench_channel2(b: &mut Bencher) {
-    b.iter(|| {
-        let (s,r) = channel();
-        for _ in 0..1000{
-            s.send(1);
-        }
-        for _ in 0..1000{
-            let r=r.recv().unwrap();
         }
     });
 }
