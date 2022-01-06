@@ -7,12 +7,10 @@ use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 // windows has a minimal size as 0x4a8!!!!
 const DEFAULT_STACK_SIZE: usize = 0x1000;
 const DEFAULT_POOL_CAPACITY: usize = 100;
-const DEFAULT_WORK_STEAL: bool = false;
 
 static WORKERS: AtomicUsize = AtomicUsize::new(0);
 static STACK_SIZE: AtomicUsize = AtomicUsize::new(DEFAULT_STACK_SIZE);
 static POOL_CAPACITY: AtomicUsize = AtomicUsize::new(DEFAULT_POOL_CAPACITY);
-static WORK_STEAL: AtomicBool = AtomicBool::new(DEFAULT_WORK_STEAL);
 /// `Cogo` Configuration type
 pub struct Config;
 
@@ -85,22 +83,5 @@ impl Config {
     /// get the default coroutine stack size
     pub fn get_stack_size(&self) -> usize {
         STACK_SIZE.load(Ordering::Acquire)
-    }
-
-
-    /// set worker steal。
-    /// If enabled, stealing global and local queues is used, which increases fairness but increases lock time.
-    /// If this function is disabled, tasks are evenly allocated to the local queue based on the last executed task, eliminating theft and improving efficiency
-    pub fn set_work_steal(&self, steal: bool) -> &Self {
-        info!("set worker steal={:?}", steal);
-        WORK_STEAL.store(steal, Ordering::Release);
-        self
-    }
-
-    /// default is disable steal.
-    /// if you want steal, call set_work_steal(true);
-    pub fn get_work_steal(&self) -> bool {
-        let steal = WORK_STEAL.load(Ordering::Acquire);
-        steal
     }
 }

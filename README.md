@@ -46,10 +46,9 @@ Cogo is a high-performance library for programming stackful coroutines with whic
 * Both stable, beta, and nightly channels are supported;
 * x86_64 GNU/Linux, x86_64 Windows, x86_64 Mac, aarch64 Linux OS are supported.
 
-
 * Support High performance channel(2 times better performance, Support the buffer);
-* Support WaitGroup(like golang)
-* Support Disable stealing and commit directly to the local queue(3 times better go!()/spawn() performance)
+* Support WaitGroup Support
+* Support defer!()
 
 
 ## Usage
