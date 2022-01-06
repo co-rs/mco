@@ -9,6 +9,9 @@ fn main(){
     defer!(||{
         println!("guard: 2");
     });
+    defer!{
+        println!("guard: 3");
+    }
     defer!({
         go!(||{
             println!("go spawn!");

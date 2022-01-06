@@ -6,11 +6,14 @@
 ///  // will print:  None Exception! \n   guard: 2 \n  guard: 1
 ///  fn main(){
 ///     defer!({
-///         println!("guard: 1");
-///     });
-///     defer!({
-///         println!("guard: 2");
-///     });
+///        println!("guard: 1");
+///        });
+///     defer!(||{
+///        println!("guard: 2");
+///        });
+///     defer!{
+///        println!("guard: 3");
+///     }
 ///     panic!("None Exception!");
 /// }
 ///
@@ -44,4 +47,20 @@ macro_rules! defer {
             Guard(Some($func))
         };
     };
+    { $($func:expr;)+ } => {
+       let _guard = {
+            pub struct Guard<F: FnOnce()>(Option<F>);
+            impl<F: FnOnce()> Drop for Guard<F> {
+                fn drop(&mut self) {
+                    if let Some(f) = (self.0).take() {
+                        f()
+                    }
+                }
+            }
+            Guard(Some(||{
+                $($func;)+
+            }))
+        };
+        ;
+    }
 }
