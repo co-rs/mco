@@ -7,7 +7,7 @@ use std::panic::{RefUnwindSafe, UnwindSafe};
 use std::sync::atomic::{fence, AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::sync::{LockResult, TryLockError, TryLockResult};
-use crossbeam::queue::SegQueue;
+use may_queue::mpsc_list::Queue as WaitList;
 
 use super::blocking::SyncBlocker;
 use super::poison;
@@ -16,7 +16,7 @@ use crate::park::ParkError;
 
 pub struct Mutex<T: ?Sized> {
     // the waiting blocker list
-    to_wake: SegQueue<Arc<SyncBlocker>>,
+    to_wake: WaitList<Arc<SyncBlocker>>,
     // track how many blockers are waiting on the mutex
     cnt: AtomicUsize,
     poison: poison::Flag,
@@ -41,7 +41,7 @@ impl<T> Mutex<T> {
     /// Creates a new mutex in an unlocked state ready for use.
     pub fn new(t: T) -> Mutex<T> {
         Mutex {
-            to_wake: SegQueue::new(),
+            to_wake: WaitList::new(),
             cnt: AtomicUsize::new(0),
             poison: poison::Flag::new(),
             data: UnsafeCell::new(t),
