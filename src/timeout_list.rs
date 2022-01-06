@@ -35,18 +35,16 @@ pub fn ns_to_ms(ns: u64) -> u64 {
     (ns + NANOS_PER_MILLI - 1) / NANOS_PER_MILLI
 }
 
-#[inline]
-fn get_instant() -> &'static Instant {
-    use std::mem::MaybeUninit;
-    // NOTICE: the static bss seems always zeroed
-    static START_TIME: MaybeUninit<Instant> = MaybeUninit::uninit();
-    unsafe { &*START_TIME.as_ptr() }
-}
+
+lazy_static!(
+    pub static ref START_TIME:Instant = Instant::now();
+);
+
 // get the current wall clock in ns
 #[inline]
 pub fn now() -> u64 {
     // we need a Monotonic Clock here
-    get_instant().elapsed().as_nanos() as u64
+    START_TIME.elapsed().as_nanos() as u64
 }
 
 // timeout event data
@@ -85,8 +83,8 @@ impl<T> IntervalEntry<T> {
     // trigger the timeout event with the supplying function
     // return next expire time
     pub fn pop_timeout<F>(&self, now: u64, f: &F) -> Option<u64>
-    where
-        F: Fn(T),
+        where
+            F: Fn(T),
     {
         let p = |v: &TimeoutData<T>| v.time <= now;
         while let Some(timeout) = self.list.inner.pop_if(&p) {
@@ -144,7 +142,7 @@ impl<T> TimeOutList<T> {
     pub fn add_timer(&self, dur: Duration, data: T) -> (TimeoutHandle<T>, bool) {
         let interval = dur_to_ns(dur);
         let time = now() + interval; // TODO: deal with overflow?
-                                     //println!("add timer = {:?}", time);
+        //println!("add timer = {:?}", time);
 
         let timeout = TimeoutData { time, data };
 
@@ -323,7 +321,6 @@ impl<T> TimerThread<T> {
 
 #[cfg(test)]
 mod tests {
-    #![feature(test)]
     use super::*;
     use std::sync::Arc;
     use std::thread;
