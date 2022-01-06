@@ -7,7 +7,7 @@ use std::panic::{RefUnwindSafe, UnwindSafe};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::sync::{LockResult, PoisonError, TryLockError, TryLockResult};
-use may_queue::mpsc_list::Queue as WaitList;
+use crate::std::queue::mpsc_list::Queue as WaitList;
 
 use crate::cancel::trigger_cancel_panic;
 use crate::park::ParkError;
