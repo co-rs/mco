@@ -108,10 +108,10 @@ impl Selector {
     ) -> io::Result<Option<u64>> {
         let timeout = timeout.map(ns_to_dur);
         // //info!("select; timeout={:?}", timeout);
-        let mask = 1 << id;
+        let mask = self.vec.len() + id;
         let single_selector = unsafe { self.vec.get_unchecked(id) };
         let scheduler = get_scheduler();
-        scheduler.workers.parked.fetch_or(mask, Ordering::Relaxed);
+        scheduler.workers.parked.fetch_or(mask as u64, Ordering::Relaxed);
         let n = match single_selector.port.get_many(events, timeout) {
             Ok(statuses) => statuses.len(),
             Err(ref e) if e.raw_os_error() == Some(WAIT_TIMEOUT as i32) => 0,
@@ -119,7 +119,7 @@ impl Selector {
         };
 
         // clear the park stat after comeback
-        scheduler.workers.parked.fetch_and(!mask, Ordering::Relaxed);
+        scheduler.workers.parked.fetch_and((mask - self.vec.len()) as u64, Ordering::Relaxed);
 
         for status in events[..n].iter() {
             // need to check the status for each io

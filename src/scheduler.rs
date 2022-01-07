@@ -80,7 +80,7 @@ impl ParkStatus {
         if first_thread < self.workers {
             // mark the thread as busy in advance (clear to 0)
             // the worker thread would set it to 1 when idle
-            let mask = 1 << first_thread;
+            let mask = self.workers + first_thread;
             self.parked.fetch_and(!mask, Ordering::Relaxed);
             scheduler.get_selector().wakeup(first_thread as usize);
         }
@@ -179,6 +179,7 @@ pub struct Scheduler {
     pub(crate) workers: ParkStatus,
     timer_thread: TimerThread,
     stealers: Vec<Vec<(usize, deque::Stealer<CoroutineImpl>)>>,
+    workers_len: usize,
 }
 
 impl Scheduler {
@@ -204,6 +205,7 @@ impl Scheduler {
             timer_thread: TimerThread::new(),
             workers: ParkStatus::new(workers as u64),
             stealers,
+            workers_len: workers
         })
     }
 
@@ -218,7 +220,7 @@ impl Scheduler {
                 stealers
                     .iter()
                     .map(|s| {
-                        if parked_threads & (1 << s.0) != 0 {
+                        if parked_threads & (self.workers_len + s.0) as u64 != 0 {
                             return None;
                         }
                         steal_local(&s.1, local)
