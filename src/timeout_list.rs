@@ -8,6 +8,7 @@ use std::time::{Duration, Instant};
 
 use crossbeam::atomic::AtomicCell;
 use crossbeam::queue::SegQueue as mpsc;
+use once_cell::sync::Lazy;
 use crate::std::queue::mpsc_list_v1::Entry;
 use crate::std::queue::mpsc_list_v1::Queue as TimeoutQueue;
 
@@ -35,10 +36,8 @@ pub fn ns_to_ms(ns: u64) -> u64 {
     (ns + NANOS_PER_MILLI - 1) / NANOS_PER_MILLI
 }
 
+pub static START_TIME: Lazy<Instant> = Lazy::new(|| { Instant::now() });
 
-lazy_static!(
-    pub static ref START_TIME:Instant = Instant::now();
-);
 
 // get the current wall clock in ns
 #[inline]
@@ -49,7 +48,8 @@ pub fn now() -> u64 {
 
 // timeout event data
 pub struct TimeoutData<T> {
-    time: u64,   // the wall clock in ns that the timer expires
+    time: u64,
+    // the wall clock in ns that the timer expires
     pub data: T, // the data associate with the timeout event
 }
 
@@ -74,8 +74,10 @@ type IntervalList<T> = Arc<TimeoutQueueWrapper<T>>;
 
 // this is the data type that used by the binary heap to get the latest timer
 struct IntervalEntry<T> {
-    time: u64,             // the head timeout value in the list, should be latest
-    list: IntervalList<T>, // point to the interval list
+    time: u64,
+    // the head timeout value in the list, should be latest
+    list: IntervalList<T>,
+    // point to the interval list
     interval: u64,
 }
 
