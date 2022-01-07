@@ -182,27 +182,27 @@ pub struct Scheduler {
 }
 
 impl Scheduler {
-    pub fn new(workers: u64) -> Box<Self> {
-        let mut local_queues = Vec::with_capacity(workers as usize);
+    pub fn new(workers: usize) -> Box<Self> {
+        let mut local_queues = Vec::with_capacity(workers);
         (0..workers).for_each(|_| local_queues.push(deque::Worker::new_fifo()));
-        let mut stealers = Vec::with_capacity(workers as usize);
+        let mut stealers = Vec::with_capacity(workers);
         for id in 0..workers {
-            let mut stealers_l = Vec::with_capacity(workers as usize);
+            let mut stealers_l = Vec::with_capacity(workers);
             for (i, worker) in local_queues.iter().enumerate() {
-                if i != id as usize {
+                if i != id {
                     stealers_l.push((i, worker.stealer()));
                 }
             }
-            stealers_l.rotate_left(id as usize);
+            stealers_l.rotate_left(id);
             stealers.push(stealers_l);
         }
         Box::new(Scheduler {
             pool: CoroutinePool::new(),
-            event_loop: EventLoop::new(workers as usize).expect("can't create event_loop"),
+            event_loop: EventLoop::new(workers).expect("can't create event_loop"),
             global_queue: deque::Injector::new(),
             local_queues,
             timer_thread: TimerThread::new(),
-            workers: ParkStatus::new(workers),
+            workers: ParkStatus::new(workers as u64),
             stealers,
         })
     }
