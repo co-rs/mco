@@ -196,7 +196,7 @@ impl Selector {
 
     // this will post an os event so that we can wakeup the event loop
     #[inline]
-    pub fn wakeup(&self, id: u64) {
+    pub fn wakeup(&self, id: usize) {
         // this is not correct for multi thread io, which thread will it wakeup?
         unsafe { self.vec.get_unchecked(id) }
             .port
