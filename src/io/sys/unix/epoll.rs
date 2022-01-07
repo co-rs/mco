@@ -59,14 +59,13 @@ impl Drop for SingleSelector {
 }
 
 pub struct Selector {
-    // 128 should be fine for max io threads
-    vec: SmallVec<[SingleSelector; 128]>,
+    vec: Vec<SingleSelector>,
 }
 
 impl Selector {
     pub fn new(io_workers: usize) -> io::Result<Self> {
         let mut s = Selector {
-            vec: SmallVec::new(),
+            vec: Vec::with_capacity(io_workers),
         };
 
         for _ in 0..io_workers {
