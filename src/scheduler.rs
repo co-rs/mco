@@ -16,6 +16,7 @@ use crossbeam::utils::Backoff;
 
 #[cfg(nightly)]
 use std::intrinsics::likely;
+
 #[cfg(not(nightly))]
 #[inline]
 fn likely(e: bool) -> bool {
@@ -57,13 +58,12 @@ static mut SCHED: *const Scheduler = std::ptr::null();
 
 pub struct ParkStatus {
     pub parked: AtomicU64,
-    workers: usize,
+    workers: u64,
 }
 
 impl ParkStatus {
-    fn new(workers: usize) -> Self {
-        assert!(workers <= 64);
-        let parked = AtomicU64::new(((1u128 << workers) - 1) as u64);
+    fn new(workers: u64) -> Self {
+        let parked = AtomicU64::new(0);
         ParkStatus { parked, workers }
     }
 
@@ -73,7 +73,7 @@ impl ParkStatus {
         let parked = self.parked.load(Ordering::Relaxed);
         // find the right most set bit
         let rms = parked & !parked.wrapping_sub(1);
-        let first_thread = rms.trailing_zeros() as usize;
+        let first_thread = rms.trailing_zeros() as u64;
         // if all threads are busy, we would not send any signal to wake up
         // any worker thread. In case worker thread missing the signal it will
         // wake up itself every 1 second, this is a rarely case
@@ -82,7 +82,7 @@ impl ParkStatus {
             // the worker thread would set it to 1 when idle
             let mask = 1 << first_thread;
             self.parked.fetch_and(!mask, Ordering::Relaxed);
-            scheduler.get_selector().wakeup(first_thread);
+            scheduler.get_selector().wakeup(first_thread as usize);
         }
     }
 }
@@ -117,7 +117,7 @@ fn init_scheduler() {
     for id in 0..workers {
         thread::spawn(move || {
             let s = unsafe { &*SCHED };
-            s.event_loop.run(id).unwrap_or_else(|e| {
+            s.event_loop.run(id as usize).unwrap_or_else(|e| {
                 panic!("event_loop failed running, err={}", e);
             });
         });
@@ -182,23 +182,23 @@ pub struct Scheduler {
 }
 
 impl Scheduler {
-    pub fn new(workers: usize) -> Box<Self> {
-        let mut local_queues = Vec::with_capacity(workers);
+    pub fn new(workers: u64) -> Box<Self> {
+        let mut local_queues = Vec::with_capacity(workers as usize);
         (0..workers).for_each(|_| local_queues.push(deque::Worker::new_fifo()));
-        let mut stealers = Vec::with_capacity(workers);
+        let mut stealers = Vec::with_capacity(workers as usize);
         for id in 0..workers {
-            let mut stealers_l = Vec::with_capacity(workers);
+            let mut stealers_l = Vec::with_capacity(workers as usize);
             for (i, worker) in local_queues.iter().enumerate() {
-                if i != id {
+                if i != id as usize {
                     stealers_l.push((i, worker.stealer()));
                 }
             }
-            stealers_l.rotate_left(id);
+            stealers_l.rotate_left(id as usize);
             stealers.push(stealers_l);
         }
         Box::new(Scheduler {
             pool: CoroutinePool::new(),
-            event_loop: EventLoop::new(workers).expect("can't create event_loop"),
+            event_loop: EventLoop::new(workers as usize).expect("can't create event_loop"),
             global_queue: deque::Injector::new(),
             local_queues,
             timer_thread: TimerThread::new(),
@@ -226,9 +226,9 @@ impl Scheduler {
                     .find_map(|r| r)
                     // Try stealing a batch of tasks from the global queue.
                     .or_else(|| {
-                        if self.global_queue.is_empty(){
+                        if self.global_queue.is_empty() {
                             None
-                        }else{
+                        } else {
                             steal_global(&self.global_queue, local)
                         }
                     })
@@ -249,9 +249,9 @@ impl Scheduler {
     #[inline]
     pub fn schedule(&self, co: CoroutineImpl) {
         #[cfg(nightly)]
-        let id = WORKER_ID.load(Ordering::Relaxed);
+            let id = WORKER_ID.load(Ordering::Relaxed);
         #[cfg(not(nightly))]
-        let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
+            let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
 
         if id == !1 {
             self.schedule_global(co);

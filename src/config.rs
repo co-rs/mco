@@ -1,14 +1,14 @@
 //! `Cogo` Configuration interface
 //!
 
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 
 // default stack size, in usize
 // windows has a minimal size as 0x4a8!!!!
 const DEFAULT_STACK_SIZE: usize = 0x1000;
 const DEFAULT_POOL_CAPACITY: usize = 100;
 
-static WORKERS: AtomicUsize = AtomicUsize::new(0);
+static WORKERS: AtomicU64 = AtomicU64::new(0);
 static STACK_SIZE: AtomicUsize = AtomicUsize::new(DEFAULT_STACK_SIZE);
 static POOL_CAPACITY: AtomicUsize = AtomicUsize::new(DEFAULT_POOL_CAPACITY);
 /// `Cogo` Configuration type
@@ -27,22 +27,21 @@ impl Config {
     /// set the worker thread number
     ///
     /// the minimum worker thread is 1, if you pass 0 to it, will use internal default
-    pub fn set_workers(&self, workers: usize) -> &Self {
-        assert!(workers <= 64);
+    pub fn set_workers(&self, workers: u64) -> &Self {
         info!("set workers={:?}", workers);
         WORKERS.store(workers, Ordering::Relaxed);
         self
     }
 
     /// get the normal workers number
-    pub fn get_workers(&self) -> usize {
+    pub fn get_workers(&self) -> u64 {
         let workers = WORKERS.load(Ordering::Relaxed);
         if workers != 0 {
             workers
         } else {
             let num = num_cpus::get();
-            WORKERS.store(num, Ordering::Relaxed);
-            num
+            WORKERS.store(num as u64, Ordering::Relaxed);
+            num as u64
         }
     }
 
