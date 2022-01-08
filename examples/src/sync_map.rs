@@ -10,6 +10,7 @@ pub fn main() {
     for i in 0..100 {
         let m1 = m.clone();
         let wg1 = wg.clone();
+        //many coroutine insert the SyncMap
         go!(move ||{
            m1.insert(i,i);
            if i==100{
