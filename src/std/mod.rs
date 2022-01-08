@@ -7,3 +7,4 @@ pub mod io;
 #[macro_use]
 pub mod defer;
 pub mod time;
+pub mod map;
