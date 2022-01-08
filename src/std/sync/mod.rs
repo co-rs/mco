@@ -7,6 +7,7 @@ mod rwlock;
 mod semphore;
 mod sync_flag;
 mod wait_group;
+mod sync_map;
 
 pub(crate) mod atomic_dur;
 #[cfg(not(unix))]
@@ -23,3 +24,4 @@ pub use self::rwlock::{RwLock, RwLockReadGuard, RwLockWriteGuard};
 pub use self::semphore::Semphore;
 pub use self::sync_flag::SyncFlag;
 pub use self::wait_group::*;
+pub use self::sync_map::*;

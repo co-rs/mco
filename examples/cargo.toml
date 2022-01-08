@@ -85,6 +85,10 @@ path = "src/wait_group.rs"
 name = "defer"
 path = "src/defer.rs"
 
+[[bin]]
+name = "sync_map"
+path = "src/sync_map.rs"
+
 [dependencies]
 cogo = {path = "../"}
 generator = "0.7"
