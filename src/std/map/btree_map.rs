@@ -30,7 +30,7 @@ impl<K, V> SyncBtreeMap<K, V> where K: std::cmp::Eq + Hash + Clone {
         }
     }
 
-    pub fn insert(&self, k: K, mut v: V) -> Option<V> where K: Clone+ std::cmp::Ord {
+    pub fn insert(&self, k: K, mut v: V) -> Option<V> where K: Clone + std::cmp::Ord {
         match self.dirty.write() {
             Ok(mut m) => {
                 m.insert(k, v)
@@ -41,7 +41,7 @@ impl<K, V> SyncBtreeMap<K, V> where K: std::cmp::Eq + Hash + Clone {
         }
     }
 
-    pub fn remove(&self, k: &K) -> Option<V> where K: Clone+ std::cmp::Ord {
+    pub fn remove(&self, k: &K) -> Option<V> where K: Clone + std::cmp::Ord {
         match self.dirty.write() {
             Ok(mut m) => {
                 m.remove(k)
@@ -93,8 +93,8 @@ impl<K, V> SyncBtreeMap<K, V> where K: std::cmp::Eq + Hash + Clone {
 
     pub fn get<Q: ?Sized>(&self, k: &Q) -> Option<SyncMapRef<'_, K, V>>
         where
-            K: Borrow<Q>+ std::cmp::Ord,
-            Q: Hash + Eq+ std::cmp::Ord,
+            K: Borrow<Q> + std::cmp::Ord,
+            Q: Hash + Eq + std::cmp::Ord,
     {
         let g = self.dirty.read();
         match g {
@@ -116,8 +116,8 @@ impl<K, V> SyncBtreeMap<K, V> where K: std::cmp::Eq + Hash + Clone {
 
     pub fn get_mut<Q: ?Sized>(&self, k: &Q) -> Option<SyncMapRefMut<'_, K, V>>
         where
-            K: Borrow<Q>+ std::cmp::Ord,
-            Q: Hash + Eq+ std::cmp::Ord,
+            K: Borrow<Q> + std::cmp::Ord,
+            Q: Hash + Eq + std::cmp::Ord,
     {
         let g = self.dirty.write();
         match g {
@@ -202,7 +202,7 @@ impl<K, V> Deref for SyncMapRef<'_, K, V> {
 
 impl<K, V> Debug for SyncMapRef<'_, K, V> where V: Debug {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.value.fmt(f)
+        self.value.unwrap().fmt(f)
     }
 }
 
@@ -238,7 +238,7 @@ impl<K, V> DerefMut for SyncMapRefMut<'_, K, V> {
 
 impl<K, V> Debug for SyncMapRefMut<'_, K, V> where V: Debug {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.value.fmt(f)
+        self.value.as_ref().unwrap().fmt(f)
     }
 }
 
@@ -300,6 +300,26 @@ impl<'a, K, V> Iterator for IterMut<'a, K, V> {
     }
 }
 
+
+impl<'a, K, V> IntoIterator for &'a SyncBtreeMap<K, V> where K: Eq + Hash + Clone {
+    type Item = (&'a K, &'a V);
+    type IntoIter = Iter<'a, K, V>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
+impl<'a, K, V> IntoIterator for &'a mut SyncBtreeMap<K, V> where K: Eq + Hash + Clone {
+    type Item = (&'a K, &'a mut V);
+    type IntoIter = IterMut<'a, K, V>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter_mut()
+    }
+}
+
+
 #[cfg(test)]
 mod test {
     use std::collections::BTreeMap;
@@ -307,7 +327,7 @@ mod test {
     use std::sync::Arc;
     use std::sync::atomic::{Ordering};
     use crate::std::map::SyncBtreeMap;
-    use crate::std::sync::{ WaitGroup};
+    use crate::std::sync::{WaitGroup};
 
 
     #[test]

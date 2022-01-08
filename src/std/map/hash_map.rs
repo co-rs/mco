@@ -1,5 +1,6 @@
 use std::borrow::{Borrow, BorrowMut};
 use std::cell::UnsafeCell;
+use std::collections::hash_map::IntoIter;
 use std::collections::HashMap;
 use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
@@ -207,7 +208,7 @@ impl<K, V> Deref for SyncMapRef<'_, K, V> {
 
 impl<K, V> Debug for SyncMapRef<'_, K, V> where V: Debug {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.value.fmt(f)
+        self.value.unwrap().fmt(f)
     }
 }
 
@@ -305,6 +306,26 @@ impl<'a, K, V> Iterator for IterMut<'a, K, V> {
     }
 }
 
+impl<'a, K, V> IntoIterator for &'a SyncHashMap<K, V> where K: Eq + Hash + Clone {
+    type Item = (&'a K, &'a V);
+    type IntoIter = Iter<'a, K, V>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter()
+    }
+}
+
+
+impl<'a, K, V> IntoIterator for &'a mut SyncHashMap<K, V> where K: Eq + Hash + Clone {
+    type Item = (&'a K, &'a mut V);
+    type IntoIter = IterMut<'a, K, V>;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.iter_mut()
+    }
+}
+
+
 #[cfg(test)]
 mod test {
     use std::collections::HashMap;
@@ -312,7 +333,7 @@ mod test {
     use std::sync::Arc;
     use std::sync::atomic::{Ordering};
     use crate::std::map::SyncHashMap;
-    use crate::std::sync::{ WaitGroup};
+    use crate::std::sync::{WaitGroup};
 
 
     #[test]
