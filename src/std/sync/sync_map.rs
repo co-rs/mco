@@ -141,6 +141,46 @@ impl<K, V> SyncMap<K, V> where K: std::cmp::Eq + Hash + Clone {
             }
         }
     }
+
+    pub fn iter(&self) -> Iter<'_, K, V> {
+        loop {
+            match self.dirty.read() {
+                Ok(mut m) => {
+                    let mut iter = Iter {
+                        g: m,
+                        inner: None,
+                    };
+                    unsafe {
+                        iter.inner = Some(change_lifetime_const(&iter.g).iter());
+                    }
+                    return iter;
+                }
+                Err(_) => {
+                    continue;
+                }
+            }
+        }
+    }
+
+    pub fn iter_mut(&self) -> IterMut<'_, K, V> {
+        loop {
+            match self.dirty.write() {
+                Ok(mut m) => {
+                    let mut iter = IterMut {
+                        g: m,
+                        inner: None,
+                    };
+                    unsafe {
+                        iter.inner = Some(change_lifetime_mut(&mut iter.g).iter_mut());
+                    }
+                    return iter;
+                }
+                Err(_) => {
+                    continue;
+                }
+            }
+        }
+    }
 }
 
 pub unsafe fn change_lifetime_const<'a, 'b, T>(x: &'a T) -> &'b T {
@@ -216,6 +256,55 @@ impl<K, V> PartialEq<Self> for SyncMapRefMut<'_, K, V> where V: Eq {
 
 impl<K, V> Eq for SyncMapRefMut<'_, K, V> where V: Eq {}
 
+
+pub struct Iter<'a, K, V> {
+    g: RwLockReadGuard<'a, HashMap<K, V>>,
+    inner: Option<std::collections::hash_map::Iter<'a, K, V>>,
+}
+
+impl<'a, K, V> Deref for Iter<'a, K, V> {
+    type Target = std::collections::hash_map::Iter<'a, K, V>;
+
+    fn deref(&self) -> &Self::Target {
+        self.inner.as_ref().unwrap()
+    }
+}
+
+impl<'a, K, V> Iterator for Iter<'a, K, V> {
+    type Item = (&'a K, &'a V);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.as_mut().unwrap().next()
+    }
+}
+
+pub struct IterMut<'a, K, V> {
+    g: RwLockWriteGuard<'a, HashMap<K, V>>,
+    inner: Option<std::collections::hash_map::IterMut<'a, K, V>>,
+}
+
+impl<'a, K, V> Deref for IterMut<'a, K, V> {
+    type Target = std::collections::hash_map::IterMut<'a, K, V>;
+
+    fn deref(&self) -> &Self::Target {
+        self.inner.as_ref().unwrap()
+    }
+}
+
+impl<'a, K, V> DerefMut for IterMut<'a, K, V> {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        self.inner.as_mut().unwrap()
+    }
+}
+
+impl<'a, K, V> Iterator for IterMut<'a, K, V> {
+    type Item = (&'a K, &'a mut V);
+
+    fn next(&mut self) -> Option<Self::Item> {
+        self.inner.as_mut().unwrap().next()
+    }
+}
+
 #[cfg(test)]
 mod test {
     use std::collections::HashMap;
@@ -244,6 +333,26 @@ mod test {
         let insert = m.insert(1, 2);
         let g = m.get(&1).unwrap();
         assert_eq!(2, *g.deref());
+    }
+
+    #[test]
+    pub fn test_iter() {
+        let m = SyncMap::<i32, i32>::new();
+        let insert = m.insert(1, 2);
+        for (k, v) in m.iter() {
+            assert_eq!(*k, 1);
+            assert_eq!(*v, 2);
+        }
+    }
+
+    #[test]
+    pub fn test_iter_mut() {
+        let m = SyncMap::<i32, i32>::new();
+        let insert = m.insert(1, 2);
+        for (k, v) in m.iter_mut() {
+            assert_eq!(*k, 1);
+            assert_eq!(*v, 2);
+        }
     }
 
     #[test]
