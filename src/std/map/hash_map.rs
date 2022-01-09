@@ -14,21 +14,32 @@ use crate::std::sync::{Mutex, MutexGuard, RwLock, RwLockReadGuard, RwLockWriteGu
 /// this sync map used to many reader,writer less.
 /// it's a mem space-for-time strategy
 pub struct SyncHashMap<K, V> {
+    read: AtomicPtr<HashMap<K, V>>,
     dirty: RwLock<HashMap<K, V>>,
 }
 
 
 impl<K, V> SyncHashMap<K, V> where K: std::cmp::Eq + Hash + Clone {
     pub fn new() -> Self {
-        Self {
+        let mut s = Self {
+            read: Default::default(),
             dirty: RwLock::new(HashMap::new()),
+        };
+        unsafe {
+            s.read.store(s.dirty.get_mut().unwrap(), Ordering::Release);
         }
+        s
     }
 
     pub fn with_capacity(capacity: usize) -> Self {
-        Self {
+        let mut s = Self {
+            read: Default::default(),
             dirty: RwLock::new(HashMap::with_capacity(capacity)),
+        };
+        unsafe {
+            s.read.store(s.dirty.get_mut().unwrap(), Ordering::Release);
         }
+        s
     }
 
     pub fn insert(&self, k: K, mut v: V) -> Option<V> where K: Clone {
@@ -54,29 +65,11 @@ impl<K, V> SyncHashMap<K, V> where K: std::cmp::Eq + Hash + Clone {
     }
 
     pub fn len(&self) -> usize {
-        loop {
-            match self.dirty.read() {
-                Ok(mut m) => {
-                    return m.len();
-                }
-                Err(_) => {
-                    continue;
-                }
-            }
-        }
+        unsafe { &*self.read.load(Ordering::Acquire) }.len()
     }
 
     pub fn is_empty(&self) -> bool {
-        loop {
-            match self.dirty.read() {
-                Ok(mut m) => {
-                    return m.is_empty();
-                }
-                Err(_) => {
-                    continue;
-                }
-            }
-        }
+        unsafe { &*self.read.load(Ordering::Acquire) }.is_empty()
     }
 
     pub fn clear(&self) {
@@ -102,22 +95,18 @@ impl<K, V> SyncHashMap<K, V> where K: std::cmp::Eq + Hash + Clone {
             K: Borrow<Q>,
             Q: Hash + Eq,
     {
-        let g = self.dirty.read();
-        match g {
-            Ok(mut m) => {
-                let mut r = SyncMapRef {
-                    g: m,
-                    value: None,
-                };
-                unsafe {
-                    r.value = Some(change_lifetime_const(r.g.get(k)?));
-                }
-                Some(r)
+        let ptr = unsafe { &*self.read.load(Ordering::Acquire) };
+        return match ptr.get(k) {
+            None => { None }
+            Some(v) => {
+                Some(
+                    SyncMapRef {
+                        g: None,
+                        value: Some(v),
+                    }
+                )
             }
-            Err(_) => {
-                None
-            }
-        }
+        };
     }
 
     pub fn get_mut<Q: ?Sized>(&self, k: &Q) -> Option<SyncMapRefMut<'_, K, V>>
@@ -143,24 +132,8 @@ impl<K, V> SyncHashMap<K, V> where K: std::cmp::Eq + Hash + Clone {
         }
     }
 
-    pub fn iter(&self) -> Iter<'_, K, V> {
-        loop {
-            match self.dirty.read() {
-                Ok(mut m) => {
-                    let mut iter = Iter {
-                        g: m,
-                        inner: None,
-                    };
-                    unsafe {
-                        iter.inner = Some(change_lifetime_const(&iter.g).iter());
-                    }
-                    return iter;
-                }
-                Err(_) => {
-                    continue;
-                }
-            }
-        }
+    pub fn iter(&self) -> std::collections::hash_map::Iter<'_, K, V> {
+        unsafe { &*self.read.load(Ordering::Acquire) }.iter()
     }
 
     pub fn iter_mut(&self) -> IterMut<'_, K, V> {
@@ -194,7 +167,7 @@ pub unsafe fn change_lifetime_mut<'a, 'b, T>(x: &'a mut T) -> &'b mut T {
 
 
 pub struct SyncMapRef<'a, K, V> {
-    g: RwLockReadGuard<'a, HashMap<K, V>>,
+    g: Option<RwLockReadGuard<'a, HashMap<K, V>>>,
     value: Option<&'a V>,
 }
 
@@ -308,7 +281,7 @@ impl<'a, K, V> Iterator for IterMut<'a, K, V> {
 
 impl<'a, K, V> IntoIterator for &'a SyncHashMap<K, V> where K: Eq + Hash + Clone {
     type Item = (&'a K, &'a V);
-    type IntoIter = Iter<'a, K, V>;
+    type IntoIter = std::collections::hash_map::Iter<'a, K, V>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
