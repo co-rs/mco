@@ -67,9 +67,9 @@ struct InnerQueue<T> {
     // chan buffer length
     buffer_len: usize,
     // The number of sender channels which are currently using this queue.
-    send_ports: AtomicUsize,
+    sender_num: AtomicUsize,
     // The number of receiver
-    recv_ports: AtomicUsize,
+    receiver_num: AtomicUsize,
 }
 
 impl<T> InnerQueue<T> {
@@ -85,13 +85,13 @@ impl<T> InnerQueue<T> {
             wake_recv: Semphore::new(0),
             wake_sender: Semphore::new(0),
             buffer_len: buffer,
-            send_ports: AtomicUsize::new(1),
-            recv_ports: AtomicUsize::new(1),
+            sender_num: AtomicUsize::new(1),
+            receiver_num: AtomicUsize::new(1),
         }
     }
 
     pub fn send(&self, t: T) -> Result<(), SendError<T>> {
-        if self.recv_ports.load(Ordering::Acquire) == 0 {
+        if self.receiver_num.load(Ordering::Acquire) == 0 {
             return Err(SendError(t));
         }
         self.queue.push(t);
@@ -131,7 +131,7 @@ impl<T> InnerQueue<T> {
                 self.wake_sender();
                 Ok(data)
             }
-            None => match self.send_ports.load(Ordering::Acquire) {
+            None => match self.sender_num.load(Ordering::Acquire) {
                 0 => Err(RecvTimeoutError::Disconnected),
                 _n => unreachable!("mpmc recv found no data"),
             },
@@ -140,7 +140,7 @@ impl<T> InnerQueue<T> {
 
     pub fn try_recv(&self) -> Result<T, TryRecvError> {
         if !self.wake_recv.try_wait() {
-            return match self.send_ports.load(Ordering::Acquire) {
+            return match self.sender_num.load(Ordering::Acquire) {
                 0 => Err(TryRecvError::Disconnected),
                 _ => Err(TryRecvError::Empty),
             };
@@ -151,7 +151,7 @@ impl<T> InnerQueue<T> {
                 self.wake_sender();
                 Ok(data)
             }
-            None => match self.send_ports.load(Ordering::Acquire) {
+            None => match self.sender_num.load(Ordering::Acquire) {
                 0 => Err(TryRecvError::Disconnected),
                 _ => unreachable!("mpmc try_recv found no data"),
             },
@@ -159,11 +159,11 @@ impl<T> InnerQueue<T> {
     }
 
     pub fn clone_send(&self) {
-        self.send_ports.fetch_add(1, Ordering::SeqCst);
+        self.sender_num.fetch_add(1, Ordering::SeqCst);
     }
 
     pub fn drop_send(&self) {
-        match self.send_ports.fetch_sub(1, Ordering::SeqCst) {
+        match self.sender_num.fetch_sub(1, Ordering::SeqCst) {
             1 => {
                 // there is no send_ports any more
                 // should tell all the waited recv to come back
@@ -177,11 +177,11 @@ impl<T> InnerQueue<T> {
     }
 
     pub fn clone_recv(&self) {
-        self.recv_ports.fetch_add(1, Ordering::SeqCst);
+        self.receiver_num.fetch_add(1, Ordering::SeqCst);
     }
 
     pub fn drop_recv(&self) {
-        match self.recv_ports.fetch_sub(1, Ordering::SeqCst) {
+        match self.receiver_num.fetch_sub(1, Ordering::SeqCst) {
             1 => {
                 // there is no receiver any more, clear the data
                 while self.queue.pop().is_some() {}
@@ -197,18 +197,18 @@ impl<T> InnerQueue<T> {
     }
 
     pub fn sender_num(&self) -> usize {
-        self.send_ports.load(Ordering::SeqCst)
+        self.sender_num.load(Ordering::SeqCst)
     }
 
     pub fn receiver_num(&self) -> usize {
-        self.recv_ports.load(Ordering::SeqCst)
+        self.receiver_num.load(Ordering::SeqCst)
     }
 }
 
 impl<T> Drop for InnerQueue<T> {
     fn drop(&mut self) {
-        assert_eq!(self.send_ports.load(Ordering::Acquire), 0);
-        assert_eq!(self.recv_ports.load(Ordering::Acquire), 0);
+        assert_eq!(self.sender_num.load(Ordering::Acquire), 0);
+        assert_eq!(self.receiver_num.load(Ordering::Acquire), 0);
     }
 }
 
