@@ -215,7 +215,7 @@ pub struct Receiver<T> {
     ///
     /// For `Sender` if this is `true` then the oneshot has gone away and it
     /// can return ready from `poll_canceled`.
-    complete: AtomicBool,
+    complete: bool,
 }
 
 impl<T> Receiver<T> {
@@ -227,7 +227,7 @@ impl<T> Receiver<T> {
     /// Tests to see whether this `Sender`'s corresponding `Receiver`
     /// has been dropped.
     pub fn is_canceled(&self) -> bool {
-        self.complete.load(Ordering::SeqCst)
+        self.complete
     }
 }
 
@@ -257,7 +257,7 @@ pub struct Sender<T> {
     ///
     /// For `Sender` if this is `true` then the oneshot has gone away and it
     /// can return ready from `poll_canceled`.
-    complete: AtomicBool,
+    complete: bool,
 }
 
 impl<T> Sender<T> {
@@ -269,7 +269,7 @@ impl<T> Sender<T> {
     /// Tests to see whether this `Sender`'s corresponding `Receiver`
     /// has been dropped.
     pub fn is_canceled(&self) -> bool {
-        self.complete.load(Ordering::SeqCst)
+        self.complete
     }
 }
 
@@ -283,7 +283,7 @@ unsafe impl<T: Send> Send for Sender<T> {}
 
 impl<T> Sender<T> {
     fn new(inner: Arc<InnerQueue<T>>) -> Sender<T> {
-        Sender { inner, complete: Default::default() }
+        Sender { inner, complete: false }
     }
 
     pub fn send(&self, t: T) -> Result<(), SendError<T>> {
@@ -306,7 +306,7 @@ impl<T> Clone for Sender<T> {
 impl<T> Drop for Sender<T> {
     fn drop(&mut self) {
         self.inner.drop_tx();
-        self.complete.store(true, Ordering::SeqCst);
+        self.complete = true;
     }
 }
 
@@ -322,7 +322,7 @@ impl<T> fmt::Debug for Sender<T> {
 
 impl<T> Receiver<T> {
     fn new(inner: Arc<InnerQueue<T>>) -> Receiver<T> {
-        Receiver { inner, complete: Default::default() }
+        Receiver { inner, complete: false}
     }
 
     pub fn try_recv(&self) -> Result<T, TryRecvError> {
@@ -400,7 +400,7 @@ impl<T> Clone for Receiver<T> {
 impl<T> Drop for Receiver<T> {
     fn drop(&mut self) {
         self.inner.drop_rx();
-        self.complete.store(true, Ordering::SeqCst);
+        self.complete = true;
     }
 }
 
