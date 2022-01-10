@@ -200,7 +200,7 @@ impl<T> InnerQueue<T> {
         self.tx_ports.load(Ordering::SeqCst)
     }
 
-    pub fn recever_num(&self) -> usize {
+    pub fn receiver_num(&self) -> usize {
         self.rx_ports.load(Ordering::SeqCst)
     }
 }
@@ -225,15 +225,17 @@ impl<T> Receiver<T> {
     /// Tests to see whether this `Sender`'s corresponding `Receiver`
     /// has been dropped.
     pub fn is_canceled(&self) -> bool {
-        self.sender_num() + self.recever_num() == 0
+        self.sender_num() + self.receiver_num() == 0
     }
 
+    /// Number of channel senders
     pub fn sender_num(&self) -> usize {
         self.inner.sender_num()
     }
 
-    pub fn recever_num(&self) -> usize {
-        self.inner.recever_num()
+    /// Number of channel receiver
+    pub fn receiver_num(&self) -> usize {
+        self.inner.receiver_num()
     }
 }
 
@@ -265,15 +267,17 @@ impl<T> Sender<T> {
     /// Tests to see whether this `Sender`'s corresponding `Receiver`
     /// has been dropped.
     pub fn is_canceled(&self) -> bool {
-        self.sender_num() + self.recever_num() == 0
+        self.sender_num() + self.receiver_num() == 0
     }
 
+    /// Number of channel senders
     pub fn sender_num(&self) -> usize {
         self.inner.sender_num()
     }
 
-    pub fn recever_num(&self) -> usize {
-        self.inner.recever_num()
+    /// Number of channel receiver
+    pub fn receiver_num(&self) -> usize {
+        self.inner.receiver_num()
     }
 }
 

@@ -21,7 +21,7 @@ fn main() {
     }
     println!("remain msg:{}", r.remain());
     println!("sender num:{}", r.sender_num());
-    println!("recver num:{}", r.recever_num());
+    println!("receiver num:{}", r.receiver_num());
 
     sleep(Duration::from_secs(2));
 
