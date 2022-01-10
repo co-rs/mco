@@ -66,10 +66,10 @@ struct InnerQueue<T> {
     wake_sender: Semphore,
     // chan buffer length
     buffer_len: usize,
-    // The number of tx channels which are currently using this queue.
-    tx_ports: AtomicUsize,
-    // if rx is dropped
-    rx_ports: AtomicUsize,
+    // The number of sender channels which are currently using this queue.
+    send_ports: AtomicUsize,
+    // The number of receiver
+    recv_ports: AtomicUsize,
 }
 
 impl<T> InnerQueue<T> {
@@ -85,13 +85,13 @@ impl<T> InnerQueue<T> {
             wake_recv: Semphore::new(0),
             wake_sender: Semphore::new(0),
             buffer_len: buffer,
-            tx_ports: AtomicUsize::new(1),
-            rx_ports: AtomicUsize::new(1),
+            send_ports: AtomicUsize::new(1),
+            recv_ports: AtomicUsize::new(1),
         }
     }
 
     pub fn send(&self, t: T) -> Result<(), SendError<T>> {
-        if self.rx_ports.load(Ordering::Acquire) == 0 {
+        if self.recv_ports.load(Ordering::Acquire) == 0 {
             return Err(SendError(t));
         }
         self.queue.push(t);
@@ -131,7 +131,7 @@ impl<T> InnerQueue<T> {
                 self.wake_sender();
                 Ok(data)
             }
-            None => match self.tx_ports.load(Ordering::Acquire) {
+            None => match self.send_ports.load(Ordering::Acquire) {
                 0 => Err(RecvTimeoutError::Disconnected),
                 _n => unreachable!("mpmc recv found no data"),
             },
@@ -140,7 +140,7 @@ impl<T> InnerQueue<T> {
 
     pub fn try_recv(&self) -> Result<T, TryRecvError> {
         if !self.wake_recv.try_wait() {
-            return match self.tx_ports.load(Ordering::Acquire) {
+            return match self.send_ports.load(Ordering::Acquire) {
                 0 => Err(TryRecvError::Disconnected),
                 _ => Err(TryRecvError::Empty),
             };
@@ -151,43 +151,43 @@ impl<T> InnerQueue<T> {
                 self.wake_sender();
                 Ok(data)
             }
-            None => match self.tx_ports.load(Ordering::Acquire) {
+            None => match self.send_ports.load(Ordering::Acquire) {
                 0 => Err(TryRecvError::Disconnected),
                 _ => unreachable!("mpmc try_recv found no data"),
             },
         }
     }
 
-    pub fn clone_tx(&self) {
-        self.tx_ports.fetch_add(1, Ordering::SeqCst);
+    pub fn clone_send(&self) {
+        self.send_ports.fetch_add(1, Ordering::SeqCst);
     }
 
-    pub fn drop_tx(&self) {
-        match self.tx_ports.fetch_sub(1, Ordering::SeqCst) {
+    pub fn drop_send(&self) {
+        match self.send_ports.fetch_sub(1, Ordering::SeqCst) {
             1 => {
-                // there is no tx port any more
-                // should tell all the waited rx to come back
+                // there is no send_ports any more
+                // should tell all the waited recv to come back
                 while self.wake_recv.get_value() == 0 {
                     self.wake_recv.post();
                 }
             }
             n if n > 1 => {}
-            n => panic!("bad number of tx_ports left {}", n),
+            n => panic!("bad number of send_ports left {}", n),
         }
     }
 
-    pub fn clone_rx(&self) {
-        self.rx_ports.fetch_add(1, Ordering::SeqCst);
+    pub fn clone_recv(&self) {
+        self.recv_ports.fetch_add(1, Ordering::SeqCst);
     }
 
-    pub fn drop_rx(&self) {
-        match self.rx_ports.fetch_sub(1, Ordering::SeqCst) {
+    pub fn drop_recv(&self) {
+        match self.recv_ports.fetch_sub(1, Ordering::SeqCst) {
             1 => {
                 // there is no receiver any more, clear the data
                 while self.queue.pop().is_some() {}
             }
             n if n > 1 => {}
-            n => panic!("bad number of rx_ports left {}", n),
+            n => panic!("bad number of recv_ports left {}", n),
         }
     }
 
@@ -197,18 +197,18 @@ impl<T> InnerQueue<T> {
     }
 
     pub fn sender_num(&self) -> usize {
-        self.tx_ports.load(Ordering::SeqCst)
+        self.send_ports.load(Ordering::SeqCst)
     }
 
     pub fn receiver_num(&self) -> usize {
-        self.rx_ports.load(Ordering::SeqCst)
+        self.recv_ports.load(Ordering::SeqCst)
     }
 }
 
 impl<T> Drop for InnerQueue<T> {
     fn drop(&mut self) {
-        assert_eq!(self.tx_ports.load(Ordering::Acquire), 0);
-        assert_eq!(self.rx_ports.load(Ordering::Acquire), 0);
+        assert_eq!(self.send_ports.load(Ordering::Acquire), 0);
+        assert_eq!(self.recv_ports.load(Ordering::Acquire), 0);
     }
 }
 
@@ -243,15 +243,15 @@ unsafe impl<T: Send> Send for Receiver<T> {}
 // impl<T> !Sync for Receiver<T> {}
 
 pub struct Iter<'a, T: 'a> {
-    rx: &'a Receiver<T>,
+    inner: &'a Receiver<T>,
 }
 
 pub struct TryIter<'a, T: 'a> {
-    rx: &'a Receiver<T>,
+    inner: &'a Receiver<T>,
 }
 
 pub struct IntoIter<T> {
-    rx: Receiver<T>,
+    inner: Receiver<T>,
 }
 
 pub struct Sender<T> {
@@ -306,14 +306,14 @@ impl<T> Sender<T> {
 
 impl<T> Clone for Sender<T> {
     fn clone(&self) -> Sender<T> {
-        self.inner.clone_tx();
+        self.inner.clone_send();
         Sender::new(self.inner.clone())
     }
 }
 
 impl<T> Drop for Sender<T> {
     fn drop(&mut self) {
-        self.inner.drop_tx();
+        self.inner.drop_send();
     }
 }
 
@@ -348,11 +348,11 @@ impl<T> Receiver<T> {
     }
 
     pub fn iter(&self) -> Iter<T> {
-        Iter { rx: self }
+        Iter { inner: self }
     }
 
     pub fn try_iter(&self) -> TryIter<T> {
-        TryIter { rx: self }
+        TryIter { inner: self }
     }
 }
 
@@ -360,7 +360,7 @@ impl<'a, T> Iterator for Iter<'a, T> {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        self.rx.recv().ok()
+        self.inner.recv().ok()
     }
 }
 
@@ -368,7 +368,7 @@ impl<'a, T> Iterator for TryIter<'a, T> {
     type Item = T;
 
     fn next(&mut self) -> Option<T> {
-        self.rx.try_recv().ok()
+        self.inner.try_recv().ok()
     }
 }
 
@@ -384,7 +384,7 @@ impl<'a, T> IntoIterator for &'a Receiver<T> {
 impl<T> Iterator for IntoIter<T> {
     type Item = T;
     fn next(&mut self) -> Option<T> {
-        self.rx.recv().ok()
+        self.inner.recv().ok()
     }
 }
 
@@ -393,20 +393,20 @@ impl<T> IntoIterator for Receiver<T> {
     type IntoIter = IntoIter<T>;
 
     fn into_iter(self) -> IntoIter<T> {
-        IntoIter { rx: self }
+        IntoIter { inner: self }
     }
 }
 
 impl<T> Clone for Receiver<T> {
     fn clone(&self) -> Receiver<T> {
-        self.inner.clone_rx();
+        self.inner.clone_recv();
         Receiver::new(self.inner.clone())
     }
 }
 
 impl<T> Drop for Receiver<T> {
     fn drop(&mut self) {
-        self.inner.drop_rx();
+        self.inner.drop_recv();
     }
 }
 
