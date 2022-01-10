@@ -1,6 +1,7 @@
 use std::borrow::{Borrow, BorrowMut};
 use std::cell::UnsafeCell;
 use std::collections::{BTreeMap};
+use std::collections::btree_map::IntoIter;
 use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
 use std::ops::{Deref, DerefMut};
@@ -318,6 +319,22 @@ impl<'a, K, V> IntoIterator for &'a mut SyncBtreeMap<K, V> where K: Eq + Hash + 
     }
 }
 
+
+impl <K, V> IntoIterator for SyncBtreeMap<K,V>{
+    type Item = (K,V);
+    type IntoIter = IntoIter<K,V>;
+
+    fn into_iter(mut self) -> Self::IntoIter {
+        match self.dirty.into_inner() {
+            Ok(v) => {
+                return v.into_iter();
+            }
+            Err(e) => {
+                return e.into_inner().into_iter();
+            }
+        }
+    }
+}
 
 #[cfg(test)]
 mod test {

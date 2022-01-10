@@ -324,6 +324,22 @@ impl<'a, K, V> IntoIterator for &'a mut SyncHashMap<K, V> where K: Eq + Hash + C
     }
 }
 
+impl <K, V> IntoIterator for SyncHashMap<K,V>{
+    type Item = (K,V);
+    type IntoIter = IntoIter<K,V>;
+
+    fn into_iter(mut self) -> Self::IntoIter {
+        match self.dirty.into_inner() {
+            Ok(v) => {
+                return v.into_iter();
+            }
+            Err(e) => {
+                return e.into_inner().into_iter();
+            }
+        }
+    }
+}
+
 
 #[cfg(test)]
 mod test {

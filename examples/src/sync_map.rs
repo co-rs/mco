@@ -1,6 +1,6 @@
 use std::ops::Deref;
 use std::sync::Arc;
-use cogo::{ go};
+use cogo::{go};
 use cogo::std::sync::{SyncHashMap, WaitGroup};
 
 pub fn main() {
