@@ -31,7 +31,7 @@ pub fn unbounded<T>() -> (Sender<T>, Receiver<T>) {
 
 /// Create a bounded channel
 pub fn bounded<T>(buf: usize) -> (Sender<T>, Receiver<T>) {
-    let a = Arc::new(InnerQueue::new_buffer(buf));
+    let a = Arc::new(MPMCBuffer::new_buffer(buf));
     (Sender::new(a.clone()), Receiver::new(a))
 }
 
@@ -56,9 +56,9 @@ macro_rules! chan {
 
 
 /// /////////////////////////////////////////////////////////////////////////////
-/// InnerQueue
+/// MPMCBuffer
 /// /////////////////////////////////////////////////////////////////////////////
-struct InnerQueue<T> {
+struct MPMCBuffer<T> {
     buffer: SegQueue<T>,
     // chan buffer length limit
     buffer_limit: usize,
@@ -72,15 +72,15 @@ struct InnerQueue<T> {
     receiver_num: AtomicUsize,
 }
 
-impl<T> InnerQueue<T> {
+impl<T> MPMCBuffer<T> {
     /// default is an Unbounded buffer
-    pub fn new() -> InnerQueue<T> {
-        InnerQueue::new_buffer(usize::MAX)
+    pub fn new() -> MPMCBuffer<T> {
+        MPMCBuffer::new_buffer(usize::MAX)
     }
 
     /// have buffer channel. If the buffered message exceeds the limit, the sender blocks until the message is consumed
-    pub fn new_buffer(mut buffer: usize) -> InnerQueue<T> {
-        InnerQueue {
+    pub fn new_buffer(mut buffer: usize) -> MPMCBuffer<T> {
+        MPMCBuffer {
             buffer: SegQueue::new(),
             wake_recv: Semphore::new(0),
             wake_sender: Semphore::new(0),
@@ -205,7 +205,7 @@ impl<T> InnerQueue<T> {
     }
 }
 
-impl<T> Drop for InnerQueue<T> {
+impl<T> Drop for MPMCBuffer<T> {
     fn drop(&mut self) {
         assert_eq!(self.sender_num.load(Ordering::Acquire), 0);
         assert_eq!(self.receiver_num.load(Ordering::Acquire), 0);
@@ -213,7 +213,7 @@ impl<T> Drop for InnerQueue<T> {
 }
 
 pub struct Receiver<T> {
-    inner: Arc<InnerQueue<T>>,
+    inner: Arc<MPMCBuffer<T>>,
 }
 
 impl<T> Receiver<T> {
@@ -255,7 +255,7 @@ pub struct IntoIter<T> {
 }
 
 pub struct Sender<T> {
-    inner: Arc<InnerQueue<T>>,
+    inner: Arc<MPMCBuffer<T>>,
 }
 
 impl<T> Sender<T> {
@@ -290,7 +290,7 @@ unsafe impl<T: Send> Send for Sender<T> {}
 /// /////////////////////////////////////////////////////////////////////////////
 
 impl<T> Sender<T> {
-    fn new(inner: Arc<InnerQueue<T>>) -> Sender<T> {
+    fn new(inner: Arc<MPMCBuffer<T>>) -> Sender<T> {
         Sender { inner }
     }
 
@@ -328,7 +328,7 @@ impl<T> fmt::Debug for Sender<T> {
 /// /////////////////////////////////////////////////////////////////////////////
 
 impl<T> Receiver<T> {
-    fn new(inner: Arc<InnerQueue<T>>) -> Receiver<T> {
+    fn new(inner: Arc<MPMCBuffer<T>>) -> Receiver<T> {
         Receiver { inner }
     }
 
