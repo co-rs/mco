@@ -60,7 +60,7 @@ macro_rules! chan {
 /// /////////////////////////////////////////////////////////////////////////////
 struct MPMCBuffer<T> {
     buffer: SegQueue<T>,
-    // chan buffer length limit
+    // chan buffer length limit. Exceeding this limit will be wait.
     buffer_limit: usize,
     // thread/coroutine for wake up
     wake_recv: Semphore,
