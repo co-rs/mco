@@ -59,13 +59,13 @@ macro_rules! chan {
 /// InnerQueue
 /// /////////////////////////////////////////////////////////////////////////////
 struct InnerQueue<T> {
-    queue: SegQueue<T>,
+    buffer: SegQueue<T>,
+    // chan buffer length limit
+    buffer_limit: usize,
     // thread/coroutine for wake up
     wake_recv: Semphore,
     // thread/coroutine for wake up
     wake_sender: Semphore,
-    // chan buffer length
-    buffer_len: usize,
     // The number of sender channels which are currently using this queue.
     sender_num: AtomicUsize,
     // The number of receiver
@@ -81,10 +81,10 @@ impl<T> InnerQueue<T> {
     /// have buffer channel. If the buffered message exceeds the limit, the sender blocks until the message is consumed
     pub fn new_buffer(mut buffer: usize) -> InnerQueue<T> {
         InnerQueue {
-            queue: SegQueue::new(),
+            buffer: SegQueue::new(),
             wake_recv: Semphore::new(0),
             wake_sender: Semphore::new(0),
-            buffer_len: buffer,
+            buffer_limit: buffer,
             sender_num: AtomicUsize::new(1),
             receiver_num: AtomicUsize::new(1),
         }
@@ -94,9 +94,9 @@ impl<T> InnerQueue<T> {
         if self.receiver_num.load(Ordering::Acquire) == 0 {
             return Err(SendError(t));
         }
-        self.queue.push(t);
+        self.buffer.push(t);
         self.wake_recv.post();
-        if self.queue.len() > self.buffer_len {
+        if self.buffer.len() > self.buffer_limit {
             self.wake_sender.wait();
         }
         Ok(())
@@ -105,7 +105,7 @@ impl<T> InnerQueue<T> {
     /// wake one sender
     #[inline]
     fn wake_sender(&self) {
-        if (self.queue.len() + 1) > self.buffer_len {
+        if (self.buffer.len() + 1) > self.buffer_limit {
             self.wake_sender.post();
         }
     }
@@ -126,7 +126,7 @@ impl<T> InnerQueue<T> {
             }
         }
 
-        match self.queue.pop() {
+        match self.buffer.pop() {
             Some(data) => {
                 self.wake_sender();
                 Ok(data)
@@ -146,7 +146,7 @@ impl<T> InnerQueue<T> {
             };
         }
 
-        match self.queue.pop() {
+        match self.buffer.pop() {
             Some(data) => {
                 self.wake_sender();
                 Ok(data)
@@ -184,7 +184,7 @@ impl<T> InnerQueue<T> {
         match self.receiver_num.fetch_sub(1, Ordering::SeqCst) {
             1 => {
                 // there is no receiver any more, clear the data
-                while self.queue.pop().is_some() {}
+                while self.buffer.pop().is_some() {}
             }
             n if n > 1 => {}
             n => panic!("bad number of recv_ports left {}", n),
@@ -193,7 +193,7 @@ impl<T> InnerQueue<T> {
 
     /// return remain msg len
     pub fn remain(&self) -> usize {
-        self.queue.len()
+        self.buffer.len()
     }
 
     pub fn sender_num(&self) -> usize {
