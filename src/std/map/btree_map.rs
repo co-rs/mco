@@ -96,8 +96,7 @@ impl<K, V> SyncBtreeMap<K, V> where K: std::cmp::Eq + Hash + Clone {
             K: Borrow<Q> + std::cmp::Ord,
             Q: Hash + Eq + std::cmp::Ord,
     {
-        let g = self.dirty.read();
-        match g {
+        match self.dirty.read() {
             Ok(mut m) => {
                 let mut r = SyncMapRef {
                     g: m,
@@ -320,12 +319,12 @@ impl<'a, K, V> IntoIterator for &'a mut SyncBtreeMap<K, V> where K: Eq + Hash + 
 }
 
 
-impl <K, V> IntoIterator for SyncBtreeMap<K,V>{
-    type Item = (K,V);
-    type IntoIter = IntoIter<K,V>;
+impl<K, V> IntoIterator for SyncBtreeMap<K, V> {
+    type Item = (K, V);
+    type IntoIter = IntoIter<K, V>;
 
     fn into_iter(mut self) -> Self::IntoIter {
-        loop{
+        loop {
             match self.dirty.into_inner() {
                 Ok(v) => {
                     return v.into_iter();

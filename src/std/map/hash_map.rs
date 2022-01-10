@@ -101,8 +101,7 @@ impl<K, V> SyncHashMap<K, V> where K: std::cmp::Eq + Hash + Clone {
             K: Borrow<Q>,
             Q: Hash + Eq,
     {
-        let g = self.dirty.read();
-        match g {
+        match self.dirty.read() {
             Ok(mut m) => {
                 let mut r = SyncMapRef {
                     g: m,
@@ -324,18 +323,18 @@ impl<'a, K, V> IntoIterator for &'a mut SyncHashMap<K, V> where K: Eq + Hash + C
     }
 }
 
-impl <K, V> IntoIterator for SyncHashMap<K,V>{
-    type Item = (K,V);
-    type IntoIter = IntoIter<K,V>;
+impl<K, V> IntoIterator for SyncHashMap<K, V> {
+    type Item = (K, V);
+    type IntoIter = IntoIter<K, V>;
 
     fn into_iter(mut self) -> Self::IntoIter {
-        loop{
+        loop {
             match self.dirty.into_inner() {
                 Ok(v) => {
                     return v.into_iter();
                 }
                 Err(e) => {
-                   self.dirty = RwLock::new(e.into_inner());
+                    self.dirty = RwLock::new(e.into_inner());
                 }
             }
         }
