@@ -325,12 +325,14 @@ impl <K, V> IntoIterator for SyncBtreeMap<K,V>{
     type IntoIter = IntoIter<K,V>;
 
     fn into_iter(mut self) -> Self::IntoIter {
-        match self.dirty.into_inner() {
-            Ok(v) => {
-                return v.into_iter();
-            }
-            Err(e) => {
-                return e.into_inner().into_iter();
+        loop{
+            match self.dirty.into_inner() {
+                Ok(v) => {
+                    return v.into_iter();
+                }
+                Err(e) => {
+                    self.dirty = RwLock::new(e.into_inner());
+                }
             }
         }
     }

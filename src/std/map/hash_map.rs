@@ -329,12 +329,14 @@ impl <K, V> IntoIterator for SyncHashMap<K,V>{
     type IntoIter = IntoIter<K,V>;
 
     fn into_iter(mut self) -> Self::IntoIter {
-        match self.dirty.into_inner() {
-            Ok(v) => {
-                return v.into_iter();
-            }
-            Err(e) => {
-                return e.into_inner().into_iter();
+        loop{
+            match self.dirty.into_inner() {
+                Ok(v) => {
+                    return v.into_iter();
+                }
+                Err(e) => {
+                   self.dirty = RwLock::new(e.into_inner());
+                }
             }
         }
     }
@@ -347,6 +349,9 @@ mod test {
     use std::ops::Deref;
     use std::sync::Arc;
     use std::sync::atomic::{Ordering};
+    use std::time::Duration;
+    use crate::coroutine::sleep;
+    use crate::sleep;
     use crate::std::map::SyncHashMap;
     use crate::std::sync::{WaitGroup};
 
