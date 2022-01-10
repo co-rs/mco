@@ -195,6 +195,14 @@ impl<T> InnerQueue<T> {
     pub fn remain(&self) -> usize {
         self.queue.len()
     }
+
+    pub fn sender_num(&self) -> usize {
+        self.tx_ports.load(Ordering::SeqCst)
+    }
+
+    pub fn recever_num(&self) -> usize {
+        self.rx_ports.load(Ordering::SeqCst)
+    }
 }
 
 impl<T> Drop for InnerQueue<T> {
@@ -206,16 +214,6 @@ impl<T> Drop for InnerQueue<T> {
 
 pub struct Receiver<T> {
     inner: Arc<InnerQueue<T>>,
-    /// Indicates whether this oneshot is complete yet. This is filled in both
-    /// by `Sender::drop` and by `Receiver::drop`, and both sides interpret it
-    /// appropriately.
-    ///
-    /// For `Receiver`, if this is `true`, then it's guaranteed that `data` is
-    /// unlocked and ready to be inspected.
-    ///
-    /// For `Sender` if this is `true` then the oneshot has gone away and it
-    /// can return ready from `poll_canceled`.
-    complete: bool,
 }
 
 impl<T> Receiver<T> {
@@ -227,7 +225,15 @@ impl<T> Receiver<T> {
     /// Tests to see whether this `Sender`'s corresponding `Receiver`
     /// has been dropped.
     pub fn is_canceled(&self) -> bool {
-        self.complete
+        self.sender_num() + self.recever_num() == 0
+    }
+
+    pub fn sender_num(&self) -> usize {
+        self.inner.sender_num()
+    }
+
+    pub fn recever_num(&self) -> usize {
+        self.inner.recever_num()
     }
 }
 
@@ -248,16 +254,6 @@ pub struct IntoIter<T> {
 
 pub struct Sender<T> {
     inner: Arc<InnerQueue<T>>,
-    /// Indicates whether this oneshot is complete yet. This is filled in both
-    /// by `Sender::drop` and by `Receiver::drop`, and both sides interpret it
-    /// appropriately.
-    ///
-    /// For `Receiver`, if this is `true`, then it's guaranteed that `data` is
-    /// unlocked and ready to be inspected.
-    ///
-    /// For `Sender` if this is `true` then the oneshot has gone away and it
-    /// can return ready from `poll_canceled`.
-    complete: bool,
 }
 
 impl<T> Sender<T> {
@@ -269,7 +265,15 @@ impl<T> Sender<T> {
     /// Tests to see whether this `Sender`'s corresponding `Receiver`
     /// has been dropped.
     pub fn is_canceled(&self) -> bool {
-        self.complete
+        self.sender_num() + self.recever_num() == 0
+    }
+
+    pub fn sender_num(&self) -> usize {
+        self.inner.sender_num()
+    }
+
+    pub fn recever_num(&self) -> usize {
+        self.inner.recever_num()
     }
 }
 
@@ -283,7 +287,7 @@ unsafe impl<T: Send> Send for Sender<T> {}
 
 impl<T> Sender<T> {
     fn new(inner: Arc<InnerQueue<T>>) -> Sender<T> {
-        Sender { inner, complete: false }
+        Sender { inner }
     }
 
     pub fn send(&self, t: T) -> Result<(), SendError<T>> {
@@ -306,7 +310,6 @@ impl<T> Clone for Sender<T> {
 impl<T> Drop for Sender<T> {
     fn drop(&mut self) {
         self.inner.drop_tx();
-        self.complete = true;
     }
 }
 
@@ -322,7 +325,7 @@ impl<T> fmt::Debug for Sender<T> {
 
 impl<T> Receiver<T> {
     fn new(inner: Arc<InnerQueue<T>>) -> Receiver<T> {
-        Receiver { inner, complete: false}
+        Receiver { inner }
     }
 
     pub fn try_recv(&self) -> Result<T, TryRecvError> {
@@ -400,7 +403,6 @@ impl<T> Clone for Receiver<T> {
 impl<T> Drop for Receiver<T> {
     fn drop(&mut self) {
         self.inner.drop_rx();
-        self.complete = true;
     }
 }
 

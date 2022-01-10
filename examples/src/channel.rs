@@ -9,7 +9,7 @@ use cogo::std::sync::mpsc::{bounded, channel, channel_buf, unbounded};
 
 fn main() {
     let (s, r) = chan!();//unbounded
-    println!("{}",s.is_canceled());
+    println!("{}", s.is_canceled());
     for i in 0..2 {
         let s_clone = s.clone();
         go!(move ||{
@@ -19,7 +19,12 @@ fn main() {
          println!("send{} done:{:?}",i,t.elapsed());
       });
     }
+    println!("remain msg:{}", r.remain());
+    println!("sender num:{}", r.sender_num());
+    println!("recver num:{}", r.recever_num());
+
     sleep(Duration::from_secs(2));
+
     for _ in 0..1 {
         let rv = r.recv().unwrap();
         println!("recv = {}", rv);
