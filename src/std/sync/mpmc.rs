@@ -222,12 +222,6 @@ impl<T> Receiver<T> {
         self.inner.remain()
     }
 
-    /// Tests to see whether this `Sender`'s corresponding `Receiver`
-    /// has been dropped.
-    pub fn is_canceled(&self) -> bool {
-        self.sender_num() + self.receiver_num() == 0
-    }
-
     /// Number of channel senders
     pub fn sender_num(&self) -> usize {
         self.inner.sender_num()
@@ -262,12 +256,6 @@ impl<T> Sender<T> {
     /// return remain msg len
     pub fn remain(&self) -> usize {
         self.inner.remain()
-    }
-
-    /// Tests to see whether this `Sender`'s corresponding `Receiver`
-    /// has been dropped.
-    pub fn is_canceled(&self) -> bool {
-        self.sender_num() + self.receiver_num() == 0
     }
 
     /// Number of channel senders
