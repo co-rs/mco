@@ -1,4 +1,5 @@
 use std::fmt::{self, Debug, Display};
+use std::io::ErrorKind::UnexpectedEof;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -33,6 +34,9 @@ impl ToString for Error {
 impl From<std::io::Error> for Error {
     #[inline]
     fn from(err: std::io::Error) -> Self {
+        if err.kind().eq(&UnexpectedEof) {
+            return new("EOF".to_string());
+        }
         new(err.to_string())
     }
 }
