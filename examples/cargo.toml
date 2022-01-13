@@ -89,17 +89,22 @@ path = "src/defer.rs"
 name = "sync_map"
 path = "src/sync_map.rs"
 
+[[bin]]
+name = "time"
+path = "src/time.rs"
+
 [dependencies]
 cogo = {path = "../"}
 generator = "0.7"
 bytes = "1.0"
-serde = "1.0"
+serde = { version = "1", features = ["derive"] }
 docopt = "1.0"
 tempdir = "0.3"
 httparse = "1.1"
 native-tls = "0.2"
 tungstenite = "0.13"
 serde_derive = "1.0"
+serde_json = "1"
 
 [profile.release]
 lto = true

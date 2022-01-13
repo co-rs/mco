@@ -1,6 +1,7 @@
-use std::fmt::{Debug, Formatter};
+use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Add, Deref, DerefMut, Sub};
 use once_cell::sync::Lazy;
+use serde::de::Error;
 use time::{format_description, OffsetDateTime, UtcOffset};
 use time::error::InvalidFormatDescription;
 use time::format_description::FormatItem;
@@ -184,21 +185,30 @@ impl Time {
 
 impl Debug for Time {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.inner.fmt(f)
+        std::fmt::Debug::fmt(&self.inner, f)
+    }
+}
+
+impl Display for Time {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        std::fmt::Display::fmt(&self.format(RFC3339Nano), f)
     }
 }
 
 impl serde::Serialize for Time {
     fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error> where S: serde::Serializer {
-        self.inner.serialize(serializer)
+        serializer.serialize_str(&self.format(RFC3339Nano))
     }
 }
 
 impl<'de> serde::Deserialize<'de> for Time {
     fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error> where D: serde::Deserializer<'de> {
-        Ok(Time {
-            inner: OffsetDateTime::deserialize(deserializer)?
-        })
+        match Time::parse(RFC3339Nano,&String::deserialize(deserializer)?){
+            Ok(v) => {Ok(v)}
+            Err(e) => {
+                Err(D::Error::custom(e.to_string()))
+            }
+        }
     }
 }
 
