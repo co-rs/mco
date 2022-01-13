@@ -9,7 +9,6 @@ use cogo::std::sync::mpsc::{bounded, channel, channel_buf, unbounded};
 
 fn main() {
     let (s, r) = chan!();//unbounded
-    println!("{}", s.is_canceled());
     for i in 0..2 {
         let s_clone = s.clone();
         go!(move ||{
