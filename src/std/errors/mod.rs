@@ -15,6 +15,7 @@ impl Error {
 }
 
 ///new error
+#[inline]
 pub fn new(text: String) -> Error {
     Error {
         inner: text
@@ -67,6 +68,18 @@ impl From<Box<dyn std::error::Error>> for Error {
 
 impl From<&Box<dyn std::error::Error>> for Error {
     fn from(arg: &Box<dyn std::error::Error>) -> Self {
+        return new(arg.to_string());
+    }
+}
+
+impl From<time::error::InvalidFormatDescription> for Error{
+    fn from(arg: time::error::InvalidFormatDescription) -> Self {
+        return new(arg.to_string());
+    }
+}
+
+impl From<time::error::Parse> for Error {
+    fn from(arg: time::error::Parse) -> Self {
         return new(arg.to_string());
     }
 }

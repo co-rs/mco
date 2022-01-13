@@ -56,7 +56,7 @@ fn main() {
                          HTTP/1.1 200 OK\r\n\
                          Server: Cogo\r\n\
                          Content-Length: {}\r\n\
-                         Date: 1-1-2000\r\n\
+                         date: 1-1-2000\r\n\
                          \r\n\
                          {}",
                         response.len(),

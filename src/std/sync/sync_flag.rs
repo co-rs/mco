@@ -19,7 +19,7 @@ use crossbeam::queue::SegQueue;
 /// When the SyncFalg is true, any thread or coroutine wait on it would
 /// return immediately.
 ///
-/// After the SyncFlag becomes true, it will never becomes false again.
+/// after the SyncFlag becomes true, it will never becomes false again.
 ///
 /// # Examples
 ///
