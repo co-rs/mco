@@ -8,3 +8,4 @@ pub mod io;
 pub mod defer;
 pub mod time;
 pub mod map;
+pub mod strings;
