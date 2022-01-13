@@ -31,17 +31,17 @@ impl Time {
     }
 
     pub fn add(&mut self, d: std::time::Duration) {
-        self.inner.add(d);
+        self.inner = self.inner.add(d);
     }
 
     // add_sec adds d seconds to the time.
     pub fn add_sec(&mut self, d: i64) {
-        self.inner.add(time::Duration::seconds(d));
+        self.inner = self.inner.add(time::Duration::seconds(d));
     }
 
     /// set_loc sets the location associated with the time.
     pub fn set_loc(&mut self, loc: time::UtcOffset) {
-        self.inner.to_offset(loc);
+        self.inner = self.inner.to_offset(loc);
     }
 
     /// after reports whether the time instant t is after u.
@@ -203,8 +203,8 @@ impl serde::Serialize for Time {
 
 impl<'de> serde::Deserialize<'de> for Time {
     fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error> where D: serde::Deserializer<'de> {
-        match Time::parse(RFC3339Nano,&String::deserialize(deserializer)?){
-            Ok(v) => {Ok(v)}
+        match Time::parse(RFC3339Nano, &String::deserialize(deserializer)?) {
+            Ok(v) => { Ok(v) }
             Err(e) => {
                 Err(D::Error::custom(e.to_string()))
             }
