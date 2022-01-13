@@ -16,4 +16,7 @@ fn main() {
     assert_eq!(true, t.before(&Time::now())); //befor
 
     assert_eq!(true, Time::now().after(&t)); //after
+
+    let formated = t.format("[year]-[month]-[day] [hour]:[minute]:[second] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]");
+    println!("{}", formated);
 }
