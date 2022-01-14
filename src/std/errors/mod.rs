@@ -1,5 +1,6 @@
 use std::fmt::{self, Debug, Display};
 use std::io::ErrorKind::UnexpectedEof;
+use crate::std::io::io;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -52,7 +53,10 @@ impl From<std::io::Error> for Error {
     #[inline]
     fn from(err: std::io::Error) -> Self {
         if err.kind().eq(&UnexpectedEof) {
-            return new("EOF".to_string());
+            return io::EOF.clone();
+        }
+        if err.kind().eq(&std::io::ErrorKind::UnexpectedEof) {
+            return io::ErrUnexpectedEOF.clone();
         }
         new(err.to_string())
     }
