@@ -149,7 +149,7 @@ impl Time {
     }
 
     /// for example:
-    /// "[year]-[month]-[day] [hour]:[minute]:[second] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]"
+    /// "[year]-[month] [ordinal] [weekday] [week_number]-[day] [hour]:[minute] [period]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]"
     ///
     pub fn format(&self, layout: &str) -> String {
         let f = {
@@ -169,7 +169,7 @@ impl Time {
     }
 
     /// for example:
-    /// "[year]-[month]-[day] [hour]:[minute]:[second] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]"
+    /// "[year]-[month] [ordinal] [weekday] [week_number]-[day] [hour]:[minute] [period]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]"
     ///
     pub fn parse(layout: &str, value: &str) -> Result<Self> {
         match format_description::parse(layout) {

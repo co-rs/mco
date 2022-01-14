@@ -27,6 +27,6 @@ fn main() {
     let formated = t.format(time::RFC3339Nano);
     println!("{}", formated);
 
-    let formated = t.format("[year]-[month]-[day] [hour]:[minute]:[second] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]");
+    let formated = t.format("[year]-[month] [ordinal] [weekday] [week_number]-[day] [hour]:[minute] [period]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]");
     println!("{}", formated);
 }
