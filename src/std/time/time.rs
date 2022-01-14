@@ -88,7 +88,7 @@ impl Time {
     /// is_zero reports whether t represents the zero time instant,
     /// January 1, year 1, 00:00:00 UTC.
     pub fn is_zero(&self) -> bool {
-        return self.unix_timestamp() == 0;
+        return self.nanosecond() == 0;
     }
 
     /// date returns the (year, month,  day) in which t occurs.
