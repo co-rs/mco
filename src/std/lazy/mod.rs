@@ -304,7 +304,7 @@
 //!
 //! **Should I use the sync or unsync flavor?**
 //!
-//! Because Rust compiler checks thread safety for you, it's impossible to accidentally use `unsync` where
+//! Because Rust compiler checks thread/coroutine safety for you, it's impossible to accidentally use `unsync` where
 //! `sync` is required. So, use `unsync` in single-threaded code and `sync` in multi-threaded. It's easy
 //! to switch between the two if code becomes multi-threaded later.
 //!
@@ -341,7 +341,7 @@ pub mod unsync {
 
     use std::panic::{RefUnwindSafe, UnwindSafe};
 
-    /// A cell which can be written to only once. It is not thread safe.
+    /// A cell which can be written to only once. It is not thread/coroutine safe.
     ///
     /// Unlike [`std::cell::RefCell`], a `OnceCell` provides simple `&`
     /// references to the contents.
