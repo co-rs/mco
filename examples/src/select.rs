@@ -22,7 +22,7 @@ fn main() {
     let id = select!(
         _ = listener.accept() => println!("got connected"),
         _ = coroutine::sleep(Duration::from_millis(1000)) => {},
-        _ = rx1.recv() => println!("rx1 received"),
+        v = rx1.recv() => println!("rx1 received {:?}",v),
         a = rx2.recv() => println!("rx2 received, a={:?}", a)
     );
 

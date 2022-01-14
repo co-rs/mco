@@ -117,7 +117,7 @@ macro_rules! cqueue_add_oneshot {
 #[macro_export]
 macro_rules! select {
     (
-        $($name:pat = $top:expr => $bottom:expr),+
+        $($name:pat = $top:expr => $bottom:expr), +$(,)?
     ) => ({
         use $crate::cqueue;
         cqueue::scope(|cqueue| {
