@@ -8,19 +8,28 @@ fn main() {
     println!("{}", t.unix());
     println!("{}", t.unix_nano());
 
-    let js = serde_json::to_string(&t).unwrap();
+    //json serize
+    let js = serde_json::json!(&t).to_string();
     println!("{}", js);
     let from_js = serde_json::from_str::<Time>(&js).unwrap();
     assert_eq!(from_js, t);
 
-    t.add(1 * 24 * Duration::from_secs(3600));// add one day
+    //add 1 day
+    t.add(1 * 24 * Duration::from_secs(3600));
     println!("add one day:{}", t);
     assert_ne!(from_js, t);
 
-    assert_eq!(true, t.before(&Time::now())); //is before?
+    //is before?
+    assert_eq!(true, t.before(&Time::now()));
 
-    assert_eq!(true, Time::now().after(&t)); //is after?
+    //is after?
+    assert_eq!(true, Time::now().after(&t));
 
+    //parse from str
+    let parsed = Time::parse(time::RFC3339Nano,&t.to_string()).unwrap();
+    assert_eq!(t,parsed);
+
+    //format time to str
     let formated = t.format(time::RFC3339);
     println!("{}", formated);
 
