@@ -19,7 +19,7 @@ Cogo is a high-performance library for programming stackful coroutines with whic
 
 # cogo crates
 
-> Cogo STD standard library
+> Cogo Powerful standard library
 * ``` cogo/std/http/server ``` An HTTP server is available(Body parsing upcoming)
 * ``` cogo/std/http/client ``` An HTTP Client(TODO) upcoming
 * ``` cogo/std/queue ``` Basic queue data structures
