@@ -42,6 +42,9 @@ fn main() {
     let formated = t.format(time::RFC1123);
     println!("{}", formated);
 
-    assert_eq!(true,Time::default().is_zero());
+    let formated = t.utc();
+    println!("utc: {}", formated);
+
     println!("{}", Time::default());
+    assert_eq!(true,Time::default().is_zero());
 }
