@@ -26,8 +26,8 @@ fn main() {
     assert_eq!(true, Time::now().after(&t));
 
     //parse from str
-    let parsed = Time::parse(time::RFC3339Nano,&t.to_string()).unwrap();
-    assert_eq!(t,parsed);
+    let parsed = Time::parse(time::RFC3339Nano, &t.to_string()).unwrap();
+    assert_eq!(t, parsed);
 
     //format time to str
     let formated = t.format(time::RFC3339);
@@ -43,8 +43,14 @@ fn main() {
     println!("{}", formated);
 
     let formated = t.utc();
-    println!("utc: {}", formated);
+    println!("to utc: {}", formated);
+    assert_eq!(t, formated.local());
+
+    let formated = t.local();
+    println!("to local: {}", formated);
+    assert_eq!(t, formated);
+
 
     println!("{}", Time::default());
-    assert_eq!(true,Time::default().is_zero());
+    assert_eq!(true, Time::default().is_zero());
 }
