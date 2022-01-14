@@ -11,3 +11,4 @@ pub mod time;
 #[macro_use]
 pub mod map;
 pub mod strings;
+pub mod lazy;

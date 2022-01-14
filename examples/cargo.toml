@@ -93,6 +93,10 @@ path = "src/sync_map.rs"
 name = "time"
 path = "src/time.rs"
 
+[[bin]]
+name = "lazy"
+path = "src/lazy.rs"
+
 [dependencies]
 cogo = {path = "../"}
 generator = "0.7"
