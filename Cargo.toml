@@ -44,8 +44,9 @@ bytes = "1.1.0"
 httparse = "1"
 itoa = "0.4"
 httpdate = "1.0"
-time = {version = "0.3.5",features = ["formatting","local-offset","parsing","serde"]}
+time = {version = "0.3",features = ["formatting","local-offset","parsing","serde"]}
 serde = "1.0"
+chrono = "0.4"
 
 [target.'cfg(unix)'.dependencies]
 nix = "0.21"
