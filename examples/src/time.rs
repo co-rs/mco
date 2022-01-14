@@ -42,5 +42,6 @@ fn main() {
     let formated = t.format(time::RFC1123);
     println!("{}", formated);
 
-    println!("{},is_zero?:{}", Time::default(),Time::default().is_zero());
+    assert_eq!(true,Time::default().is_zero());
+    println!("{}", Time::default());
 }
