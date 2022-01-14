@@ -2,13 +2,13 @@ use std::alloc::Layout;
 use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Add, Deref, DerefMut, Sub};
 use std::time::SystemTime;
-use once_cell::sync::Lazy;
 use serde::de::Error;
 use time::{format_description, OffsetDateTime, UtcOffset};
 use time::error::InvalidFormatDescription;
 use time::format_description::FormatItem;
 use crate::std::time::format::{longDayNames, longMonthNames};
 use crate::std::errors::Result;
+use crate::std::lazy::sync::Lazy;
 use crate::std::time::sys::Timespec;
 
 /// "Mon, 02 Jan 2006 15:04:05 GMT"
