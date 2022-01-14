@@ -1,6 +1,6 @@
 use once_cell::sync::Lazy;
 
-pub const longDayNames: Lazy<Vec<&str>> = Lazy::new(|| {
+pub static longDayNames: Lazy<Vec<&str>> = Lazy::new(|| {
     vec![
         "Sunday",
         "Monday",
@@ -12,7 +12,7 @@ pub const longDayNames: Lazy<Vec<&str>> = Lazy::new(|| {
     ]
 });
 
-pub const shortDayNames: Lazy<Vec<&str>> = Lazy::new(|| {
+pub static shortDayNames: Lazy<Vec<&str>> = Lazy::new(|| {
     vec![
         "Sun",
         "Mon",
@@ -24,7 +24,7 @@ pub const shortDayNames: Lazy<Vec<&str>> = Lazy::new(|| {
     ]
 });
 
-pub const shortMonthNames: Lazy<Vec<&str>> = Lazy::new(|| {
+pub static shortMonthNames: Lazy<Vec<&str>> = Lazy::new(|| {
     vec![
         "Jan",
         "Feb",
@@ -41,7 +41,7 @@ pub const shortMonthNames: Lazy<Vec<&str>> = Lazy::new(|| {
     ]
 });
 
-pub const longMonthNames: Lazy<Vec<&str>> = Lazy::new(|| {
+pub static longMonthNames: Lazy<Vec<&str>> = Lazy::new(|| {
     vec![
         "January",
         "February",

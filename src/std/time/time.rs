@@ -16,7 +16,7 @@ pub const RFC3339: &'static str = "[year]-[month]-[day]T[hour]:[minute]:[second]
 ///"2006-01-02T15:04:05.999999999Z07:00"
 pub const RFC3339Nano: &'static str = "[year]-[month]-[day]T[hour]:[minute]:[second].[subsecond][offset_hour sign:mandatory]:[offset_minute]";
 
-pub const GLOBAL_OFFSET: Lazy<UtcOffset> = Lazy::new(|| {
+pub static GLOBAL_OFFSET: Lazy<UtcOffset> = Lazy::new(|| {
     UtcOffset::from_whole_seconds(chrono::offset::Local::now().offset().local_minus_utc()).unwrap()
 });
 
