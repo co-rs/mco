@@ -17,6 +17,8 @@ pub const TimeFormat: &'static str = "[weekday], [day] [month] [year] [hour]:[mi
 pub const RFC3339: &'static str = "[year]-[month]-[day]T[hour]:[minute]:[second][offset_hour sign:mandatory]:[offset_minute]";
 ///"2006-01-02T15:04:05.999999999Z07:00"
 pub const RFC3339Nano: &'static str = "[year]-[month]-[day]T[hour]:[minute]:[second].[subsecond][offset_hour sign:mandatory]:[offset_minute]";
+///"Mon, 02 Jan 2006 15:04:05 MST"
+pub const RFC1123: &'static str = "[weekday repr:short], [day] [month repr:short] [year] [hour]:[minute]:[second] MST";
 
 /// Obtain the offset of Utc time and Local time in seconds, using Lazy only once to improve performance
 pub static GLOBAL_OFFSET: Lazy<UtcOffset> = Lazy::new(|| {

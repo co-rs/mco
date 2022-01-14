@@ -38,4 +38,7 @@ fn main() {
 
     let formated = t.format("[year]-[month] [ordinal] [weekday] [week_number]-[day] [hour]:[minute] [period]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]");
     println!("{}", formated);
+
+    let formated = t.format(time::RFC1123);
+    println!("{}", formated);
 }
