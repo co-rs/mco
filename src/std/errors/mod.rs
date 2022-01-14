@@ -12,6 +12,12 @@ impl Error {
     pub fn error(&self) -> String {
         self.inner.clone()
     }
+
+    pub fn warp<E>(e: E, info: &str) -> Self where E: std::fmt::Display {
+        Self {
+            inner: format!("{}{}", info, e)
+        }
+    }
 }
 
 ///new error
@@ -72,7 +78,7 @@ impl From<&Box<dyn std::error::Error>> for Error {
     }
 }
 
-impl From<time::error::InvalidFormatDescription> for Error{
+impl From<time::error::InvalidFormatDescription> for Error {
     fn from(arg: time::error::InvalidFormatDescription) -> Self {
         return new(arg.to_string());
     }
