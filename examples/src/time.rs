@@ -41,4 +41,6 @@ fn main() {
 
     let formated = t.format(time::RFC1123);
     println!("{}", formated);
+
+    println!("{}", Time::default());
 }

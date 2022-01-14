@@ -12,7 +12,7 @@ use crate::std::errors::Result;
 use crate::std::time::sys::Timespec;
 
 /// "Mon, 02 Jan 2006 15:04:05 GMT"
-pub const TimeFormat: &'static str = "[weekday], [day] [month] [year] [hour]:[minute]:[second] GMT";
+pub const TimeFormat: &'static str = "[weekday repr:short], [day] [month repr:short] [year] [hour]:[minute]:[second] GMT";
 /// "2006-01-02T15:04:05Z07:00"
 pub const RFC3339: &'static str = "[year]-[month]-[day]T[hour]:[minute]:[second][offset_hour sign:mandatory]:[offset_minute]";
 ///"2006-01-02T15:04:05.999999999Z07:00"
@@ -212,6 +212,12 @@ impl Debug for Time {
 impl Display for Time {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         std::fmt::Display::fmt(&self.format(RFC3339Nano), f)
+    }
+}
+
+impl Default for Time {
+    fn default() -> Self {
+        Self::parse(RFC3339, "0001-01-01T00:00:00+00:00").unwrap()
     }
 }
 
