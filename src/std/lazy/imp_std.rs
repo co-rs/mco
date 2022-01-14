@@ -9,7 +9,6 @@ use std::{
     marker::PhantomData,
     panic::{RefUnwindSafe, UnwindSafe},
     sync::atomic::{AtomicBool, AtomicUsize, Ordering},
-    thread::{self, Thread},
 };
 use std::sync::Arc;
 use crate::coroutine::Coroutine;
@@ -230,11 +229,16 @@ impl Drop for WaiterQueue<'_> {
 
         unsafe {
             let mut queue = (state_and_queue & !STATE_MASK) as *const Waiter;
+            if !queue.is_null(){
+                (*queue).p.unpark();
+            }
             while !queue.is_null() {
                 let next = (*queue).next;
                 (*queue).signaled.store(true, Ordering::Release);
                 queue = next;
-                (*next).p.unpark();
+                if !next.is_null(){
+                    (*next).p.unpark();
+                }
             }
         }
     }
@@ -244,8 +248,6 @@ impl Drop for WaiterQueue<'_> {
 #[cfg(test)]
 mod tests {
     use std::panic;
-    use std::{sync::mpsc::channel, thread};
-
     use super::OnceCell;
 
     impl<T> OnceCell<T> {
@@ -271,12 +273,12 @@ mod tests {
         static O: OnceCell<()> = OnceCell::new();
         static mut RUN: bool = false;
 
-        let (tx, rx) = channel();
+        let (tx, rx) = chan!();
         for _ in 0..10 {
             let tx = tx.clone();
-            thread::spawn(move || {
+            go!(move || {
                 for _ in 0..4 {
-                    thread::yield_now()
+                    crate::coroutine::yield_now();
                 }
                 unsafe {
                     O.init(|| {
@@ -334,9 +336,9 @@ mod tests {
         assert!(t.is_err());
 
         // make sure someone's waiting inside the once via a force
-        let (tx1, rx1) = channel();
-        let (tx2, rx2) = channel();
-        let t1 = thread::spawn(move || {
+        let (tx1, rx1) = chan!();
+        let (tx2, rx2) = chan!();
+        let t1 = go!(move || {
             O.init(|| {
                 tx1.send(()).unwrap();
                 rx2.recv().unwrap();
@@ -346,7 +348,7 @@ mod tests {
         rx1.recv().unwrap();
 
         // put another waiter on the once
-        let t2 = thread::spawn(|| {
+        let t2 = go!(|| {
             let mut called = false;
             O.init(|| {
                 called = true;
