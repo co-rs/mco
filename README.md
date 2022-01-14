@@ -6,7 +6,7 @@
 
 Cogo is a high-performance library for programming stackful coroutines with which you can easily develop and maintain massive concurrent programs. It can be thought as the Rust version of the popular [Goroutine][go].
 
-> Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Many improvements(Inspired by ```Golang```  [parking_lot](https://github.com/Amanieu/parking_lot)  and [crossbeam](https://github.com/crossbeam-rs/crossbeam)) and [hyper](https://github.com/hyperium/hyper) and more...
+> Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Many improvements(Inspired by [Golang](https://golang.google.cn/),  [parking_lot](https://github.com/Amanieu/parking_lot)  and [crossbeam](https://github.com/crossbeam-rs/crossbeam)) and more...
 
 
 
