@@ -217,7 +217,7 @@ impl Display for Time {
 
 impl Default for Time {
     fn default() -> Self {
-        Self::parse(RFC3339, "0001-01-01T00:00:00+00:00").unwrap()
+        Self::parse(RFC3339Nano, "0001-01-01T00:00:00.000000+00:00").unwrap()
     }
 }
 
