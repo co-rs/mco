@@ -1,6 +1,7 @@
 use std::alloc::Layout;
 use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Add, Deref, DerefMut, Sub};
+use std::time::SystemTime;
 use once_cell::sync::Lazy;
 use serde::de::Error;
 use time::{format_description, OffsetDateTime, UtcOffset};
@@ -8,6 +9,7 @@ use time::error::InvalidFormatDescription;
 use time::format_description::FormatItem;
 use crate::std::time::format::{longDayNames, longMonthNames};
 use crate::std::errors::Result;
+use crate::std::time::sys::Timespec;
 
 /// "Mon, 02 Jan 2006 15:04:05 GMT"
 pub const TimeFormat: &'static str = "[weekday], [day] [month] [year] [hour]:[minute]:[second] GMT";
@@ -17,7 +19,9 @@ pub const RFC3339: &'static str = "[year]-[month]-[day]T[hour]:[minute]:[second]
 pub const RFC3339Nano: &'static str = "[year]-[month]-[day]T[hour]:[minute]:[second].[subsecond][offset_hour sign:mandatory]:[offset_minute]";
 
 pub static GLOBAL_OFFSET: Lazy<UtcOffset> = Lazy::new(|| {
-    UtcOffset::from_whole_seconds(chrono::offset::Local::now().offset().local_minus_utc()).unwrap()
+    let now = Timespec::now();
+    //println!("sec {}",now.nsec);
+    UtcOffset::from_whole_seconds(now.local().tm_utcoff).unwrap()
 });
 
 /// a time wrapper just like golang
