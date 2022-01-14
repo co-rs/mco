@@ -25,7 +25,7 @@ macro_rules! hash_map {
 
 #[macro_export]
 macro_rules! btree_map {
-    ({ $($key:tt:$value:expr),+   $(,)?} ) => {
+    { $($key:tt:$value:expr),+   $(,)?} => {
        {
             let mut temp_table_data = std::collections::btree_map::BTreeMap::new();
              $(temp_table_data.insert($key,$value);)+
