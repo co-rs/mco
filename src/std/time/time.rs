@@ -25,9 +25,19 @@ impl Time {
     pub fn unix_timestamp(&self) -> i64 {
         self.inner.unix_timestamp()
     }
+
+    pub fn unix_timestamp_nano(&self) -> i64 {
+        self.inner.unix_timestamp_nanos() as i64
+    }
+
     // unix_sec returns the time's seconds since Jan 1 1970 (Unix time).
-    pub fn unix_sec(&self) -> i64 {
+    pub fn unix(&self) -> i64 {
         self.inner.unix_timestamp()
+    }
+
+    // unix_sec returns the time's seconds since Jan 1 1970 (Unix time).
+    pub fn unix_nano(&self) -> i64 {
+        self.inner.unix_timestamp_nanos() as i64
     }
 
     pub fn add(&mut self, d: std::time::Duration) {
