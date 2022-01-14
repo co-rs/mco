@@ -19,9 +19,7 @@ pub const RFC3339: &'static str = "[year]-[month]-[day]T[hour]:[minute]:[second]
 pub const RFC3339Nano: &'static str = "[year]-[month]-[day]T[hour]:[minute]:[second].[subsecond][offset_hour sign:mandatory]:[offset_minute]";
 
 pub static GLOBAL_OFFSET: Lazy<UtcOffset> = Lazy::new(|| {
-    let now = Timespec::now();
-    //println!("sec {}",now.nsec);
-    UtcOffset::from_whole_seconds(now.local().tm_utcoff).unwrap()
+    UtcOffset::from_whole_seconds(Timespec::now().local().tm_utcoff).unwrap()
 });
 
 /// a time wrapper just like golang
