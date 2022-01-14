@@ -20,6 +20,16 @@ impl Error {
     }
 }
 
+/// warp errors
+#[macro_export]
+macro_rules! err_warp {
+     ($($arg:tt)*) => {{
+         $crate::std::errors::Error{
+             inner: format!($($arg)*)
+         }
+     }}
+}
+
 ///new error
 #[inline]
 pub fn new(text: String) -> Error {
