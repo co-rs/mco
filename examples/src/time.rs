@@ -17,9 +17,9 @@ fn main() {
     println!("add one day:{}", t);
     assert_ne!(from_js, t);
 
-    assert_eq!(true, t.before(&Time::now())); //befor
+    assert_eq!(true, t.before(&Time::now())); //is before?
 
-    assert_eq!(true, Time::now().after(&t)); //after
+    assert_eq!(true, Time::now().after(&t)); //is after?
 
     let formated = t.format(time::RFC3339);
     println!("{}", formated);
