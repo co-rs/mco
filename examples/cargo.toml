@@ -101,7 +101,6 @@ serde = { version = "1", features = ["derive"] }
 docopt = "1.0"
 tempdir = "0.3"
 httparse = "1.1"
-tungstenite = "0.13"
 serde_derive = "1.0"
 serde_json = "1"
 
