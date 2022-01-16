@@ -380,7 +380,7 @@ impl Month {
         self.into()
     }
     // string returns the English name of the month ("January", "February", ...).
-    pub fn String(&self) -> String {
+    pub fn string(&self) -> String {
         if Month::January <= *self && *self <= Month::December {
             return longMonthNames[(self.i64() - 1) as usize].to_string();
         }
@@ -471,8 +471,8 @@ mod test {
     #[test]
     fn test_mon() {
         let m = Month::May;
-        println!("{}", m.String());
-        assert_eq!("May", m.String());
+        println!("{}", m.string());
+        assert_eq!("May", m.string());
     }
 
 
