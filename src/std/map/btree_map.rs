@@ -137,7 +137,7 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
     /// assert_eq!(*map.get(&1).unwrap(), "a");
     /// assert_eq!(map.get(&2).is_none(), true);
     /// ```
-    pub fn get<Q: ?Sized>(&self, k: &Q) -> Option<SyncMapRef<'_, V>>
+    pub fn get<Q: ?Sized>(&self, k: &Q) -> Option<&V>
         where
             K: Borrow<Q> + std::cmp::Ord,
             Q: Hash + Eq + std::cmp::Ord,
@@ -150,9 +150,7 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
                     if s.is_null() {
                         return None;
                     }
-                    Some(SyncMapRef {
-                        value: Some(&**s)
-                    })
+                    Some(&**s)
                 }
             }
         }
@@ -227,34 +225,6 @@ pub unsafe fn change_lifetime_const<'a, 'b, T>(x: &'a T) -> &'b T {
 pub unsafe fn change_lifetime_mut<'a, 'b, T>(x: &'a mut T) -> &'b mut T {
     &mut *(x as *mut T)
 }
-
-
-pub struct SyncMapRef<'a, V> {
-    value: Option<&'a V>,
-}
-
-impl<V> Deref for SyncMapRef<'_, V> {
-    type Target = V;
-
-    fn deref(&self) -> &Self::Target {
-        self.value.as_ref().unwrap()
-    }
-}
-
-impl<V> Debug for SyncMapRef<'_, V> where V: Debug {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.value.unwrap().fmt(f)
-    }
-}
-
-
-impl<V> PartialEq<Self> for SyncMapRef<'_, V> where V: Eq {
-    fn eq(&self, other: &Self) -> bool {
-        self.value.eq(&other.value)
-    }
-}
-
-impl<V> Eq for SyncMapRef<'_, V> where V: Eq {}
 
 
 pub struct SyncMapRefMut<'a, K, V> {

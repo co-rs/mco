@@ -159,7 +159,7 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
     /// assert_eq!(*map.get(&1).unwrap(), "a");
     /// assert_eq!(map.get(&2).is_none(), true);
     /// ```
-    pub fn get<Q: ?Sized>(&self, k: &Q) -> Option<SyncMapRef<'_, V>>
+    pub fn get<Q: ?Sized>(&self, k: &Q) -> Option<&V>
         where
             K: Borrow<Q>,
             Q: Hash + Eq,
@@ -172,9 +172,7 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
                     if s.is_null() {
                         return None;
                     }
-                    Some(SyncMapRef {
-                        value: Some(&**s)
-                    })
+                   Some(&**s)
                 }
             }
         }
@@ -250,33 +248,6 @@ pub unsafe fn change_lifetime_mut<'a, 'b, T>(x: &'a mut T) -> &'b mut T {
     &mut *(x as *mut T)
 }
 
-
-pub struct SyncMapRef<'a, V> {
-    value: Option<&'a V>,
-}
-
-impl<V> Deref for SyncMapRef<'_, V> {
-    type Target = V;
-
-    fn deref(&self) -> &Self::Target {
-        self.value.as_ref().unwrap()
-    }
-}
-
-impl<V> Debug for SyncMapRef<'_, V> where V: Debug {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        self.value.unwrap().fmt(f)
-    }
-}
-
-
-impl<V> PartialEq<Self> for SyncMapRef<'_, V> where V: Eq {
-    fn eq(&self, other: &Self) -> bool {
-        self.value.eq(&other.value)
-    }
-}
-
-impl<V> Eq for SyncMapRef<'_, V> where V: Eq {}
 
 
 pub struct SyncMapRefMut<'a, K, V> {
@@ -487,7 +458,7 @@ mod test {
         let m = SyncHashMap::<i32, i32>::new();
         let insert = m.insert(1, 2);
         let g = m.get(&1).unwrap();
-        assert_eq!(2, *g.deref());
+        assert_eq!(&2, g);
     }
 
     #[derive(Clone, Debug, Eq, PartialEq, Hash)]
@@ -513,7 +484,7 @@ mod test {
         assert_eq!(true, m.is_empty());
         assert_eq!(true, m.dirty.lock().unwrap().is_empty());
         assert_eq!(None, m.get(&1));
-        assert_eq!(A { inner: 0 }, *g.deref());
+        assert_eq!(&A { inner: 0 }, g);
     }
 
     #[test]
