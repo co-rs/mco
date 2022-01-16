@@ -6,11 +6,11 @@ extern crate test;
 
 use std::collections::HashMap;
 use test::Bencher;
-use cogo::std::sync::{Mutex, SyncMap};
+use cogo::std::sync::{Mutex, SyncHashMap};
 
 #[bench]
 fn bench_sync_hash_map_write(b: &mut Bencher) {
-    let m = SyncMap::new();
+    let m = SyncHashMap::new();
     let mut i = 0;
     b.iter(|| {
         i += 1;
@@ -30,7 +30,7 @@ fn bench_mutex_hash_map_write(b: &mut Bencher) {
 
 #[bench]
 fn bench_sync_hash_map_read(b: &mut Bencher) {
-    let m = SyncMap::new();
+    let m = SyncHashMap::new();
     for i in 0..1000000{
         m.insert(i, i);
     }
