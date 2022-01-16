@@ -30,7 +30,7 @@ impl<K, V> SyncBtreeMap<K, V> where K: std::cmp::Eq + Hash + Clone {
         }
     }
 
-    pub fn insert(&self, k: K, mut v: V) -> Option<V> where K: Clone + std::cmp::Ord {
+    pub fn insert(&self, k: K, v: V) -> Option<V> where K: Clone + std::cmp::Ord {
         match self.dirty.write() {
             Ok(mut m) => {
                 m.insert(k, v)
@@ -55,7 +55,7 @@ impl<K, V> SyncBtreeMap<K, V> where K: std::cmp::Eq + Hash + Clone {
     pub fn len(&self) -> usize {
         loop {
             match self.dirty.read() {
-                Ok(mut m) => {
+                Ok(m) => {
                     return m.len();
                 }
                 Err(_) => {
@@ -68,7 +68,7 @@ impl<K, V> SyncBtreeMap<K, V> where K: std::cmp::Eq + Hash + Clone {
     pub fn is_empty(&self) -> bool {
         loop {
             match self.dirty.read() {
-                Ok(mut m) => {
+                Ok(m) => {
                     return m.is_empty();
                 }
                 Err(_) => {
@@ -97,7 +97,7 @@ impl<K, V> SyncBtreeMap<K, V> where K: std::cmp::Eq + Hash + Clone {
             Q: Hash + Eq + std::cmp::Ord,
     {
         match self.dirty.read() {
-            Ok(mut m) => {
+            Ok(m) => {
                 let mut r = SyncMapRef {
                     g: m,
                     value: None,
@@ -120,7 +120,7 @@ impl<K, V> SyncBtreeMap<K, V> where K: std::cmp::Eq + Hash + Clone {
     {
         let g = self.dirty.write();
         match g {
-            Ok(mut m) => {
+            Ok(m) => {
                 let mut r = SyncMapRefMut {
                     g: m,
                     value: None,
@@ -139,7 +139,7 @@ impl<K, V> SyncBtreeMap<K, V> where K: std::cmp::Eq + Hash + Clone {
     pub fn iter(&self) -> Iter<'_, K, V> {
         loop {
             match self.dirty.read() {
-                Ok(mut m) => {
+                Ok(m) => {
                     let mut iter = Iter {
                         g: m,
                         inner: None,
@@ -159,7 +159,7 @@ impl<K, V> SyncBtreeMap<K, V> where K: std::cmp::Eq + Hash + Clone {
     pub fn iter_mut(&self) -> IterMut<'_, K, V> {
         loop {
             match self.dirty.write() {
-                Ok(mut m) => {
+                Ok(m) => {
                     let mut iter = IterMut {
                         g: m,
                         inner: None,

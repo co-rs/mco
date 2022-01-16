@@ -79,7 +79,7 @@ impl<T> MPMCBuffer<T> {
     }
 
     /// have buffer channel. If the buffered message exceeds the limit, the sender blocks until the message is consumed
-    pub fn new_buffer(mut buffer: usize) -> MPMCBuffer<T> {
+    pub fn new_buffer(buffer: usize) -> MPMCBuffer<T> {
         MPMCBuffer {
             buffer: SegQueue::new(),
             wake_recv: Semphore::new(0),

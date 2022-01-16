@@ -213,7 +213,7 @@ impl Time {
     }
 
     pub fn now_utc() -> Time {
-        let mut now = time::OffsetDateTime::now_utc();
+        let now = time::OffsetDateTime::now_utc();
         return Time {
             inner: now
         };
@@ -388,14 +388,14 @@ impl Month {
         for _ in 0..20 {
             buf.push(0);
         }
-        let n = fmtInt(&mut buf, self.i64() as u64) as usize;
+        let n = fmt_int(&mut buf, self.i64() as u64) as usize;
         return "%!month(".to_string() + &String::from_utf8(buf[n..].to_vec()).unwrap_or_default() + ")";
     }
 }
 
-// fmtInt formats v into the tail of buf.
+// fmt_int formats v into the tail of buf.
 // It returns the index where the output begins.
-fn fmtInt(buf: &mut Vec<u8>, mut v: u64) -> i64 {
+fn fmt_int(buf: &mut Vec<u8>, mut v: u64) -> i64 {
     let mut w = buf.len();
     if v == 0 {
         w -= 1;
@@ -456,7 +456,7 @@ impl Weekday {
         for _ in 0..20 {
             buf.push(0u8);
         }
-        let n = fmtInt(&mut buf, self.i64() as u64);
+        let n = fmt_int(&mut buf, self.i64() as u64);
         return format!("%!weekday({})", String::from_utf8(buf[n as usize..].to_vec()).unwrap_or_default());
     }
 }
