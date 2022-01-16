@@ -11,6 +11,8 @@ use crate::std::sync::{Mutex, MutexGuard};
 use std::marker::PhantomData;
 
 use std::collections::{BTreeMap as Map, btree_map::IntoIter as IntoIter, btree_map::Iter as MapIter, btree_map::IterMut as MapIterMut};
+use serde::{Deserializer, Serialize, Serializer};
+use serde::ser::SerializeMap;
 
 pub type SyncBtreeMap<K, V> = SyncMapImpl<K, V>;
 
@@ -125,6 +127,25 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
 
     pub fn shrink_to_fit(&self) {
         //nothing to do
+    }
+
+    pub fn from(map: Map<K, V>) -> Self where K: Clone + Eq + Hash + Ord {
+        let s = Self::new();
+        match s.dirty.lock() {
+            Ok(mut m) => {
+                unsafe {
+                    (&mut *s.read.get()).clear();
+                }
+                *m = map;
+                unsafe {
+                    for (k, v) in m.iter() {
+                        (&mut *s.read.get()).insert(k.clone(), v);
+                    }
+                }
+            }
+            Err(_) => {}
+        }
+        s
     }
 
     /// # Examples
@@ -344,6 +365,29 @@ impl<K, V> IntoIterator for SyncMapImpl<K, V> where
     }
 }
 
+impl<K, V> From<Map<K, V>> for SyncMapImpl<K, V> {
+    fn from(arg: Map<K, V>) -> Self {
+        Self::from(arg)
+    }
+}
+
+impl<K, V> serde::Serialize for SyncMapImpl<K, V> where K: Eq + Hash + Clone + Serialize, V: Serialize {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+        let mut m = serializer.serialize_map(Some(self.len()))?;
+        for (k, v) in self.iter() {
+            m.serialize_key(k)?;
+            m.serialize_value(v)?;
+        }
+        m.end()
+    }
+}
+
+impl<'de, K, V> serde::Deserialize<'de> for SyncMapImpl<K, V> where K: Eq + Hash + Clone + Ord + serde::Deserialize<'de>, V: serde::Deserialize<'de> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: Deserializer<'de> {
+        let m = Map::deserialize(deserializer)?;
+        Ok(Self::from(m))
+    }
+}
 
 #[cfg(test)]
 mod test {

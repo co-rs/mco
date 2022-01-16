@@ -10,7 +10,9 @@ use std::time::Duration;
 use crate::std::sync::{Mutex, MutexGuard};
 use std::marker::PhantomData;
 
-use std::collections::{HashMap as Map, hash_map::IntoIter as IntoIter, hash_map::Iter as MapIter, hash_map::IterMut as MapIterMut};
+use std::collections::{HashMap as Map, hash_map::IntoIter as IntoIter, hash_map::Iter as MapIter, hash_map::IterMut as MapIterMut, HashMap};
+use serde::ser::SerializeMap;
+use serde::{Deserializer, Serialize, Serializer};
 
 
 pub type SyncHashMap<K, V> = SyncMapImpl<K, V>;
@@ -139,6 +141,25 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
         }
     }
 
+    pub fn from(map: Map<K, V>) -> Self where K: Clone + Eq + Hash {
+        let s = Self::with_capacity(map.capacity());
+        match s.dirty.lock() {
+            Ok(mut m) => {
+                unsafe {
+                    (&mut *s.read.get()).clear();
+                }
+                *m = map;
+                unsafe {
+                    for (k, v) in m.iter() {
+                        (&mut *s.read.get()).insert(k.clone(), v);
+                    }
+                }
+            }
+            Err(_) => {}
+        }
+        s
+    }
+
 
     /// Returns a reference to the value corresponding to the key.
     ///
@@ -172,7 +193,7 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
                     if s.is_null() {
                         return None;
                     }
-                   Some(&**s)
+                    Some(&**s)
                 }
             }
         }
@@ -247,7 +268,6 @@ pub unsafe fn change_lifetime_const<'a, 'b, T>(x: &'a T) -> &'b T {
 pub unsafe fn change_lifetime_mut<'a, 'b, T>(x: &'a mut T) -> &'b mut T {
     &mut *(x as *mut T)
 }
-
 
 
 pub struct SyncMapRefMut<'a, K, V> {
@@ -364,6 +384,31 @@ impl<K, V> IntoIterator for SyncMapImpl<K, V> where
 
     fn into_iter(mut self) -> Self::IntoIter {
         self.into_iter()
+    }
+}
+
+
+impl <K,V>From<Map<K,V>> for SyncMapImpl<K,V> {
+    fn from(arg: Map<K, V>) -> Self {
+        Self::from(arg)
+    }
+}
+
+impl<K, V> serde::Serialize for SyncMapImpl<K, V> where K: Eq + Hash + Clone + Serialize, V: Serialize {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+        let mut m = serializer.serialize_map(Some(self.len()))?;
+        for (k, v) in self.iter() {
+            m.serialize_key(k)?;
+            m.serialize_value(v)?;
+        }
+        m.end()
+    }
+}
+
+impl<'de, K, V> serde::Deserialize<'de> for SyncMapImpl<K, V> where K: Eq + Hash + Clone + serde::Deserialize<'de>, V: serde::Deserialize<'de> {
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: Deserializer<'de> {
+        let m = Map::deserialize(deserializer)?;
+        Ok(Self::from(m))
     }
 }
 
