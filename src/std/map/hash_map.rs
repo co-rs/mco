@@ -149,7 +149,16 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
     /// Since reading a map is unlocked, it is very fast
     ///
     /// test bench_sync_hash_map_read   ... bench:           8 ns/iter (+/- 0)
+    /// # Examples
     ///
+    /// ```
+    /// use cogo::std::sync::{Mutex, SyncHashMap};
+    ///
+    /// let map = SyncHashMap::new();
+    /// map.insert(1, "a");
+    /// assert_eq!(map.get(&1), Some(&"a"));
+    /// assert_eq!(map.get(&2), None);
+    /// ```
     pub fn get<Q: ?Sized>(&self, k: &Q) -> Option<SyncMapRef<'_, V>>
         where
             K: Borrow<Q>,
