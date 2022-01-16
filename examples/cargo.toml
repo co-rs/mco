@@ -111,6 +111,11 @@ path = "src/time.rs"
 name = "lazy"
 path = "src/lazy.rs"
 
+[[bin]]
+name = "time_tick"
+path = "src/time_tick.rs"
+
+
 [profile.release]
 lto = true
 opt-level = 3
