@@ -139,6 +139,17 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
         }
     }
 
+
+    /// Returns a reference to the value corresponding to the key.
+    ///
+    /// The key may be any borrowed form of the map's key type, but
+    /// [`Hash`] and [`Eq`] on the borrowed form *must* match those for
+    /// the key type.
+    ///
+    /// Since reading a map is unlocked, it is very fast
+    ///
+    /// test bench_sync_hash_map_read   ... bench:           8 ns/iter (+/- 0)
+    ///
     pub fn get<Q: ?Sized>(&self, k: &Q) -> Option<SyncMapRef<'_, V>>
         where
             K: Borrow<Q>,
