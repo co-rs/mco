@@ -3,7 +3,9 @@
 ///
 ///
 /// for example:
-///  // will print:  None Exception! \n   guard: 2 \n  guard: 1
+/// ```
+///  use cogo::defer;
+///  //LIFO, so it will print: guard: 3  guard: 2   guard: 1
 ///  fn main(){
 ///     defer!({
 ///        println!("guard: 1");
@@ -14,9 +16,8 @@
 ///     defer!{
 ///        println!("guard: 3");
 ///     }
-///     panic!("None Exception!");
 /// }
-///
+/// ```
 ///
 ///
 #[macro_export]

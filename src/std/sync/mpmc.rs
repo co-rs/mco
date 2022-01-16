@@ -37,10 +37,18 @@ pub fn bounded<T>(buf: usize) -> (Sender<T>, Receiver<T>) {
 
 /// create an channel(mpmc)
 ///  for example:
+/// ```
+///   use cogo::chan;
 ///   //bounded
 ///   let (sender, receiver) = chan!(2);
+///   sender.send(1);//send msg
+///   let rv=receiver.recv(); //recv msg
 ///   //unbounded
 ///   let (sender, receiver) = chan!();
+///   sender.send(1);
+///   let rv=receiver.recv();
+///
+/// ```
 #[macro_export]
 macro_rules! chan {
     () => {

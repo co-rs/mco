@@ -11,6 +11,13 @@ use crate::std::errors::Result;
 /// A Ticker holds a channel that delivers ``ticks'' of a clock
 /// at intervals.
 /// for example:
+/// ```
+///         use cogo::coroutine::sleep;
+///         use cogo::std::time::tick::Ticker;
+///         use std::sync::Arc;
+///         use std::time::Duration;
+///         use cogo::go;
+///
 ///         let mut t = Arc::new(Ticker::new(Duration::from_secs(1)));
 ///         let tclone = t.clone();
 ///         go!(move ||{
@@ -21,6 +28,7 @@ use crate::std::errors::Result;
 ///         sleep(Duration::from_secs(3));
 ///         t.stop();
 ///
+/// ```
 pub struct Ticker {
     pub d: Arc<Mutex<Duration>>,
     pub recv: Receiver<Time>,

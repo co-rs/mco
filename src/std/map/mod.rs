@@ -6,12 +6,18 @@ pub use btree_map::*;
 
 /// make an hash map
 /// for example:
+/// ```
+/// use cogo::hash_map;
+///
+/// let f=1;
+/// let v=7;
 /// let m = hash_map!{
 ///         1:1,
 ///         2:2,
 ///         f:v,
 ///         6:9*2
 ///     };
+/// ```
 #[macro_export]
 macro_rules! hash_map {
     { $($key:tt:$value:expr),+   $(,)?} => {
