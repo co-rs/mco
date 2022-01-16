@@ -4,7 +4,7 @@ extern crate native_tls;
 extern crate tungstenite;
 
 use cogo::net::TcpListener;
-use tungstenite::server::accept;
+use tungstenite::accept;
 
 fn main() {
     let handler = go!(move || {
