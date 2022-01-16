@@ -39,3 +39,25 @@ macro_rules! btree_map {
         }
     };
 }
+
+#[macro_export]
+macro_rules! sync_hash_map {
+    { $($key:tt:$value:expr),+   $(,)?} => {
+       {
+            let mut temp_table_data = $crate::std::map::SyncHashMap::new();
+            $(temp_table_data.insert($key,$value);)+
+            temp_table_data
+        }
+    };
+}
+
+#[macro_export]
+macro_rules! sync_btree_map {
+    { $($key:tt:$value:expr),+   $(,)?} => {
+       {
+            let mut temp_table_data = $crate::std::map::SyncBTreeMap::new();
+             $(temp_table_data.insert($key,$value);)+
+            temp_table_data
+        }
+    };
+}
