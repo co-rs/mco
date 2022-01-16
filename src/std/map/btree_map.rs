@@ -413,32 +413,4 @@ mod test {
             assert_eq!(*v, 2);
         }
     }
-
-    #[test]
-    pub fn test_smoke() {
-        let wait1 = WaitGroup::new();
-        let m1 = Arc::new(SyncBtreeMap::<i32, i32>::new());
-        for i in 0..100 {
-            let wg = wait1.clone();
-            let m = m1.clone();
-            go!(move ||{
-                let insert = m.insert(1, 2);
-                let g = m.get(&1).unwrap();
-                assert_eq!(2, *g.deref());
-                drop(wg);
-                println!("done{}",i);
-            });
-        }
-        for i in 0..100 {
-            let wg = wait1.clone();
-            let m = m1.clone();
-            go!(move ||{
-                let g = m.get(&2);
-                assert_eq!(None, g);
-                drop(wg);
-                println!("done remove {}",i);
-            });
-        }
-        wait1.wait();
-    }
 }

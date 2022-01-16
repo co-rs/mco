@@ -457,7 +457,7 @@ mod test {
     pub fn test_insert4() {
         let m = Arc::new(SyncHashMap::<i32, i32>::new());
         let wg = WaitGroup::new();
-        for _ in 0..1000 {
+        for _ in 0..8 {
             let wg1 = wg.clone();
             let wg2 = wg.clone();
             let m1 = m.clone();
@@ -557,33 +557,6 @@ mod test {
         }
     }
 
-    #[test]
-    pub fn test_smoke() {
-        let wait1 = WaitGroup::new();
-        let m1 = Arc::new(SyncHashMap::<i32, i32>::new());
-        for i in 0..10000 {
-            let wg = wait1.clone();
-            let m = m1.clone();
-            go!(move ||{
-                let insert = m.insert(i, i);
-                let g = m.get(&i).unwrap();
-                assert_eq!(i, *g.deref());
-                drop(wg);
-                println!("done{}",i);
-            });
-        }
-        for i in 0..10000 {
-            let wg = wait1.clone();
-            let m = m1.clone();
-            go!(move ||{
-                let g = m.get(&i);
-                assert_eq!(None, g);
-                drop(wg);
-                println!("done remove {}",i);
-            });
-        }
-        wait1.wait();
-    }
 
     #[test]
     pub fn test_smoke2() {
