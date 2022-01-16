@@ -120,6 +120,7 @@ pub fn bulk_end(start: usize, end: usize, mut expect: usize) -> usize {
 #[cfg(test)]
 mod tests {
     #![feature(test)]
+
     use super::*;
 
     #[test]

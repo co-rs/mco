@@ -67,6 +67,7 @@ pub struct AtomicOption<T: Wrapped> {
 }
 
 unsafe impl<T: Wrapped + Send> Send for AtomicOption<T> {}
+
 unsafe impl<T: Wrapped + Send> Sync for AtomicOption<T> {}
 
 impl<T: Wrapped> AtomicOption<T> {

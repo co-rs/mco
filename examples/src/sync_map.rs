@@ -5,7 +5,7 @@ use cogo::std::sync::{SyncHashMap, WaitGroup};
 
 pub fn main() {
     let m = Arc::new(SyncHashMap::new());
-    let wg=WaitGroup::new(); //notice message
+    let wg = WaitGroup::new(); //notice message
 
     for i in 0..100 {
         let m1 = m.clone();
@@ -20,7 +20,7 @@ pub fn main() {
     }
 
     wg.wait();
-    for (k,v) in m.deref(){
-        println!("{},{}",k,v);
+    for (k, v) in m.deref() {
+        println!("{},{}", k, v);
     }
 }

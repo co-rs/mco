@@ -44,6 +44,7 @@ struct Node<T> {
 }
 
 unsafe impl<T: Send> Send for Node<T> {}
+
 unsafe impl<T: Sync> Sync for Node<T> {}
 
 struct State<T> {
@@ -54,6 +55,7 @@ struct State<T> {
 }
 
 unsafe impl<T: Send> Send for State<T> {}
+
 unsafe impl<T: Sync> Sync for State<T> {}
 
 pub struct Queue<T> {

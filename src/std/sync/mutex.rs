@@ -24,8 +24,11 @@ pub struct Mutex<T: ?Sized> {
 }
 
 unsafe impl<T: ?Sized + Send> Send for Mutex<T> {}
+
 unsafe impl<T: ?Sized + Send> Sync for Mutex<T> {}
+
 impl<T: ?Sized> UnwindSafe for Mutex<T> {}
+
 impl<T: ?Sized> RefUnwindSafe for Mutex<T> {}
 
 pub struct MutexGuard<'a, T: ?Sized + 'a> {
@@ -126,7 +129,7 @@ impl<T: ?Sized> Mutex<T> {
         }
     }
 
-    fn unpark_one(&self, w: &SyncBlocker) -> Result<(),ParkError> {
+    fn unpark_one(&self, w: &SyncBlocker) -> Result<(), ParkError> {
         w.unpark()?;
         if w.take_release() {
             self.unlock();
@@ -149,8 +152,8 @@ impl<T: ?Sized> Mutex<T> {
     }
 
     pub fn into_inner(self) -> LockResult<T>
-    where
-        T: Sized,
+        where
+            T: Sized,
     {
         let data = self.data.into_inner();
         poison::map_result(self.poison.borrow(), |_| data)
@@ -242,6 +245,7 @@ pub fn guard_poison<'a, T: ?Sized>(guard: &MutexGuard<'a, T>) -> &'a poison::Fla
 #[cfg(test)]
 mod tests {
     #![feature(test)]
+
     use super::*;
     use crate::std::sync::mpsc::channel;
     use crate::std::sync::Condvar;
@@ -250,7 +254,9 @@ mod tests {
     use std::thread;
 
     struct Packet<T>(Arc<(Mutex<T>, Condvar)>);
+
     unsafe impl<T: Send> Send for Packet<T> {}
+
     unsafe impl<T> Sync for Packet<T> {}
 
     #[derive(Eq, PartialEq, Debug)]
@@ -337,7 +343,7 @@ mod tests {
             let _lock = m2.lock().unwrap();
             panic!("test panic in inner thread to poison mutex");
         })
-        .join();
+            .join();
 
         assert!(m.is_poisoned());
         match Arc::try_unwrap(m).unwrap().into_inner() {
@@ -361,7 +367,7 @@ mod tests {
             let _lock = m2.lock().unwrap();
             panic!("test panic in inner thread to poison mutex");
         })
-        .join();
+            .join();
 
         assert!(m.is_poisoned());
         match Arc::try_unwrap(m).unwrap().get_mut() {
@@ -431,7 +437,7 @@ mod tests {
             let lock = arc2.lock().unwrap();
             assert_eq!(*lock, 2);
         })
-        .join();
+            .join();
         assert!(arc.lock().is_err());
         assert!(arc.is_poisoned());
     }
@@ -468,7 +474,7 @@ mod tests {
             let _u = Unwinder { i: arc2 };
             panic!();
         })
-        .join();
+            .join();
         let lock = arc.lock().unwrap();
         assert_eq!(*lock, 2);
     }

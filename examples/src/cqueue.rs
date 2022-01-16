@@ -9,6 +9,7 @@ use cogo::{coroutine, cqueue};
 // this is wrapper to work around the compile error
 // we are safe to share the data in bottom half since we run them orderly
 struct SyncCell<T>(T);
+
 impl<T> SyncCell<T> {
     unsafe fn get_mut(&mut self) -> &mut T {
         &mut *(&self.0 as *const _ as *mut T)

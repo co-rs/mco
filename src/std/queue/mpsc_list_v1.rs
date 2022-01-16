@@ -11,6 +11,7 @@ struct Node<T> {
     value: Option<T>,
     refs: usize,
 }
+
 // linked bit is MSB, ref count is 2 for handle and list
 const REF_INIT: usize = 0x1000_0002;
 const REF_COUNT_MASK: usize = 0x0FFF_FFFF;
@@ -37,8 +38,8 @@ impl<T> Entry<T> {
     /// must make sure it's not popped by the consumer
     #[inline]
     pub unsafe fn with_mut_data<F>(&self, f: F)
-    where
-        F: FnOnce(&mut T),
+        where
+            F: FnOnce(&mut T),
     {
         let node = &mut *self.0.as_ptr();
         let data = node.value.as_mut().expect("Node value is None");
@@ -148,6 +149,7 @@ pub struct Queue<T> {
 }
 
 unsafe impl<T: Send> Send for Queue<T> {}
+
 unsafe impl<T: Send> Sync for Queue<T> {}
 
 impl<T> Queue<T> {
@@ -222,8 +224,8 @@ impl<T> Queue<T> {
     }
 
     pub fn pop_if<F>(&self, f: &F) -> Option<T>
-    where
-        F: Fn(&T) -> bool,
+        where
+            F: Fn(&T) -> bool,
     {
         unsafe {
             let tail = *self.tail.get();
@@ -345,6 +347,7 @@ impl<T> Drop for Queue<T> {
 #[cfg(test)]
 mod tests {
     #![feature(test)]
+
     use super::*;
     use std::sync::mpsc::channel;
     use std::sync::Arc;

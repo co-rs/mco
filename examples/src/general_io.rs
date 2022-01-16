@@ -15,7 +15,7 @@ fn main() {
     cogo::config().set_workers(1);
     let b_run = true;
 
-    let r=join!(
+    let r = join!(
         {
             // this will block the whole thread, use Coio instead!!
             // let mut stdin = io::stdin();

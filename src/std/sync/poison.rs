@@ -55,8 +55,8 @@ pub struct Guard {
 }
 
 pub fn map_result<T, U, F>(result: LockResult<T>, f: F) -> LockResult<U>
-where
-    F: FnOnce(T) -> U,
+    where
+        F: FnOnce(T) -> U,
 {
     match result {
         Ok(t) => Ok(f(t)),

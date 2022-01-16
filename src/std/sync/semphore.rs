@@ -172,6 +172,7 @@ impl fmt::Debug for Semphore {
 #[cfg(test)]
 mod tests {
     #![feature(test)]
+
     use super::*;
     use std::sync::Arc;
     use std::sync::mpsc::TryRecvError;

@@ -229,14 +229,14 @@ impl Drop for WaiterQueue<'_> {
 
         unsafe {
             let mut queue = (state_and_queue & !STATE_MASK) as *const Waiter;
-            if !queue.is_null(){
+            if !queue.is_null() {
                 (*queue).p.unpark();
             }
             while !queue.is_null() {
                 let next = (*queue).next;
                 (*queue).signaled.store(true, Ordering::Release);
                 queue = next;
-                if !next.is_null(){
+                if !next.is_null() {
                     (*next).p.unpark();
                 }
             }

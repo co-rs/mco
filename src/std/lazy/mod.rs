@@ -527,8 +527,8 @@ pub mod unsync {
         /// assert_eq!(value, &92);
         /// ```
         pub fn get_or_init<F>(&self, f: F) -> &T
-        where
-            F: FnOnce() -> T,
+            where
+                F: FnOnce() -> T,
         {
             enum Void {}
             match self.get_or_try_init(|| Ok::<T, Void>(f())) {
@@ -563,8 +563,8 @@ pub mod unsync {
         /// assert_eq!(cell.get(), Some(&92))
         /// ```
         pub fn get_or_try_init<F, E>(&self, f: F) -> Result<&T, E>
-        where
-            F: FnOnce() -> Result<T, E>,
+            where
+                F: FnOnce() -> Result<T, E>,
         {
             if let Some(val) = self.get() {
                 return Ok(val);
@@ -960,8 +960,8 @@ pub mod sync {
         /// assert_eq!(value, &92);
         /// ```
         pub fn get_or_init<F>(&self, f: F) -> &T
-        where
-            F: FnOnce() -> T,
+            where
+                F: FnOnce() -> T,
         {
             enum Void {}
             match self.get_or_try_init(|| Ok::<T, Void>(f())) {
@@ -997,8 +997,8 @@ pub mod sync {
         /// assert_eq!(cell.get(), Some(&92))
         /// ```
         pub fn get_or_try_init<F, E>(&self, f: F) -> Result<&T, E>
-        where
-            F: FnOnce() -> Result<T, E>,
+            where
+                F: FnOnce() -> Result<T, E>,
         {
             // Fast path check
             if let Some(value) = self.get() {

@@ -66,7 +66,7 @@ impl SyncFlag {
     }
 
     #[inline]
-    fn wakeup_all(&self) -> Result<(),ParkError>{
+    fn wakeup_all(&self) -> Result<(), ParkError> {
         while let Some(w) = self.to_wake.pop() {
             w.unpark()?;
             if w.take_release() {
@@ -153,6 +153,7 @@ impl fmt::Debug for SyncFlag {
 #[cfg(test)]
 mod tests {
     #![feature(test)]
+
     use super::*;
     use std::sync::Arc;
     use std::thread;

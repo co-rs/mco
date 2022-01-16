@@ -85,7 +85,7 @@ pub fn time_to_local_tm(sec: i64, tm: &mut Tm) {
             panic!("localtime_r failed: {}", io::Error::last_os_error());
         }
         #[cfg(any(target_os = "solaris", target_os = "illumos"))]
-        let gmtoff = {
+            let gmtoff = {
             tzset();
             // < 0 means we don't know; assume we're not in DST.
             if out.tm_isdst == 0 {
@@ -98,17 +98,17 @@ pub fn time_to_local_tm(sec: i64, tm: &mut Tm) {
             }
         };
         #[cfg(not(any(target_os = "solaris", target_os = "illumos")))]
-        let gmtoff = out.tm_gmtoff;
+            let gmtoff = out.tm_gmtoff;
         tm_to_rust_tm(&out, gmtoff as i32, tm);
     }
 }
 
 pub fn utc_tm_to_time(rust_tm: &Tm) -> i64 {
     #[cfg(not(any(
-        all(target_os = "android", target_pointer_width = "32"),
-        target_os = "nacl",
-        target_os = "solaris",
-        target_os = "illumos"
+    all(target_os = "android", target_pointer_width = "32"),
+    target_os = "nacl",
+    target_os = "solaris",
+    target_os = "illumos"
     )))]
     use libc::timegm;
     #[cfg(all(target_os = "android", target_pointer_width = "32"))]

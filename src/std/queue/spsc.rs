@@ -19,6 +19,7 @@ pub struct Queue<T> {
 }
 
 unsafe impl<T: Send> Send for Queue<T> {}
+
 unsafe impl<T: Send> Sync for Queue<T> {}
 
 impl<T> Queue<T> {
@@ -164,6 +165,7 @@ impl<T> Drop for Queue<T> {
 #[cfg(test)]
 mod tests {
     #![feature(test)]
+
     use super::*;
 
     #[test]
