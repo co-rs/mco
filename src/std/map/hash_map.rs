@@ -434,6 +434,33 @@ mod test {
     }
 
     #[test]
+    pub fn test_insert4() {
+        let m = Arc::new(SyncHashMap::<i32, i32>::new());
+        let wg = WaitGroup::new();
+        for _ in 0..1000 {
+            let wg1 = wg.clone();
+            let wg2 = wg.clone();
+            let m1 = m.clone();
+            let m2 = m.clone();
+            go!(move ||{
+                 for i in 0..10000{
+                     m1.remove(&i);
+                     let insert = m1.insert(i, i);
+                 }
+                 drop(wg1);
+            });
+            go!(move ||{
+                 for i in 0..10000{
+                     m2.remove(&i);
+                     let insert = m2.insert(i, i);
+                 }
+                 drop(wg2);
+            });
+        }
+        wg.wait();
+    }
+
+    #[test]
     pub fn test_get() {
         let m = SyncHashMap::<i32, i32>::new();
         let insert = m.insert(1, 2);
