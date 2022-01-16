@@ -152,12 +152,12 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
     /// # Examples
     ///
     /// ```
-    /// use cogo::std::sync::{Mutex, SyncHashMap};
+    /// use cogo::std::sync::{SyncHashMap};
     ///
     /// let map = SyncHashMap::new();
     /// map.insert(1, "a");
-    /// assert_eq!(map.get(&1), Some(&"a"));
-    /// assert_eq!(map.get(&2), None);
+    /// assert_eq!(*map.get(&1).unwrap(), "a");
+    /// assert_eq!(map.get(&2).is_none(), true);
     /// ```
     pub fn get<Q: ?Sized>(&self, k: &Q) -> Option<SyncMapRef<'_, V>>
         where
