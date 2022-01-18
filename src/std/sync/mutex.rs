@@ -141,8 +141,7 @@ impl<T: ?Sized> Mutex<T> {
         if self.cnt.fetch_sub(1, Ordering::SeqCst) > 1 {
             self.to_wake
                 .pop()
-                .map(|w| self.unpark_one(&w))
-                .expect("got null blocker!");
+                .map(|w| self.unpark_one(&w));
         }
     }
 
