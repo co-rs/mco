@@ -1,3 +1,13 @@
+pub struct Guard<F: FnOnce()>(pub Option<F>);
+
+impl<F: FnOnce()> Drop for Guard<F> {
+    fn drop(&mut self) {
+        if let Some(f) = (self.0).take() {
+            f()
+        }
+    }
+}
+
 /// Defers evaluation of a block of code until the end of the scope.
 /// Sort of LIFO(last-in, first-out queue)
 ///
@@ -23,45 +33,12 @@
 #[macro_export]
 macro_rules! defer {
     ($func:block) => {
-       let _guard = {
-            pub struct Guard<F: FnOnce()>(Option<F>);
-            impl<F: FnOnce()> Drop for Guard<F> {
-                fn drop(&mut self) {
-                    if let Some(f) = (self.0).take() {
-                        f()
-                    }
-                }
-            }
-            Guard(Some(||$func))
-        };
+       let _guard = $crate::std::defer::Guard(Some(||$func));
     };
     ($func:expr) => {
-       let _guard = {
-            pub struct Guard<F: FnOnce()>(Option<F>);
-            impl<F: FnOnce()> Drop for Guard<F> {
-                fn drop(&mut self) {
-                    if let Some(f) = (self.0).take() {
-                        f()
-                    }
-                }
-            }
-            Guard(Some($func))
-        };
+        let _guard = $crate::std::defer::Guard(Some($func));
     };
     { $($func:expr;)+ } => {
-       let _guard = {
-            pub struct Guard<F: FnOnce()>(Option<F>);
-            impl<F: FnOnce()> Drop for Guard<F> {
-                fn drop(&mut self) {
-                    if let Some(f) = (self.0).take() {
-                        f()
-                    }
-                }
-            }
-            Guard(Some(||{
-                $($func;)+
-            }))
-        };
-        ;
+       let _guard = $crate::std::defer::Guard(Some(||{$($func;)+}));
     }
 }
