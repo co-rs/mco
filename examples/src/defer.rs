@@ -16,6 +16,5 @@ fn main() {
             println!("go spawn!");
         });
     }
-    ;
     panic!("None Exception!");
 }
