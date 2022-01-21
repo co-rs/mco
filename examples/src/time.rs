@@ -8,7 +8,7 @@ fn main() {
     println!("{}", t.unix());
     println!("{}", t.unix_nano());
 
-    //json serize
+    //json
     let js = serde_json::json!(&t).to_string();
     println!("{}", js);
     let from_js = serde_json::from_str::<Time>(&js).unwrap();
