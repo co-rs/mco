@@ -19,7 +19,7 @@ fn main() {
         tx1.send(42).unwrap();
     });
 
-    let id = select!(
+    let id = select!{
         _ = listener.accept() => {
             println!("got connected")
         },
@@ -32,7 +32,7 @@ fn main() {
         a = rx2.recv() => {
             println!("rx2 received, a={:?}", a)
         }
-    );
+    };
 
     assert_eq!(id, 3);
     assert_eq!(rx1.recv(), Ok(42));
