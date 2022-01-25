@@ -23,7 +23,7 @@ Cogo is a high-performance library for programming stackful coroutines with whic
 * ``` cogo/std/http/server ``` An HTTP server is available(Body parsing upcoming)
 * ``` cogo/std/http/client ``` An HTTP Client(TODO) upcoming
 * ``` cogo/std/queue ``` Basic queue data structures
-* ``` cogo/std/sync ```  Includes ``` Mutex/RwLock/WaitGroup/Semphore/channel(Bounded, unbounded, chan!()) ```...and more..
+* ``` cogo/std/sync ```  Includes ``` Mutex/RwLock/WaitGroup/Semphore/chan!()/chan!(1000) ```...and more..
 * ``` cogo/std/defer ``` Defers evaluation of a block of code until the end of the scope.
 * ``` cogo/std/map ```  Provides the same concurrency map as Golang, with ```SyncHashMap``` and ```SyncBtreeMap```.It is suitable for concurrent environments with too many reads and too few writes
 * ``` cogo/std/time ``` Improve the implementation of a high performance time
