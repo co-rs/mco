@@ -21,6 +21,7 @@ macro_rules! go {
 
     // for builder/scope spawn
     ($builder:expr, $func:expr) => {{
+        use $crate::coroutine::Spawn;
         fn _go_check<F, T>(f: F) -> F
         where
             F: FnOnce() -> T + Send,

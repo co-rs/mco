@@ -115,6 +115,9 @@ path = "src/lazy.rs"
 name = "time_tick"
 path = "src/time_tick.rs"
 
+[[bin]]
+name = "go"
+path = "src/go.rs"
 
 [profile.release]
 lto = true
