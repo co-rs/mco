@@ -28,6 +28,7 @@
 
 #[macro_use]
 extern crate log;
+extern crate core;
 
 mod cancel;
 mod config;
