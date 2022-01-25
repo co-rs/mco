@@ -4,7 +4,7 @@ use std::time::Duration;
 use parking_lot::{Condvar, Mutex};
 
 use crate::coroutine_impl::is_coroutine;
-use crate::park::{Park, ParkError};
+use crate::park::{ParkImpl, Park, ParkUnPark, ParkError};
 
 #[derive(Debug)]
 #[allow(clippy::mutex_atomic)]
@@ -53,7 +53,7 @@ impl ThreadPark {
 
 #[derive(Debug)]
 pub enum Parker {
-    Coroutine(Park),
+    Coroutine(Box<dyn crate::park::ParkUnPark>),
     Thread(ThreadPark),
 }
 
@@ -66,9 +66,9 @@ impl Blocker {
     /// create a new blocker
     pub fn new(ignore_cancel: bool) -> Self {
         let parker = if is_coroutine() {
-            let park = Park::new();
+            let park = ParkImpl::new();
             park.ignore_cancel(ignore_cancel);
-            Parker::Coroutine(park)
+            Parker::Coroutine(Box::new(ParkImpl::new()))
         } else {
             let park = ThreadPark::new();
             Parker::Thread(park)
@@ -85,7 +85,7 @@ impl Blocker {
     #[inline]
     pub fn park(&self, timeout: Option<Duration>) -> Result<(), ParkError> {
         match self.parker {
-            Parker::Coroutine(ref co) => co.park_timeout(timeout)?,
+            Parker::Coroutine(ref co) => co.park_option(timeout)?,
             Parker::Thread(ref t) => t.park_timeout(timeout)?,
         }
         Ok(())
@@ -106,7 +106,7 @@ impl Blocker {
 // but run the coroutine right away in the current thread
 // this is an optimized blocker especially usefull for waiting io
 #[derive(Debug, Default)]
-pub struct FastBlocker(Park);
+pub struct FastBlocker(ParkImpl);
 
 impl FastBlocker {
     pub fn new() -> Self {
@@ -114,7 +114,7 @@ impl FastBlocker {
             panic!("only possible to block coroutine");
         }
 
-        FastBlocker(Park::new())
+        FastBlocker(ParkImpl::new())
     }
 
     #[inline]

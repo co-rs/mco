@@ -1,4 +1,5 @@
 use std::fmt;
+use std::fmt::Debug;
 use std::io::ErrorKind;
 use std::ptr;
 use std::sync::atomic::{AtomicBool, AtomicPtr, AtomicUsize, Ordering};
@@ -15,21 +16,42 @@ use crate::std::sync::AtomicOption;
 use crate::timeout_list::TimeoutHandle;
 use crate::yield_now::{get_co_para, yield_now, yield_with};
 
+
+pub trait Park: Send + Sync + Debug {
+    fn park(&self) -> Result<(), ParkError>;
+    fn park_timeout(&self, d: Duration) -> Result<(), ParkError>;
+}
+
+pub trait UnPark: Send + Sync + Debug {
+    fn unpark(&self);
+}
+
+pub trait ParkUnPark: Park + UnPark {
+    fn park_option(&self, d: Option<Duration>) -> Result<(), ParkError> {
+        match d {
+            None => { self.park() }
+            Some(d) => { self.park_timeout(d) }
+        }
+    }
+}
+
+
 #[derive(Debug, Copy, Clone, Eq, PartialEq)]
 pub enum ParkError {
     Canceled,
     Timeout,
 }
 
-impl <T>From<PoisonError<T>> for ParkError{
+impl<T> From<PoisonError<T>> for ParkError {
     fn from(_: PoisonError<T>) -> Self {
         Self::Timeout
     }
 }
 
 
-pub struct DropGuard<'a>(&'a Park);
-pub struct Park {
+pub struct DropGuard<'a>(&'a ParkImpl);
+
+pub struct ParkImpl {
     // the coroutine that waiting for this park instance
     wait_co: Arc<AtomicOption<CoroutineImpl>>,
     // when odd means the Park no need to block
@@ -45,16 +67,34 @@ pub struct Park {
     wait_kernel: AtomicBool,
 }
 
-impl Default for Park {
-    fn default() -> Self {
-        Park::new()
+impl Park for ParkImpl {
+    fn park(&self) -> Result<(), ParkError> {
+        self.park_timeout(None)
+    }
+
+    fn park_timeout(&self, d: Duration) -> Result<(), ParkError> {
+        self.park_timeout(Some(d))
     }
 }
 
+impl UnPark for ParkImpl {
+    fn unpark(&self) {
+        self.unpark()
+    }
+}
+
+impl Default for ParkImpl {
+    fn default() -> Self {
+        ParkImpl::new()
+    }
+}
+
+impl ParkUnPark for ParkImpl {}
+
 // this is the park resource type (spmc style)
-impl Park {
+impl ParkImpl {
     pub fn new() -> Self {
-        Park {
+        ParkImpl {
             wait_co: Arc::new(AtomicOption::none()),
             state: AtomicUsize::new(0),
             check_cancel: true.into(),
@@ -227,7 +267,7 @@ impl<'a> Drop for DropGuard<'a> {
     }
 }
 
-impl Drop for Park {
+impl Drop for ParkImpl {
     fn drop(&mut self) {
         // wait the kernel finish
         if !self.wait_kernel.load(Ordering::Acquire) {
@@ -241,7 +281,7 @@ impl Drop for Park {
     }
 }
 
-impl EventSource for Park {
+impl EventSource for ParkImpl {
     // register the coroutine to the park
     fn subscribe(&mut self, co: CoroutineImpl) {
         let cancel = co_cancel_data(&co);
@@ -284,7 +324,7 @@ impl EventSource for Park {
     }
 }
 
-impl fmt::Debug for Park {
+impl fmt::Debug for ParkImpl {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(
             f,
