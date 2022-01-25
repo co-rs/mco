@@ -12,7 +12,7 @@ use std::sync::Arc;
 use std::time::Duration;
 
 use super::Semphore;
-use crossbeam::queue::SegQueue;
+use crate::std::queue::seg_queue::SegQueue;
 
 /// Create an unbounded channel. if If you want to limit the number of messages, use bounded channel_buf()
 pub fn channel<T>() -> (Sender<T>, Receiver<T>) {

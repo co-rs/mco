@@ -7,7 +7,7 @@ use std::{io, ptr};
 use crate::coroutine_impl::run_coroutine;
 use crate::scheduler::get_scheduler;
 use crate::timeout_list::{now, ns_to_dur};
-use crossbeam::queue::SegQueue as mpsc;
+use crate::std::queue::seg_queue::SegQueue as mpsc;
 use smallvec::SmallVec;
 
 use super::{timeout_handler, EventData, IoData, TimerList};

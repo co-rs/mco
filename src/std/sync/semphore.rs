@@ -6,7 +6,7 @@ use std::time::Duration;
 use super::blocking::SyncBlocker;
 use crate::cancel::trigger_cancel_panic;
 use crate::park::ParkError;
-use crossbeam::queue::SegQueue as WaitList;
+use crate::std::queue::seg_queue::SegQueue as WaitList;
 
 /// Semphore primitive
 ///

@@ -7,7 +7,7 @@ use std::thread;
 use std::time::{Duration, Instant};
 
 use crossbeam::atomic::AtomicCell;
-use crossbeam::queue::SegQueue as mpsc;
+use crate::std::queue::seg_queue::SegQueue as mpsc;
 use once_cell::sync::Lazy;
 use parking_lot::Mutex;
 use crate::std::queue::mpsc_list_v1::Entry;

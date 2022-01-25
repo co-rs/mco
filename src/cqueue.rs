@@ -13,7 +13,7 @@ use crate::std::sync::Mutex;
 use crate::std::sync::{AtomicOption, Blocker};
 use crate::yield_now::yield_with;
 
-use crossbeam::queue::SegQueue as Queue;
+use crate::std::queue::seg_queue::SegQueue as Queue;
 
 /// This enumeration is the list of the possible reasons that `poll`
 /// could not return Event when called.
