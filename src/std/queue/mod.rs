@@ -6,5 +6,6 @@ pub mod mpsc_list;
 pub mod mpsc_list_v1;
 pub mod spsc;
 pub mod seg_queue;
+pub mod array_queue;
 
 pub use crate::std::queue::block_node::BLOCK_SIZE;
