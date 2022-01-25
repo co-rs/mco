@@ -57,7 +57,7 @@ macro_rules! chan {
     ($num:expr) => {
         $crate::std::sync::mpsc::bounded($num)
     };
-    ($num:expr,$t:path) => {
+    ($t:path,$num:expr) => {
         $crate::std::sync::mpsc::bounded::<$t>($num)
     };
 }
