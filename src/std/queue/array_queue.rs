@@ -61,7 +61,7 @@ pub struct ArrayQueue<T> {
     tail: CachePadded<AtomicUsize>,
 
     /// The buffer holding slots.
-    buffer: *mut Slot<T>,
+    buffer: Vec<Slot<T>>,
 
     /// The queue capacity.
     cap: usize,
@@ -111,19 +111,14 @@ impl<T> ArrayQueue<T> {
             //         }
             //     })
             //     .collect();
-            let mut boxed: Box<Vec<Slot<T>>> = Box::new({
-                let mut v = Vec::with_capacity(cap);
-                for i in 0..cap {
-                    v.push(Slot {
-                        stamp: AtomicUsize::new(i),
-                        value: UnsafeCell::new(MaybeUninit::uninit()),
-                    });
-                }
-                v
-            });
-            let ptr = boxed.as_mut_ptr();
-            mem::forget(boxed);
-            ptr
+            let mut v = Vec::with_capacity(cap);
+            for i in 0..cap {
+                v.push(Slot {
+                    stamp: AtomicUsize::new(i),
+                    value: UnsafeCell::new(MaybeUninit::uninit()),
+                });
+            }
+            v
         };
 
         // One lap is the smallest power of two greater than `cap`.
@@ -163,7 +158,7 @@ impl<T> ArrayQueue<T> {
             let lap = tail & !(self.one_lap - 1);
 
             // Inspect the corresponding slot.
-            let slot = unsafe { &*self.buffer.add(index) };
+            let slot = unsafe { self.buffer.get_unchecked(index) };
             let stamp = slot.stamp.load(Ordering::Acquire);
 
             // If the tail and the stamp match, we may attempt to push.
@@ -243,7 +238,7 @@ impl<T> ArrayQueue<T> {
             let lap = head & !(self.one_lap - 1);
 
             // Inspect the corresponding slot.
-            let slot = unsafe { &*self.buffer.add(index) };
+            let slot = unsafe { self.buffer.get_unchecked(index) };
             let stamp = slot.stamp.load(Ordering::Acquire);
 
             // If the the stamp is ahead of the head by 1, we may attempt to pop.
@@ -417,21 +412,12 @@ impl<T> Drop for ArrayQueue<T> {
 
             unsafe {
                 let p = {
-                    let slot = &mut *self.buffer.add(index);
+                    let slot = &mut self.buffer.get_unchecked(index);
                     let value = &mut *slot.value.get();
                     value.as_mut_ptr()
                 };
                 p.drop_in_place();
             }
-        }
-
-        // Finally, deallocate the buffer, but don't run any destructors.
-        unsafe {
-            // Create a slice from the buffer to make
-            // a fat pointer. Then, use Box::from_raw
-            // to deallocate it.
-            let ptr = core::slice::from_raw_parts_mut(self.buffer, self.cap) as *mut [Slot<T>];
-            Box::from_raw(ptr);
         }
     }
 }
