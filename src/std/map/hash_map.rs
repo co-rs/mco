@@ -269,7 +269,6 @@ pub unsafe fn change_lifetime_mut<'a, 'b, T>(x: &'a mut T) -> &'b mut T {
     &mut *(x as *mut T)
 }
 
-
 pub struct SyncMapRefMut<'a, K, V> {
     g: MutexGuard<'a, Map<K, V>>,
     value: Option<&'a mut V>,
@@ -388,7 +387,7 @@ impl<K, V> IntoIterator for SyncMapImpl<K, V> where
 }
 
 
-impl <K,V>From<Map<K,V>> for SyncMapImpl<K,V> {
+impl<K, V> From<Map<K, V>> for SyncMapImpl<K, V> {
     fn from(arg: Map<K, V>) -> Self {
         Self::from(arg)
     }
@@ -412,6 +411,16 @@ impl<'de, K, V> serde::Deserialize<'de> for SyncMapImpl<K, V> where K: Eq + Hash
     }
 }
 
+impl<K, V> Debug for SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone + Debug, V: Debug {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut m = f.debug_map();
+        for (k, v) in self.iter() {
+            m.key(k);
+            m.value(v);
+        }
+        m.finish()
+    }
+}
 
 #[cfg(test)]
 mod test {
@@ -425,6 +434,13 @@ mod test {
     use crate::std::map::SyncHashMap;
     use crate::std::sync::{WaitGroup};
 
+    #[test]
+    pub fn test_debug() {
+        let m: SyncHashMap<i32, i32> = SyncHashMap::new();
+        m.insert(1,1);
+        println!("{:?}",m);
+        assert_eq!(format!("{:?}",m),"{1: 1}");
+    }
 
     #[test]
     pub fn test_empty() {

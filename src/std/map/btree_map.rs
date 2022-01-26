@@ -389,6 +389,17 @@ impl<'de, K, V> serde::Deserialize<'de> for SyncMapImpl<K, V> where K: Eq + Hash
     }
 }
 
+impl<K, V> Debug for SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone + Debug, V: Debug {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        let mut m = f.debug_map();
+        for (k, v) in self.iter() {
+            m.key(k);
+            m.value(v);
+        }
+        m.finish()
+    }
+}
+
 #[cfg(test)]
 mod test {
     use std::collections::BTreeMap;
