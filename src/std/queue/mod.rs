@@ -4,7 +4,6 @@ mod block_node;
 pub mod mpmc_bounded;
 pub mod mpsc_list;
 pub mod mpsc_list_v1;
-pub mod spsc;
 pub mod seg_queue;
 pub mod array_queue;
 

@@ -6,7 +6,7 @@ use std::time::Duration;
 
 use crate::cancel::trigger_cancel_panic;
 use crate::park::ParkError;
-use crate::std::queue::spsc;
+use crate::std::queue::seg_queue::SegQueue;
 
 use super::blocking::SyncBlocker;
 use super::mutex::{self, Mutex, MutexGuard};
@@ -25,7 +25,7 @@ impl WaitTimeoutResult {
 
 pub struct Condvar {
     // the waiting blocker list
-    to_wake: Mutex<spsc::Queue<Arc<SyncBlocker>>>,
+    to_wake: SegQueue<Arc<SyncBlocker>>,
     // used to verify the same mutex instance
     mutex: AtomicUsize,
 }
@@ -33,7 +33,7 @@ pub struct Condvar {
 impl Condvar {
     pub fn new() -> Condvar {
         Condvar {
-            to_wake: Mutex::new(spsc::Queue::new()),
+            to_wake: SegQueue::new(),
             mutex: AtomicUsize::new(0),
         }
     }
@@ -52,11 +52,7 @@ impl Condvar {
         if let Some(c) = cancel.as_ref() {
             c.disable_cancel();
         }
-
-        let g = self.to_wake.lock()?;
-        g.push(cur.clone());
-        drop(g);
-
+        self.to_wake.push(cur.clone());
         // unlock the mutex to let other continue
         mutex::unlock_mutex(lock);
         if let Some(c) = cancel.as_ref() {
@@ -154,12 +150,7 @@ impl Condvar {
 
     pub fn notify_one(&self) -> Result<(), ParkError> {
         // NOTICE: the following code would not drop the lock!
-        // if let Some(w) = self.to_wake.lock().unwrap().pop() {
-
-        let g = self.to_wake.lock()?;
-        let w = g.pop();
-        drop(g);
-
+        let w = self.to_wake.pop();
         if let Some(w) = w {
             w.unpark()?;
             if w.take_release() {
@@ -170,8 +161,7 @@ impl Condvar {
     }
 
     pub fn notify_all(&self) -> Result<(), ParkError> {
-        let g = self.to_wake.lock()?;
-        while let Some(w) = g.pop() {
+        while let Some(w) = self.to_wake.pop() {
             w.unpark()?;
         }
         Ok(())

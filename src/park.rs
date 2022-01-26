@@ -8,8 +8,6 @@ use std::time::Duration;
 use crate::cancel::Cancel;
 use crate::coroutine_impl::{co_cancel_data, run_coroutine, CoroutineImpl, EventSource};
 use crate::scheduler::get_scheduler;
-use crate::std::queue::spsc;
-use crate::std::queue::spsc::Queue;
 use crate::std::sync::atomic_dur::AtomicDuration;
 use crate::std::sync::AtomicOption;
 use crate::timeout_list::TimeoutHandle;
