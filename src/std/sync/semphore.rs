@@ -178,7 +178,7 @@ mod tests {
     use std::sync::mpsc::TryRecvError;
     use std::thread;
     use std::time::Duration;
-    use crate::std::sync::mpsc::channel;
+    use crate::std::sync::channel::channel;
 
 
     #[test]

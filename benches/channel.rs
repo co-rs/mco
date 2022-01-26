@@ -6,7 +6,7 @@ extern crate cogo;
 extern crate test;
 
 use test::Bencher;
-use cogo::std::sync::mpmc::channel;
+use cogo::std::sync::channel::channel;
 
 
 // improve performance  from 39,294 ns/iter to 12,207 ns/iter (my computer)

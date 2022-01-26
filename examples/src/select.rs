@@ -5,7 +5,7 @@ use std::time::Duration;
 
 use cogo::coroutine;
 use cogo::net::TcpListener;
-use cogo::std::sync::mpsc::channel;
+use cogo::std::sync::channel::channel;
 
 // general select example that use cqueue
 fn main() {

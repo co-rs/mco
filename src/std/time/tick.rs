@@ -3,7 +3,7 @@ use std::sync::{Arc, LockResult};
 use std::sync::mpsc::RecvError;
 use std::time::Duration;
 use crate::coroutine::sleep;
-use crate::std::sync::mpmc::{Receiver, Sender};
+use crate::std::sync::channel::{Receiver, Sender};
 use crate::std::sync::Mutex;
 use crate::std::time::time::Time;
 use crate::std::errors::Result;

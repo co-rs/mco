@@ -1,10 +1,7 @@
 use std::time::Duration;
-
-
 use cogo::coroutine::sleep;
 use cogo::{chan, go};
-use cogo::std::sync::mpsc;
-use cogo::std::sync::mpsc::{bounded, channel, channel_buf, unbounded};
+use cogo::std::sync::channel::{bounded, channel, channel_buf, unbounded};
 
 
 fn main() {

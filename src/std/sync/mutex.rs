@@ -246,7 +246,7 @@ mod tests {
     #![feature(test)]
 
     use super::*;
-    use crate::std::sync::mpsc::channel;
+    use crate::std::sync::channel::channel;
     use crate::std::sync::Condvar;
     use std::sync::atomic::{AtomicUsize, Ordering};
     use std::sync::Arc;

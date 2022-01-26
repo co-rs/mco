@@ -1,7 +1,7 @@
 use std::sync::mpsc::RecvError;
 use crate::std::errors::Error;
 use crate::std::io::{Stream, TryStream};
-use crate::std::sync::mpsc::{Receiver, Sender, unbounded};
+use crate::std::sync::channel::{Receiver, Sender, unbounded};
 
 
 /// ChanStream,based on mpsc channel.when send Err data stop next
@@ -53,7 +53,7 @@ impl<T, E> Stream for ChanStream<T, E> {
 #[cfg(test)]
 mod test {
     use crate::std::io::{ChanStream, TryStream};
-    use crate::std::sync::mpsc::channel;
+    use crate::std::sync::channel::channel;
     use crate::std::errors::Error;
     use std::ops::ControlFlow;
 

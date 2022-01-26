@@ -1,7 +1,7 @@
 use std::time::Duration;
 use cogo::coroutine::sleep;
 use cogo::go;
-use cogo::std::sync::mpmc::channel;
+use cogo::std::sync::channel::channel;
 use cogo::std::sync::WaitGroup;
 
 #[test]

@@ -5,7 +5,7 @@ members = [
 
 [package]
 name = "cogo"
-version = "0.1.27"
+version = "0.1.28"
 edition = "2018"
 authors = ["zhuxiujia@qq.com","Xudong Huang <huangxu008@hotmail.com>"]
 license = "MIT/Apache-2.0"

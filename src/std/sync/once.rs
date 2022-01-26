@@ -52,7 +52,7 @@ mod test {
     use std::panic::catch_unwind;
     use std::sync::Arc;
     use crate::{chan, defer};
-    use crate::std::sync::mpmc::Sender;
+    use crate::std::sync::channel::Sender;
     use crate::std::sync::Once;
 
     pub struct One {

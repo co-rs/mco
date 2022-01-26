@@ -285,7 +285,7 @@ fn test_sleep() {
 
 #[test]
 fn join_macro() {
-    use cogo::std::sync::mpsc::channel;
+    use cogo::std::sync::channel::channel;
 
     let (tx1, rx1) = channel();
     let (tx2, rx2) = channel();
@@ -314,7 +314,7 @@ fn join_macro() {
 
 #[test]
 fn go_with_macro() {
-    use cogo::std::sync::mpsc::channel;
+    use cogo::std::sync::channel::channel;
 
     let (tx1, rx1) = channel();
     let (tx2, rx2) = channel();

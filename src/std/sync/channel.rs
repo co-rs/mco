@@ -52,13 +52,13 @@ pub fn bounded<T>(buf: usize) -> (Sender<T>, Receiver<T>) {
 #[macro_export]
 macro_rules! chan {
     () => {
-        $crate::std::sync::mpsc::bounded(usize::MAX)
+        $crate::std::sync::channel::bounded(usize::MAX)
     };
     ($num:expr) => {
-        $crate::std::sync::mpsc::bounded($num)
+        $crate::std::sync::channel::bounded($num)
     };
     ($t:path,$num:expr) => {
-        $crate::std::sync::mpsc::bounded::<$t>($num)
+        $crate::std::sync::channel::bounded::<$t>($num)
     };
 }
 
@@ -1125,9 +1125,9 @@ mod tests {
 
     #[test]
     fn stress_mutli_recv() {
-        use crate::std::sync::mpsc;
+        use crate::std::sync::channel;
         let (tx, rx) = channel();
-        let (tx1, rx1) = mpsc::channel();
+        let (tx1, rx1) = channel();
         let stress = stress_factor() + 100;
 
         for i in 0..10 {
