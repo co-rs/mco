@@ -8,7 +8,7 @@ use crate::config::config;
 use crate::join::{make_join_handle, Join, JoinHandle};
 use crate::local::get_co_local_data;
 use crate::local::CoroutineLocal;
-use crate::park::{ParkImpl, Park};
+use crate::park::Park;
 use crate::scheduler::get_scheduler;
 use crossbeam::atomic::AtomicCell;
 use generator::{Generator, Gn};
@@ -106,7 +106,7 @@ fn get_co_local(co: &CoroutineImpl) -> *mut CoroutineLocal {
 struct Inner {
     name: Option<String>,
     stack_size: usize,
-    park: Box<dyn crate::park::ParkUnPark>,
+    park: Park,
     cancel: Cancel,
 }
 
@@ -125,7 +125,7 @@ impl Coroutine {
             inner: Arc::new(Inner {
                 name,
                 stack_size,
-                park: Box::new(ParkImpl::new()),
+                park: Park::new(),
                 cancel: Cancel::new(),
             }),
         }
@@ -249,9 +249,9 @@ impl Builder {
     /// The join handle can be used to block on
     /// termination of the child coroutine, including recovering its panics.
     fn spawn_impl<F, T>(self, f: F) -> io::Result<(CoroutineImpl, JoinHandle<T>)>
-        where
-            F: FnOnce() -> T + Send + 'static,
-            T: Send + 'static,
+    where
+        F: FnOnce() -> T + Send + 'static,
+        T: Send + 'static,
     {
         static DONE: Done = Done {};
 
@@ -499,8 +499,9 @@ fn park_timeout_impl(dur: Option<Duration>) {
         // in thread context we do nothing
         return;
     }
+
     let co_handle = current();
-    co_handle.inner.park.park_option(dur).ok();
+    co_handle.inner.park.park_timeout(dur).ok();
 }
 
 /// block the current coroutine until it's get unparked
