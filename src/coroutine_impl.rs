@@ -356,7 +356,7 @@ impl Builder {
         let (co, handle) = self.spawn_impl(f)?;
 
         // put the coroutine to ready list
-        get_scheduler().schedule(co);
+        get_scheduler().schedule_global(co);
 
         Ok(handle)
     }
