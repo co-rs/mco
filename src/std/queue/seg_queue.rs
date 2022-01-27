@@ -1,4 +1,3 @@
-
 use core::cell::UnsafeCell;
 use core::fmt;
 use core::marker::PhantomData;
@@ -53,7 +52,7 @@ struct Block<T> {
 
     /// Slots for values.
     // slots: [Slot<T>; BLOCK_CAP],
-    slots:Vec<Slot<T>>,//BLOCK_CAP
+    slots: Vec<Slot<T>>,//BLOCK_CAP
 }
 
 impl<T> Block<T> {
@@ -65,18 +64,21 @@ impl<T> Block<T> {
         //  [3] `Slot::value` (UnsafeCell) may be safely zero initialized because it
         //       holds a MaybeUninit.
         //  [4] `Slot::state` (AtomicUsize) may be safely zero initialized.
-       Block{
-           next: Default::default(),
-           slots: {
-               let mut v=Vec::with_capacity(BLOCK_CAP);
-               for _ in 0..BLOCK_CAP{
-                   unsafe {
-                       v.push(MaybeUninit::zeroed().assume_init());
-                   }
-               }
-               v
-           }
-       }
+        Block {
+            next: Default::default(),
+            slots: {
+                let mut v = Vec::with_capacity(BLOCK_CAP);
+                unsafe {
+                    v.set_len(BLOCK_CAP);
+                }
+                for idx in 0..BLOCK_CAP {
+                    unsafe {
+                        v[idx] = MaybeUninit::zeroed().assume_init();
+                    }
+                }
+                v
+            },
+        }
     }
 
     /// Waits until the next pointer is set.
@@ -156,6 +158,7 @@ pub struct SegQueue<T> {
 }
 
 unsafe impl<T: Send> Send for SegQueue<T> {}
+
 unsafe impl<T: Send> Sync for SegQueue<T> {}
 
 impl<T> SegQueue<T> {

@@ -112,11 +112,16 @@ impl<T> ArrayQueue<T> {
             //     })
             //     .collect();
             let mut v = Vec::with_capacity(cap);
+            unsafe {
+                v.set_len(cap);
+            }
             for i in 0..cap {
-                v.push(Slot {
-                    stamp: AtomicUsize::new(i),
-                    value: UnsafeCell::new(MaybeUninit::uninit()),
-                });
+                unsafe {
+                    v[i] = Slot {
+                        stamp: AtomicUsize::new(i),
+                        value: UnsafeCell::new(MaybeUninit::uninit()),
+                    };
+                }
             }
             v
         };
