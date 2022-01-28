@@ -17,7 +17,7 @@ fn main() {
 
     //add 1 day
     t.add(1 * 24 * Duration::from_secs(3600));
-    println!("add one day:{}", t);
+    println!("added 1 day:{}", t);
     assert_ne!(from_js, t);
 
     //is before?
@@ -32,16 +32,16 @@ fn main() {
 
     //format time to str
     let formated = t.format(time::RFC3339);
-    println!("{}", formated);
+    println!("formated: {}", formated);
 
     let formated = t.format(time::RFC3339Nano);
-    println!("{}", formated);
+    println!("formated: {}", formated);
 
     let formated = t.format("[year]-[month] [ordinal] [weekday] [week_number]-[day] [hour]:[minute] [period]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]");
-    println!("{}", formated);
+    println!("formated: {}", formated);
 
     let formated = t.format(time::RFC1123);
-    println!("{}", formated);
+    println!("formated: {}", formated);
 
     let formated = t.utc();
     println!("to utc: {}", formated);
@@ -51,7 +51,6 @@ fn main() {
     println!("to local: {}", formated);
     assert_eq!(t, formated);
 
-
-    println!("{}", Time::default());
+    println!("default(): {}", Time::default());
     assert_eq!(true, Time::default().is_zero());
 }
