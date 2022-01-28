@@ -1,4 +1,4 @@
-use std::fmt::{self, Debug, Display};
+use std::fmt::{self, Debug, Display, Formatter};
 use std::io::ErrorKind::UnexpectedEof;
 use crate::std::io::io;
 
@@ -60,6 +60,15 @@ impl From<std::io::Error> for Error {
         }
         new(err.to_string())
     }
+}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        std::fmt::Display::fmt(&self.inner, f)
+    }
+}
+
+impl std::error::Error for Error {
 }
 
 impl From<&str> for Error {
