@@ -5,6 +5,7 @@ use cogo::std::time::time;
 fn main() {
     let mut t = Time::now();
     println!("{}", t);
+    println!("{:?}", t);
     println!("{}", t.unix());
     println!("{}", t.unix_nano());
 
