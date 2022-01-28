@@ -249,9 +249,9 @@ impl Builder {
     /// The join handle can be used to block on
     /// termination of the child coroutine, including recovering its panics.
     fn spawn_impl<F, T>(self, f: F) -> io::Result<(CoroutineImpl, JoinHandle<T>)>
-    where
-        F: FnOnce() -> T + Send + 'static,
-        T: Send + 'static,
+        where
+            F: FnOnce() -> T + Send + 'static,
+            T: Send + 'static,
     {
         static DONE: Done = Done {};
 
@@ -352,13 +352,7 @@ impl Builder {
             F: FnOnce() -> T + Send + 'static,
             T: Send + 'static,
     {
-        // we will still get optimizations in spawn_impl
-        let (co, handle) = self.spawn_impl(f)?;
-
-        // put the coroutine to ready list
-        get_scheduler().schedule_global(co);
-
-        Ok(handle)
+        return self.spawn_local(f);
     }
 
     /// first run the coroutine in current thread, you should allways use
