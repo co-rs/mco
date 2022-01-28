@@ -222,7 +222,9 @@ impl Time {
 
 impl Debug for Time {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(&self.format(RFC3339Nano), f)
+        f.debug_tuple("Time")
+            .field(&self.format(RFC3339Nano))
+            .finish()
     }
 }
 
