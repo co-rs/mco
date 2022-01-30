@@ -12,7 +12,7 @@ fn main() {
     let rv = r.recv().unwrap();
     println!("recv = {},remain:{}", rv, r.remain());
 
-    //bounded 1
+    //bounded length = 1
     let (s, r) = chan!(1);
     go!(move ||{
        let send_result = s.send(1);
