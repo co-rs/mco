@@ -5,26 +5,28 @@ use cogo::std::sync::channel::{bounded, channel, channel_buf, unbounded};
 
 
 fn main() {
-    let (s, r) = chan!();//unbounded
-    for i in 0..2 {
-        let s_clone = s.clone();
-        go!(move ||{
-         let t=std::time::Instant::now();
-         println!("send{}",i);
-         s_clone.send(1);
-         println!("send{} done:{:?}",i,t.elapsed());
-      });
-    }
-    println!("remain msg:{}", r.remain());
-    println!("sender num:{}", r.sender_num());
-    println!("receiver num:{}", r.receiver_num());
+    //unbounded
+    let (s, r) = chan!();
+    s.send(1);
+    println!("remain msg:{},sender num:{},receiver num:{}", r.remain(), r.sender_num(), r.receiver_num());
+    let rv = r.recv().unwrap();
+    println!("recv = {},remain:{}", rv, r.remain());
+
+    //bounded 1
+    let (s, r) = chan!(1);
+    go!(move ||{
+       let send_result = s.send(1);
+       println!("send 1 is_ok:{}", send_result.is_ok());
+       //will blocking until the excess messages are consumed or the channel is closed
+       println!("s.send(2) blocking 2s...");
+       let send_result = s.send(2);
+       println!("send 2 is_ok: {:?}", send_result);
+    });
 
     sleep(Duration::from_secs(2));
-
-    for _ in 0..1 {
-        let rv = r.recv().unwrap();
-        println!("recv = {}", rv);
-    }
-    println!("chan buffer remain num: {}", r.remain());
-    sleep(Duration::from_secs(2));
+    let rv = r.recv().unwrap();
+    println!("recv = {},remain:{}", rv, r.remain());
+    let rv = r.recv().unwrap();
+    println!("recv = {},remain:{}", rv, r.remain());
+    sleep(Duration::from_secs(1));
 }
