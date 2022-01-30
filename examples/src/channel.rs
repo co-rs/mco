@@ -1,8 +1,6 @@
 use std::time::Duration;
 use cogo::coroutine::sleep;
 use cogo::{chan, go};
-use cogo::std::sync::channel::{bounded, channel, channel_buf, unbounded};
-
 
 fn main() {
     //unbounded
@@ -12,7 +10,12 @@ fn main() {
     let rv = r.recv().unwrap();
     println!("recv = {},remain:{}", rv, r.remain());
 
-    //bounded length = 1
+    sleep(Duration::from_secs(1));
+    test_bounded();
+}
+
+//bounded length = 1
+fn test_bounded() {
     let (s, r) = chan!(1);
     go!(move ||{
        let send_result = s.send(1);
