@@ -168,6 +168,21 @@ impl Time {
     }
 
     /// format a time to string
+    /// [year]
+    /// [month]
+    /// [ordinal]
+    /// [weekday]
+    /// [week_number]
+    /// [day]
+    /// [hour]
+    /// [minute]
+    /// [period]
+    /// [second]
+    /// [subsecond]
+    /// [offset_hour sign:mandatory]
+    /// [offset_minute]
+    /// [offset_second]
+    ///
     /// for example:
     /// ```rust
     ///     use cogo::std::time::Time;
@@ -195,7 +210,22 @@ impl Time {
         self.inner.format(&f).unwrap_or_default()
     }
 
-    /// parse a string value to Time
+    /// parse a string value to Time。
+    /// [year]
+    /// [month]
+    /// [ordinal]
+    /// [weekday]
+    /// [week_number]
+    /// [day]
+    /// [hour]
+    /// [minute]
+    /// [period]
+    /// [second]
+    /// [subsecond]
+    /// [offset_hour sign:mandatory]
+    /// [offset_minute]
+    /// [offset_second]
+    ///
     /// for example:
     /// ```rust
     ///     use cogo::std::time::{time,time::Time};
