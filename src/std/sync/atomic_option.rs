@@ -111,7 +111,12 @@ impl<T: Wrapped> AtomicOption<T> {
     #[inline]
     pub fn get(&self) -> Option<&<T as Wrapped>::Data> {
         unsafe {
-            self.inner.load(Ordering::Acquire).as_ref()
+            let s = self.inner.load(Ordering::Acquire);
+            if s.is_null() {
+                return None;
+            } else {
+                return s.as_ref();
+            }
         }
     }
 }
