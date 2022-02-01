@@ -2,9 +2,9 @@ use cogo::coroutine::sleep;
 use cogo::{defer, go};
 
 fn main() {
-    defer!({
+    defer!{
         println!("guard: 1");
-    });
+    };
     defer!(||{
         println!("guard: 2");
     });
@@ -13,7 +13,7 @@ fn main() {
     }
     defer! {
         go!(||{
-            println!("go spawn!");
+            println!("-----------------go spawn success-------------------");
         });
     }
     panic!("None Exception!");
