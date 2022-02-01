@@ -4,8 +4,8 @@ use cogo::{go};
 use cogo::std::sync::{SyncHashMap, WaitGroup};
 
 pub fn main() {
-    let m = Arc::new(SyncHashMap::new());
-    let wg = WaitGroup::new(); //notice message
+    let m = SyncHashMap::new_arc();//or SyncBtreeMap
+    let wg = WaitGroup::new();
 
     for i in 0..100 {
         let m1 = m.clone();
