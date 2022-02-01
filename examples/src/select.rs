@@ -29,7 +29,6 @@ fn main() {
         v = rx1.recv() => {
             println!("rx1 received {:?}",v)
         },
-        //only try once,not wait send
         Ok(v) = rx1.try_recv() => {
             println!("rx1 received {:?}",v)
         },
