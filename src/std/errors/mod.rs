@@ -4,7 +4,7 @@ use crate::std::io::io;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Clone, Debug, Eq, PartialEq, Hash)]
+#[derive(Clone, Eq, PartialEq, Hash)]
 pub struct Error {
     pub inner: String,
 }
@@ -18,6 +18,10 @@ impl Error {
         Self {
             inner: format!("{}{}", info, e)
         }
+    }
+
+    pub fn to_string(&self) -> String {
+        self.inner.clone()
     }
 }
 
@@ -43,11 +47,18 @@ pub trait FromError<T>: Sized {
     fn from_err(_: T) -> Error;
 }
 
-impl ToString for Error {
-    fn to_string(&self) -> String {
-        self.inner.clone()
+impl Display for Error {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        std::fmt::Display::fmt(&self.inner, f)
     }
 }
+
+impl Debug for Error {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        std::fmt::Debug::fmt(&self.inner, f)
+    }
+}
+
 
 impl From<std::io::Error> for Error {
     #[inline]
@@ -62,14 +73,7 @@ impl From<std::io::Error> for Error {
     }
 }
 
-impl Display for Error {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        std::fmt::Display::fmt(&self.inner, f)
-    }
-}
-
-impl std::error::Error for Error {
-}
+impl std::error::Error for Error {}
 
 impl From<&str> for Error {
     fn from(arg: &str) -> Self {
