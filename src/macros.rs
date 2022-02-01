@@ -92,7 +92,7 @@ macro_rules! go_with {
 #[macro_export]
 macro_rules! cqueue_add {
     ($cqueue:ident, $token:expr, $name:pat = $top:expr => $bottom:expr) => {{
-        go!($cqueue, $token, |es| loop {
+        $crate::go!($cqueue, $token, |es| loop {
             let $name = $top;
             es.send(es.get_token());
             $bottom
@@ -102,10 +102,12 @@ macro_rules! cqueue_add {
 
 /// macro used to create the select coroutine
 /// that will run only once, thus generate only one event
+/// use cogo::select;
+///
 #[macro_export]
 macro_rules! cqueue_add_oneshot {
     ($cqueue:ident, $token:expr, $name:pat = $top:expr => $bottom:expr) => {{
-        go!($cqueue, $token, |es| {
+        $crate::go!($cqueue, $token, |es| {
             let $name = $top;
             es.send(es.get_token());
             $bottom
@@ -124,7 +126,7 @@ macro_rules! select {
         cqueue::scope(|cqueue| {
             let mut _token = 0;
             $(
-                cqueue_add_oneshot!(cqueue, _token, $name = $top => $bottom);
+                $crate::cqueue_add_oneshot!(cqueue, _token, $name = $top => $bottom);
                 _token += 1;
             )+
             match cqueue.poll(None) {
@@ -144,7 +146,7 @@ macro_rules! join {
         use $crate::coroutine;
         coroutine::scope(|s| {
             $(
-                go!(s, || $body);
+                $crate::go!(s, || $body);
             )+
         })
     })
