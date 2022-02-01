@@ -6,11 +6,11 @@ mod bench {
     extern crate test;
 
     use std::sync::Arc;
+    use std::sync::mpsc::channel;
     use self::test::Bencher;
 
-
-    use std::sync::mpsc::channel;
     use std::thread;
+    use cogo::chan;
     use cogo::std::queue::mpmc_bounded::Queue;
 
     #[bench]
@@ -21,7 +21,7 @@ mod bench {
             let nmsgs = total_work / nthreads;
             let q = Queue::with_capacity(nthreads * nmsgs);
             assert_eq!(None, q.pop());
-            let (tx, rx) = channel();
+            let (tx, rx) = chan!();
 
             for _ in 0..nthreads {
                 let q = q.clone();
@@ -195,25 +195,11 @@ mod bench {
 
 
     // improve performance  from 39,294 ns/iter to 12,207 ns/iter (my computer)
-//test bench_channel  ... bench:      12,207 ns/iter (+/- 118)
+    //test bench_channel  ... bench:      12,207 ns/iter (+/- 118)
     #[bench]
     fn bench_channel(b: &mut Bencher) {
         b.iter(|| {
-            let (s, r) = channel();
-            for _ in 0..1000 {
-                s.send(1);
-            }
-            for _ in 0..1000 {
-                let r = r.recv().unwrap();
-            }
-        });
-    }
-
-    //test bench_channel2 ... bench:      39,294 ns/iter (+/- 639)
-    #[bench]
-    fn bench_channel2(b: &mut Bencher) {
-        b.iter(|| {
-            let (s, r) = channel();
+            let (s, r) = chan!();
             for _ in 0..1000 {
                 s.send(1);
             }
