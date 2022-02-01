@@ -111,6 +111,28 @@ macro_rules! select {
     (
         $($name:pat = $top:expr => $bottom:expr), +$(,)?
     ) => ({
+        $crate::select_token!($($name = $top => $bottom), +);
+    });
+}
+/// macro used to select for only one event
+/// it will return the index of which event happens first
+/// for example:
+/// ```rust
+/// use cogo::{chan, select_token};
+///
+///     let (s, r) = chan!();
+///     s.send(1);
+///     let id = select_token! {
+///         rv = r.recv() => {
+///             println!("{:?}",rv);
+///         }
+///     };
+/// ```
+#[macro_export]
+macro_rules! select_token {
+    (
+        $($name:pat = $top:expr => $bottom:expr), +$(,)?
+    ) => ({
         $crate::cqueue::scope(|cqueue| {
             let mut _token = 0;
             $(
@@ -122,7 +144,7 @@ macro_rules! select {
                 _ => unreachable!("select error"),
             }
         })
-    })
+    });
 }
 
 /// macro used to join all scoped sub coroutines

@@ -156,7 +156,7 @@ fn cqueue_select() {
         tx1.send(42).unwrap();
     });
 
-    let id = select!(
+    let id= select_token!(
         _ = coroutine::sleep(Duration::from_millis(1000)) => {},
         _ = rx1.recv() => println!("rx1 received"),
         a = rx2.recv() => println!("rx2 received, a={:?}", a)
