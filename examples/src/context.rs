@@ -1,6 +1,6 @@
 use std::sync::mpsc::RecvError;
 use std::time::Duration;
-use cogo::{go, select};
+use cogo::{err, go, select};
 use cogo::coroutine::sleep;
 use cogo::std::context::{CancelCtx, Canceler};
 use cogo::std::errors::Error;
@@ -8,7 +8,7 @@ use cogo::std::errors::Error;
 //TODO Context is not stable yet
 fn main() {
     let mut ctx = CancelCtx::new_arc(None);
-    ctx.cancel(Some(Error::from("EOF")));
+    ctx.cancel(Some(err!("EOF")));
     loop {
         let mut break_self = false;
         select! {
