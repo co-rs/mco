@@ -113,9 +113,7 @@ macro_rules! cqueue_add_oneshot {
 macro_rules! select {
     (
         $($name:pat = $top:expr => $bottom:expr), +$(,)?
-    ) => ({
-        $crate::select_token!($($name = $top => $bottom), +);
-    });
+    ) => ($crate::select_token!($($name = $top => $bottom), +););
 }
 /// macro used to select for only one event
 /// it will return the index of which event happens first
