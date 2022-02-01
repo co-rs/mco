@@ -5,12 +5,11 @@ use std::time::Duration;
 
 use cogo::coroutine;
 use cogo::net::TcpListener;
-use cogo::std::sync::channel::channel;
 
 // general select example that use cqueue
 fn main() {
-    let (tx1, rx1) = channel();
-    let (tx2, rx2) = channel();
+    let (tx1, rx1) = chan!();
+    let (tx2, rx2) = chan!();
     let listener = TcpListener::bind(("0.0.0.0", 1234)).unwrap();
 
     go!(move || {
