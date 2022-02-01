@@ -72,6 +72,7 @@ pub struct JoinHandle<T> {
 }
 
 unsafe impl<T> Send for JoinHandle<T> {}
+
 unsafe impl<T> Sync for JoinHandle<T> {}
 
 /// create a JoinHandle

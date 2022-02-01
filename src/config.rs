@@ -11,6 +11,7 @@ const DEFAULT_POOL_CAPACITY: usize = 100;
 static WORKERS: AtomicUsize = AtomicUsize::new(0);
 static STACK_SIZE: AtomicUsize = AtomicUsize::new(DEFAULT_STACK_SIZE);
 static POOL_CAPACITY: AtomicUsize = AtomicUsize::new(DEFAULT_POOL_CAPACITY);
+
 /// `Cogo` Configuration type
 pub struct Config;
 

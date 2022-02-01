@@ -1,8 +1,10 @@
 #![feature(test)]
+
 #[cfg(all(nightly, test))]
 mod bench {
     #![feature(test)]
     extern crate test;
+
     use self::test::Bencher;
 
     use super::*;
@@ -41,6 +43,7 @@ mod bench {
 
         block_pop_sc_impl!(cogo::std::queue::spsc);
     }
+
     use test_queue::ScBlockPop;
 
 

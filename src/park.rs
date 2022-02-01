@@ -19,7 +19,7 @@ pub enum ParkError {
     Timeout,
 }
 
-impl <T>From<PoisonError<T>> for ParkError{
+impl<T> From<PoisonError<T>> for ParkError {
     fn from(_: PoisonError<T>) -> Self {
         Self::Timeout
     }
@@ -27,6 +27,7 @@ impl <T>From<PoisonError<T>> for ParkError{
 
 
 pub struct DropGuard<'a>(&'a Park);
+
 pub struct Park {
     // the coroutine that waiting for this park instance
     wait_co: Arc<AtomicOption<CoroutineImpl>>,

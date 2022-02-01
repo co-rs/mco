@@ -3,13 +3,13 @@
 mod select;
 
 #[cfg(any(
-    target_os = "bitrig",
-    target_os = "dragonfly",
-    target_os = "freebsd",
-    target_os = "ios",
-    target_os = "macos",
-    target_os = "netbsd",
-    target_os = "openbsd"
+target_os = "bitrig",
+target_os = "dragonfly",
+target_os = "freebsd",
+target_os = "ios",
+target_os = "macos",
+target_os = "netbsd",
+target_os = "openbsd"
 ))]
 #[path = "kqueue.rs"]
 mod select;
@@ -104,6 +104,7 @@ pub struct EventData {
 }
 
 unsafe impl Send for EventData {}
+
 unsafe impl Sync for EventData {}
 
 impl EventData {

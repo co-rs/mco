@@ -14,12 +14,12 @@ use cogo::std::sync::channel::channel;
 #[bench]
 fn bench_channel(b: &mut Bencher) {
     b.iter(|| {
-        let (s,r) = channel();
-        for _ in 0..1000{
+        let (s, r) = channel();
+        for _ in 0..1000 {
             s.send(1);
         }
-        for _ in 0..1000{
-            let r=r.recv().unwrap();
+        for _ in 0..1000 {
+            let r = r.recv().unwrap();
         }
     });
 }
@@ -28,12 +28,12 @@ fn bench_channel(b: &mut Bencher) {
 #[bench]
 fn bench_channel2(b: &mut Bencher) {
     b.iter(|| {
-        let (s,r) = channel();
-        for _ in 0..1000{
+        let (s, r) = channel();
+        for _ in 0..1000 {
             s.send(1);
         }
-        for _ in 0..1000{
-            let r=r.recv().unwrap();
+        for _ in 0..1000 {
+            let r = r.recv().unwrap();
         }
     });
 }

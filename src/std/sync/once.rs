@@ -40,7 +40,7 @@ impl Once {
 
     fn do_slow<F>(&self, mut f: F) where F: FnMut() {
         if self.done.load(Ordering::SeqCst) == 0 {
-            self.done.store(1,Ordering::SeqCst);
+            self.done.store(1, Ordering::SeqCst);
             f();
         }
     }

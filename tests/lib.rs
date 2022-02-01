@@ -1,5 +1,6 @@
 use std::thread;
 use std::time::{Duration, Instant};
+
 extern crate generator;
 #[macro_use]
 extern crate cogo;
@@ -146,9 +147,9 @@ fn spawn_inside() {
         yield_now();
         println!("bye from parent: {:?}", me);
     })
-    .unwrap()
-    .join()
-    .unwrap();
+        .unwrap()
+        .join()
+        .unwrap();
 
     thread::sleep(Duration::from_millis(200));
 }
@@ -322,18 +323,18 @@ fn go_with_macro() {
     go_with!(8192, move || {
         tx1.send(coroutine::current().stack_size()).unwrap();
     })
-    .unwrap()
-    .join()
-    .unwrap();
+        .unwrap()
+        .join()
+        .unwrap();
 
     go_with!("test_task", 10240, move || {
         let task = coroutine::current();
         let msg = (task.name().map(ToOwned::to_owned), task.stack_size());
         tx2.send(msg).unwrap();
     })
-    .unwrap()
-    .join()
-    .unwrap();
+        .unwrap()
+        .join()
+        .unwrap();
 
     {
         let x = rx1.recv().unwrap();

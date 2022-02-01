@@ -17,10 +17,11 @@ fn main() {
                     println!("done");
                     break_self = true;
                 }
-        };
+        }
+        ;
         if break_self {
             break;
-        }else{
+        } else {
             println!("sleep 1s");
             sleep(Duration::from_secs(1));
         }

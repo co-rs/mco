@@ -205,7 +205,7 @@ impl Scheduler {
             timer_thread: TimerThread::new(),
             workers: ParkStatus::new(workers as u64),
             stealers,
-            workers_len: workers
+            workers_len: workers,
         })
     }
 

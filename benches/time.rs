@@ -19,8 +19,8 @@ mod bench {
 
     #[bench]
     fn mult_thread_test(b: &mut Bencher) {
-        std::thread::spawn(move ||{
-            for _ in 0..100000{
+        std::thread::spawn(move || {
+            for _ in 0..100000 {
                 let now = Time::now();
             }
         });

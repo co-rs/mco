@@ -1,8 +1,10 @@
 #![feature(test)]
+
 #[cfg(all(nightly, test))]
 mod bench {
     #![cfg(nightly)]
     extern crate test;
+
     use self::test::Bencher;
 
 

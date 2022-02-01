@@ -31,7 +31,7 @@ fn bench_mutex_hash_map_write(b: &mut Bencher) {
 #[bench]
 fn bench_sync_hash_map_read(b: &mut Bencher) {
     let m = SyncHashMap::new();
-    for i in 0..1000000{
+    for i in 0..1000000 {
         m.insert(i, i);
     }
     b.iter(|| {
@@ -42,7 +42,7 @@ fn bench_sync_hash_map_read(b: &mut Bencher) {
 #[bench]
 fn bench_mutex_hash_map_read(b: &mut Bencher) {
     let m = Mutex::new(HashMap::new());
-    for i in 0..1000000{
+    for i in 0..1000000 {
         m.lock().unwrap().insert(i, i);
     }
     b.iter(|| {

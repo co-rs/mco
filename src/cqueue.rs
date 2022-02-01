@@ -168,8 +168,8 @@ impl Cqueue {
     /// should use `cqueue_add` and `cqueue_add_oneshot` macros to
     /// create select coroutines correctly
     fn add_impl<'a, F>(&self, token: usize, f: F) -> Selector
-    where
-        F: FnOnce(EventSender) + Send + 'a,
+        where
+            F: FnOnce(EventSender) + Send + 'a,
     {
         let sender = EventSender {
             id: self.total.load(Ordering::Relaxed),
@@ -190,8 +190,8 @@ impl Cqueue {
     /// should use `cqueue_add` and `cqueue_add_oneshot` macros to
     /// create select coroutines correctly
     pub fn add<'a, F>(&self, token: usize, f: F) -> Selector
-    where
-        F: FnOnce(EventSender) + Send + 'a,
+        where
+            F: FnOnce(EventSender) + Send + 'a,
     {
         self.add_impl(token, f)
     }
@@ -313,8 +313,8 @@ impl Drop for Cqueue {
 /// Scopes, in particular, support scoped select coroutine spawning.
 ///
 pub fn scope<'a, F, R>(f: F) -> R
-where
-    F: FnOnce(&Cqueue) -> R + 'a,
+    where
+        F: FnOnce(&Cqueue) -> R + 'a,
 {
     let cqueue = Cqueue {
         ev_queue: Queue::new(),

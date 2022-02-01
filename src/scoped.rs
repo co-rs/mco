@@ -14,8 +14,8 @@ use crossbeam::atomic::AtomicCell;
 
 /// Like `coroutine::spawn`, but without the closure bounds.
 pub unsafe fn spawn_unsafe<'a, F>(f: F) -> JoinHandle<()>
-where
-    F: FnOnce() + Send + 'a,
+    where
+        F: FnOnce() + Send + 'a,
 {
     let closure: Box<dyn FnOnce() + 'a> = Box::new(f);
     let closure: Box<dyn FnOnce() + Send> = mem::transmute(closure);
@@ -63,8 +63,8 @@ pub struct ScopedJoinHandle<T> {
 /// Scopes, in particular, support scoped coroutine spawning.
 ///
 pub fn scope<'a, F, R>(f: F) -> R
-where
-    F: FnOnce(&Scope<'a>) -> R,
+    where
+        F: FnOnce(&Scope<'a>) -> R,
 {
     let mut scope = Scope {
         dtors: RefCell::new(None),
@@ -114,8 +114,8 @@ impl<'a> Scope<'a> {
     /// This is akin to having a destructor on the stack, except that it is
     /// *guaranteed* to be run.
     pub fn defer<F>(&self, f: F)
-    where
-        F: FnOnce() + 'a,
+        where
+            F: FnOnce() + 'a,
     {
         let mut dtors = self.dtors.borrow_mut();
         *dtors = Some(DtorChain {
@@ -132,9 +132,9 @@ impl<'a> Scope<'a> {
     /// directly. This is ensured by having the parent join on the child coroutine before the
     /// scope exits.
     fn spawn_impl<F, T>(&self, f: F) -> ScopedJoinHandle<T>
-    where
-        F: FnOnce() -> T + Send + 'a,
-        T: Send + 'a,
+        where
+            F: FnOnce() -> T + Send + 'a,
+            T: Send + 'a,
     {
         let their_packet = Arc::new(AtomicCell::new(None));
         let my_packet = their_packet.clone();
@@ -169,9 +169,9 @@ impl<'a> Scope<'a> {
     /// directly. This is ensured by having the parent join on the child coroutine before the
     /// scope exits.
     pub unsafe fn spawn<F, T>(&self, f: F) -> ScopedJoinHandle<T>
-    where
-        F: FnOnce() -> T + Send + 'a,
-        T: Send + 'a,
+        where
+            F: FnOnce() -> T + Send + 'a,
+            T: Send + 'a,
     {
         self.spawn_impl(f)
     }

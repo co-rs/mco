@@ -71,7 +71,7 @@ impl Ticker {
                 Ok(())
             }
             Err(e) => {
-                Err(err_warp!("lock fail: {}",e))
+                Err(errors!("lock fail: {}",e))
             }
         }
     }
@@ -85,7 +85,7 @@ impl Ticker {
                 Ok(())
             }
             Err(e) => {
-                Err(err_warp!("lock fail: {}",e))
+                Err(errors!("lock fail: {}",e))
             }
         }
     }

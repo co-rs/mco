@@ -52,11 +52,11 @@ impl TcpStream {
         let mut c = net_impl::TcpStreamConnect::new(addr, None)?;
 
         #[cfg(unix)]
-        {
-            if c.check_connected()? {
-                return c.done();
+            {
+                if c.check_connected()? {
+                    return c.done();
+                }
             }
-        }
 
         yield_with(&c);
         c.done()
@@ -73,11 +73,11 @@ impl TcpStream {
         let mut c = net_impl::TcpStreamConnect::new(addr, Some(timeout))?;
 
         #[cfg(unix)]
-        {
-            if c.check_connected()? {
-                return c.done();
+            {
+                if c.check_connected()? {
+                    return c.done();
+                }
             }
-        }
 
         yield_with(&c);
         c.done()
@@ -184,23 +184,23 @@ impl Read for TcpStream {
         }
 
         #[cfg(unix)]
-        {
-            self.io.reset();
-            // this is an earlier return try for nonblocking read
-            // it's useful for server but not necessary for client
-            match self.sys.read(buf) {
-                Ok(n) => return Ok(n),
-                Err(e) => {
-                    // raw_os_error is faster than kind
-                    let raw_err = e.raw_os_error();
-                    if raw_err == Some(libc::EAGAIN) || raw_err == Some(libc::EWOULDBLOCK) {
-                        // do nothing here
-                    } else {
-                        return Err(e);
+            {
+                self.io.reset();
+                // this is an earlier return try for nonblocking read
+                // it's useful for server but not necessary for client
+                match self.sys.read(buf) {
+                    Ok(n) => return Ok(n),
+                    Err(e) => {
+                        // raw_os_error is faster than kind
+                        let raw_err = e.raw_os_error();
+                        if raw_err == Some(libc::EAGAIN) || raw_err == Some(libc::EWOULDBLOCK) {
+                            // do nothing here
+                        } else {
+                            return Err(e);
+                        }
                     }
                 }
             }
-        }
 
         let mut reader = net_impl::SocketRead::new(self, buf, self.read_timeout.get());
         yield_with(&reader);
@@ -219,22 +219,22 @@ impl Write for TcpStream {
         }
 
         #[cfg(unix)]
-        {
-            self.io.reset();
-            // this is an earlier return try for nonblocking write
-            match self.sys.write(buf) {
-                Ok(n) => return Ok(n),
-                Err(e) => {
-                    // raw_os_error is faster than kind
-                    let raw_err = e.raw_os_error();
-                    if raw_err == Some(libc::EAGAIN) || raw_err == Some(libc::EWOULDBLOCK) {
-                        // do nothing here
-                    } else {
-                        return Err(e);
+            {
+                self.io.reset();
+                // this is an earlier return try for nonblocking write
+                match self.sys.write(buf) {
+                    Ok(n) => return Ok(n),
+                    Err(e) => {
+                        // raw_os_error is faster than kind
+                        let raw_err = e.raw_os_error();
+                        if raw_err == Some(libc::EAGAIN) || raw_err == Some(libc::EWOULDBLOCK) {
+                            // do nothing here
+                        } else {
+                            return Err(e);
+                        }
                     }
                 }
             }
-        }
 
         let mut writer = net_impl::SocketWrite::new(self, buf, self.write_timeout.get());
         yield_with(&writer);
@@ -252,22 +252,22 @@ impl Write for TcpStream {
         }
 
         #[cfg(unix)]
-        {
-            self.io.reset();
-            // this is an earlier return try for nonblocking write
-            match self.sys.write_vectored(bufs) {
-                Ok(n) => return Ok(n),
-                Err(e) => {
-                    // raw_os_error is faster than kind
-                    let raw_err = e.raw_os_error();
-                    if raw_err == Some(libc::EAGAIN) || raw_err == Some(libc::EWOULDBLOCK) {
-                        // do nothing here
-                    } else {
-                        return Err(e);
+            {
+                self.io.reset();
+                // this is an earlier return try for nonblocking write
+                match self.sys.write_vectored(bufs) {
+                    Ok(n) => return Ok(n),
+                    Err(e) => {
+                        // raw_os_error is faster than kind
+                        let raw_err = e.raw_os_error();
+                        if raw_err == Some(libc::EAGAIN) || raw_err == Some(libc::EWOULDBLOCK) {
+                            // do nothing here
+                        } else {
+                            return Err(e);
+                        }
                     }
                 }
             }
-        }
 
         let mut writer =
             net_impl::SocketWriteVectored::new(self, &self.sys, bufs, self.write_timeout.get());
@@ -340,7 +340,7 @@ impl TcpListener {
         use socket2::{Domain, Socket, Type};
         let mut addrs = addr.to_socket_addrs()?;
         let next = addrs.next();
-        if next.is_none(){
+        if next.is_none() {
             return io::Result::Err(io::Error::new(ErrorKind::Other, "addrs.next() is none!"));
         }
         let addr = next.unwrap();
@@ -353,7 +353,7 @@ impl TcpListener {
         listener.set_reuse_address(true)?;
 
         #[cfg(unix)]
-        listener.set_reuse_port(true)?;
+            listener.set_reuse_port(true)?;
 
         listener.bind(&addr.into())?;
         for addr in addrs {
@@ -378,21 +378,21 @@ impl TcpListener {
         }
 
         #[cfg(unix)]
-        {
-            self.io.reset();
-            match self.sys.accept() {
-                Ok((s, a)) => return TcpStream::new(s).map(|s| (s, a)),
-                Err(e) => {
-                    // raw_os_error is faster than kind
-                    let raw_err = e.raw_os_error();
-                    if raw_err == Some(libc::EAGAIN) || raw_err == Some(libc::EWOULDBLOCK) {
-                        // do nothing here
-                    } else {
-                        return Err(e);
+            {
+                self.io.reset();
+                match self.sys.accept() {
+                    Ok((s, a)) => return TcpStream::new(s).map(|s| (s, a)),
+                    Err(e) => {
+                        // raw_os_error is faster than kind
+                        let raw_err = e.raw_os_error();
+                        if raw_err == Some(libc::EAGAIN) || raw_err == Some(libc::EWOULDBLOCK) {
+                            // do nothing here
+                        } else {
+                            return Err(e);
+                        }
                     }
                 }
             }
-        }
 
         let mut a = net_impl::TcpListenerAccept::new(self)?;
         yield_with(&a);

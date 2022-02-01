@@ -46,8 +46,7 @@ unsafe impl<K, V> Send for SyncMapImpl<K, V> {}
 unsafe impl<K, V> Sync for SyncMapImpl<K, V> {}
 
 impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
-
-    pub fn new_arc() -> Arc<Self>{
+    pub fn new_arc() -> Arc<Self> {
         Arc::new(Self::new())
     }
 
@@ -442,9 +441,9 @@ mod test {
     #[test]
     pub fn test_debug() {
         let m: SyncHashMap<i32, i32> = SyncHashMap::new();
-        m.insert(1,1);
-        println!("{:?}",m);
-        assert_eq!(format!("{:?}",m),"{1: 1}");
+        m.insert(1, 1);
+        println!("{:?}", m);
+        assert_eq!(format!("{:?}", m), "{1: 1}");
     }
 
     #[test]
