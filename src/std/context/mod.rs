@@ -16,13 +16,13 @@ use crate::std::sync::{AtomicOption, Mutex, Receiver, Sender, Wrapped};
 /// Context's methods may be called by multiple goroutines simultaneously.
 pub trait Context {
     fn deadline(&self) -> (Time, bool);
-    fn done(&self) -> Option<&Receiver<()>>;
+    fn done(&self) -> &Receiver<()>;
     fn err(&self) -> Option<Error>;
 }
 
 pub trait Canceler {
     fn cancel(&self, err: Option<Error>);
-    fn done(&self) -> Option<&Receiver<()>>;
+    fn done(&self) -> &Receiver<()>;
 }
 
 /// CLOSE_CHAN is a reusable closed channel.
@@ -84,8 +84,8 @@ impl Canceler for CancelCtx {
         self.children.clear();
     }
 
-    fn done(&self) -> Option<&Receiver<()>> {
-        self.done.get()
+    fn done(&self) -> &Receiver<()> {
+        self.done.get().unwrap()
     }
 }
 

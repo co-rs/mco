@@ -14,7 +14,7 @@ fn main() {
     loop {
         let mut break_self = false;
         select! {
-                Ok(v) = ctx.done().unwrap().try_recv() =>{
+                Ok(v) = ctx.done().try_recv() =>{
                     println!("done");
                     break_self = true;
                 }
