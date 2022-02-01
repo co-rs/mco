@@ -228,19 +228,11 @@ impl Time {
     ///
     /// for example:
     /// ```rust
-    ///     use cogo::std::time::{time,time::Time};
+    ///     use cogo::std::time::{RFC3339Nano,Time};
     ///
-    ///     let mut t = Time::now();
+    ///     let parsed = Time::parse("[year]-[month] [ordinal] [weekday] [week_number]-[day] [hour]:[minute] [period]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]","2022-02 033 Wednesday 05-02 01:49 AM:22.1210536 +08:00:00").unwrap();
     ///
-    ///     //custom format
-    ///     let formatted = t.format(
-    ///     "[year]-[month] [ordinal] [weekday] [week_number]-[day] [hour]:[minute] [period]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]"
-    ///     );
-    ///     let parsed = Time::parse(&formatted, &t.to_string()).unwrap();
-    ///
-    ///     //use define RFC to format
-    ///     let parsed = Time::parse(time::RFC3339Nano, &t.to_string()).unwrap();
-    ///     assert_eq!(t, parsed);
+    ///     let parsed = Time::parse(RFC3339Nano, "2022-02-03T01:51:00.9335458+08:00").unwrap();
     /// ```
     pub fn parse(layout: &str, value: &str) -> Result<Self> {
         match format_description::parse(layout) {

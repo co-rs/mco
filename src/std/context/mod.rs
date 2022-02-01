@@ -26,7 +26,7 @@ pub trait Canceler {
 }
 
 /// CLOSE_CHAN is a reusable closed channel.
-static CLOSE_RECV: Lazy<(Receiver<()>)> = Lazy::new(|| {
+static CLOSE_RECV: Lazy<Receiver<()>> = Lazy::new(|| {
     let (s, r) = chan!();
     r
 });

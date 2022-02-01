@@ -19,7 +19,7 @@ fn main() {
         tx1.send(42).unwrap();
     });
 
-    let id = select!{
+    let id = select! {
         _ = listener.accept() => {
             println!("got connected")
         },
@@ -27,6 +27,10 @@ fn main() {
 
         },
         v = rx1.recv() => {
+            println!("rx1 received {:?}",v)
+        },
+        //only try once,not wait send
+        Ok(v) = rx1.try_recv() => {
             println!("rx1 received {:?}",v)
         },
         a = rx2.recv() => {

@@ -84,9 +84,10 @@ macro_rules! cqueue_add {
 macro_rules! cqueue_add_oneshot {
     ($cqueue:ident, $token:expr, $name:pat = $top:expr => $bottom:expr) => {{
         $crate::go!($cqueue, $token, |es| {
-            let $name = $top;
+            if let $name = $top{
+                $bottom
+            }
             es.send(es.get_token());
-            $bottom
         })
     }};
 }
