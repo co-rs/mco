@@ -107,6 +107,13 @@ impl<T: Wrapped> AtomicOption<T> {
     pub fn is_none(&self) -> bool {
         self.inner.load(Ordering::Acquire).is_null()
     }
+
+    #[inline]
+    pub fn get(&self) -> Option<&<T as Wrapped>::Data> {
+        unsafe {
+            self.inner.load(Ordering::Acquire).as_ref()
+        }
+    }
 }
 
 impl<T: Wrapped> Default for AtomicOption<T> {
