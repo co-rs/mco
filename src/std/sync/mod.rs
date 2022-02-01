@@ -1,3 +1,4 @@
+#[macro_use]
 mod atomic_option;
 mod blocking;
 mod condvar;

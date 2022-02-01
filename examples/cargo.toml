@@ -119,6 +119,10 @@ path = "src/time_tick.rs"
 name = "go"
 path = "src/go.rs"
 
+[[bin]]
+name = "context"
+path = "src/context.rs"
+
 [profile.release]
 lto = true
 opt-level = 3

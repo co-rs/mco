@@ -21,6 +21,22 @@ pub trait Wrapped {
 //     }
 // }
 
+#[macro_export]
+macro_rules! impl_wrapper {
+    ($t:ty) => {
+        impl $crate::std::sync::Wrapped for $t {
+    type Data = $t;
+    fn into_raw(self) -> *mut Self::Data {
+        Box::into_raw(Box::new(self)) as _
+    }
+    unsafe fn from_raw(p: *mut Self::Data) -> $t {
+        *Box::from_raw(p as _)
+    }
+}
+    };
+}
+
+
 impl<T> Wrapped for *mut T {
     type Data = T;
     fn into_raw(self) -> *mut T {
@@ -107,6 +123,12 @@ impl<T: Wrapped> AtomicOption<T> {
     pub fn is_none(&self) -> bool {
         self.inner.load(Ordering::Acquire).is_null()
     }
+
+    #[inline]
+    pub fn is_some(&self) -> bool {
+        !self.is_none()
+    }
+
 
     #[inline]
     pub fn get(&self) -> Option<&<T as Wrapped>::Data> {
