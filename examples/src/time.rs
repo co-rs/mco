@@ -31,25 +31,25 @@ fn main() {
     assert_eq!(t, parsed);
 
     //format time to str
-    let formated = t.format(time::RFC3339);
-    println!("formated: {}", formated);
+    let formatted = t.format(time::RFC3339);
+    println!("formatted: {}", formatted);
 
-    let formated = t.format(time::RFC3339Nano);
-    println!("formated: {}", formated);
+    let formatted = t.format(time::RFC3339Nano);
+    println!("formatted: {}", formatted);
 
-    let formated = t.format("[year]-[month] [ordinal] [weekday] [week_number]-[day] [hour]:[minute] [period]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]");
-    println!("formated: {}", formated);
+    let formatted = t.format("[year]-[month] [ordinal] [weekday] [week_number]-[day] [hour]:[minute] [period]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]");
+    println!("formatted: {}", formatted);
 
-    let formated = t.format(time::RFC1123);
-    println!("formated: {}", formated);
+    let formatted = t.format(time::RFC1123);
+    println!("formatted: {}", formatted);
 
-    let formated = t.utc();
-    println!("to utc: {}", formated);
-    assert_eq!(t, formated.local());
+    let formatted = t.utc();
+    println!("to utc: {}", formatted);
+    assert_eq!(t, formatted.local());
 
-    let formated = t.local();
-    println!("to local: {}", formated);
-    assert_eq!(t, formated);
+    let formatted = t.local();
+    println!("to local: {}", formatted);
+    assert_eq!(t, formatted);
 
     println!("default(): {}", Time::default());
     assert_eq!(true, Time::default().is_zero());

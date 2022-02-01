@@ -167,9 +167,17 @@ impl Time {
         self.inner.nanosecond() as i32
     }
 
+    /// format a time to string
     /// for example:
-    /// "[year]-[month] [ordinal] [weekday] [week_number]-[day] [hour]:[minute] [period]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]"
+    /// ```rust
+    ///     use cogo::std::time::Time;
     ///
+    ///     let mut t = Time::now();
+    ///     let formatted = t.format(
+    ///     "[year]-[month] [ordinal] [weekday] [week_number]-[day] [hour]:[minute] [period]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]"
+    ///     );
+    ///     println!("formatted: {}", formatted);
+    /// ```
     pub fn format(&self, layout: &str) -> String {
         let f = {
             match format_description::parse(layout) {
@@ -187,9 +195,23 @@ impl Time {
         self.inner.format(&f).unwrap_or_default()
     }
 
+    /// parse a string value to Time
     /// for example:
-    /// "[year]-[month] [ordinal] [weekday] [week_number]-[day] [hour]:[minute] [period]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]"
+    /// ```rust
+    ///     use cogo::std::time::{time,time::Time};
     ///
+    ///     let mut t = Time::now();
+    ///
+    ///     //custom format
+    ///     let formatted = t.format(
+    ///     "[year]-[month] [ordinal] [weekday] [week_number]-[day] [hour]:[minute] [period]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]"
+    ///     );
+    ///     let parsed = Time::parse(&formatted, &t.to_string()).unwrap();
+    ///
+    ///     //use define RFC to format
+    ///     let parsed = Time::parse(time::RFC3339Nano, &t.to_string()).unwrap();
+    ///     assert_eq!(t, parsed);
+    /// ```
     pub fn parse(layout: &str, value: &str) -> Result<Self> {
         match format_description::parse(layout) {
             Ok(v) => {
