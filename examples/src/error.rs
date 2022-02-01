@@ -1,7 +1,7 @@
-use cogo::errors;
+use cogo::err;
 
 fn main() {
-    let e = errors!("EOF");
-    let e = errors!("{:?}","EOF".to_string());
-    let e = errors!("{},{}","EOF"," and other error");
+    let e = err!("EOF");
+    let e = err!("{:?}","EOF".to_string());
+    let e = err!("{},{}","EOF"," and other error");
 }

@@ -28,7 +28,7 @@ impl Error {
 
 /// warp errors
 #[macro_export]
-macro_rules! errors {
+macro_rules! err {
      ($($arg:tt)*) => {{
          $crate::std::errors::Error{
              inner: format!($($arg)*)
