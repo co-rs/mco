@@ -103,6 +103,9 @@ macro_rules! cqueue_add_oneshot {
 ///     select! {
 ///         rv = r.recv() => {
 ///             println!("{:?}",rv);
+///         },
+///         Ok(msg) = r.try_recv() => {
+///             println!("{}",msg);
 ///         }
 ///     };
 /// ```
