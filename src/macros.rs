@@ -117,6 +117,18 @@ macro_rules! cqueue_add_oneshot {
 
 /// macro used to select for only one event
 /// it will return the index of which event happens first
+/// for example:
+/// ```rust
+/// use cogo::{chan, select};
+///
+///     let (s, r) = chan!();
+///     s.send(1);
+///     select! {
+///         rv = r.recv().unwrap() => {
+///             println!("{}",rv);
+///         }
+///     };
+/// ```
 #[macro_export]
 macro_rules! select {
     (
