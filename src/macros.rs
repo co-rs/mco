@@ -111,8 +111,7 @@ macro_rules! select {
     (
         $($name:pat = $top:expr => $bottom:expr), +$(,)?
     ) => ({
-        use $crate::cqueue;
-        cqueue::scope(|cqueue| {
+        $crate::cqueue::scope(|cqueue| {
             let mut _token = 0;
             $(
                 $crate::cqueue_add_oneshot!(cqueue, _token, $name = $top => $bottom);
