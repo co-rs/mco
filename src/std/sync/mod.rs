@@ -16,7 +16,7 @@ pub(crate) mod delay_drop;
 #[macro_use]
 pub mod channel;
 
-pub use self::atomic_option::AtomicOption;
+pub use self::atomic_option::*;
 pub use self::blocking::{Blocker, FastBlocker};
 pub use self::condvar::{Condvar, WaitTimeoutResult};
 pub use self::mutex::{Mutex, MutexGuard};
