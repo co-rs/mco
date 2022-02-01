@@ -150,6 +150,14 @@ macro_rules! select {
 }
 
 /// macro used to join all scoped sub coroutines
+/// for example:
+/// ```rust
+/// use cogo::join;
+/// join!({  },
+///       {  },
+///       {  }
+/// );
+/// ```
 #[macro_export]
 macro_rules! join {
     (
