@@ -8,15 +8,15 @@ pub fn main() {
     let wg = WaitGroup::new();
 
     for i in 0..100 {
-        let m1 = m.clone();
-        let wg1 = wg.clone();
-        //many coroutine insert the SyncMap
-        go!(move ||{
-           m1.insert(i,i);
-           if i==100{
-                drop(wg1);
+        let m = m.clone();
+        let wg = wg.clone();
+
+        go!(move || {
+            m.insert(i, i);
+            if i == 100 {
+                drop(wg);
             }
-       });
+        });
     }
 
     wg.wait();
