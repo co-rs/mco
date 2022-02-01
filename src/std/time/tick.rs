@@ -35,6 +35,11 @@ pub struct Ticker {
 }
 
 impl Ticker {
+
+    pub fn new_arc(d: Duration) -> Arc<Self> {
+        Arc::new(Self::new(d))
+    }
+
     pub fn new(d: Duration) -> Self {
         let d = Arc::new(Mutex::new(d));
         let (s, r) = chan!();
