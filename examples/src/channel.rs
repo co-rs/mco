@@ -14,7 +14,7 @@ fn main() {
     test_bounded();
 }
 
-//bounded length = 1
+//bounded length = 1, If the sender sends more messages than the limit, it waits until the message is consumed
 fn test_bounded() {
     let (s, r) = chan!(1);
     go!(move ||{
