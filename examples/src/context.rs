@@ -10,7 +10,6 @@ fn main() {
     let mut ctx = CancelCtx::new_arc(None);
 
     ctx.cancel(Some(Error::from("EOF")));
-    ctx.cancel(Some(Error::from("EOF")));
     loop {
         let mut break_self = false;
         select! {
