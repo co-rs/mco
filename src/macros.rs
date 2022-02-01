@@ -8,42 +8,18 @@
 macro_rules! go {
     // for free spawn
     ($func:expr) => {{
-        fn _go_check<F, T>(f: F) -> F
-        where
-            F: FnOnce() -> T + Send + 'static,
-            T: Send + 'static,
-        {
-            f
-        }
-        let f = _go_check($func);
-        unsafe { $crate::coroutine::spawn(f) }
+        unsafe { $crate::coroutine::spawn($func) }
     }};
 
     // for builder/scope spawn
     ($builder:expr, $func:expr) => {{
         use $crate::coroutine::Spawn;
-        fn _go_check<F, T>(f: F) -> F
-        where
-            F: FnOnce() -> T + Send,
-            T: Send,
-        {
-            f
-        }
-        let f = _go_check($func);
-        unsafe { $builder.spawn(f) }
+        unsafe { $builder.spawn($func) }
     }};
 
     // for cqueue add spawn
     ($cqueue:expr, $token:expr, $func:expr) => {{
-        fn _go_check<F, T>(f: F) -> F
-        where
-            F: FnOnce($crate::cqueue::EventSender) -> T + Send,
-            T: Send,
-        {
-            f
-        }
-        let f = _go_check($func);
-        unsafe { $cqueue.add($token, f) }
+        unsafe { $cqueue.add($token, $func) }
     }};
 }
 

@@ -2,6 +2,7 @@ use std::any::Any;
 use std::cell::UnsafeCell;
 use std::collections::HashMap;
 use std::hash::Hash;
+use std::sync::Arc;
 use std::sync::atomic::Ordering;
 use crate::std::time::time::Time;
 use crate::std::errors::{Error, Result};
@@ -37,11 +38,19 @@ pub struct CancelCtx {
     err: AtomicOption<Error>,
 }
 
+unsafe impl Send for CancelCtx{}
+unsafe impl Sync for CancelCtx{}
+
 
 impl_wrapper!(Receiver<()>);
 impl_wrapper!(Error);
 
 impl CancelCtx {
+
+    pub fn new_arc(parent: Option<Box<dyn Context>>) -> Arc<Self> {
+        Arc::new(Self::new(parent))
+    }
+
     pub fn new(parent: Option<Box<dyn Context>>) -> Self {
         CancelCtx {
             context: parent,
