@@ -124,8 +124,8 @@ macro_rules! cqueue_add_oneshot {
 ///     let (s, r) = chan!();
 ///     s.send(1);
 ///     select! {
-///         rv = r.recv().unwrap() => {
-///             println!("{}",rv);
+///         rv = r.recv() => {
+///             println!("{:?}",rv);
 ///         }
 ///     };
 /// ```
