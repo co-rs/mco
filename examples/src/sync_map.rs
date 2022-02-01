@@ -4,11 +4,12 @@ use cogo::{go};
 use cogo::std::sync::{SyncHashMap, WaitGroup};
 
 pub fn main() {
-    let m = SyncHashMap::new_arc();//or SyncBtreeMap
+    //or SyncBtreeMap::new_arc()
+    let map = SyncHashMap::new_arc();
     let wg = WaitGroup::new();
 
     for i in 0..100 {
-        let m = m.clone();
+        let m = map.clone();
         let wg = wg.clone();
 
         go!(move || {
@@ -20,7 +21,7 @@ pub fn main() {
     }
 
     wg.wait();
-    for (k, v) in m.deref() {
+    for (k, v) in map.deref() {
         println!("{},{}", k, v);
     }
 }
