@@ -33,28 +33,31 @@ static CLOSE_RECV: Lazy<Receiver<()>> = Lazy::new(|| {
 
 pub struct CancelCtx {
     context: Option<Box<dyn Context>>,
+    send: Sender<()>,
     done: AtomicOption<Receiver<()>>,
     children: SyncHashMap<String, Box<dyn Canceler>>,
     err: AtomicOption<Error>,
 }
 
-unsafe impl Send for CancelCtx{}
-unsafe impl Sync for CancelCtx{}
+unsafe impl Send for CancelCtx {}
+
+unsafe impl Sync for CancelCtx {}
 
 
 impl_wrapper!(Receiver<()>);
 impl_wrapper!(Error);
 
 impl CancelCtx {
-
     pub fn new_arc(parent: Option<Box<dyn Context>>) -> Arc<Self> {
         Arc::new(Self::new(parent))
     }
 
     pub fn new(parent: Option<Box<dyn Context>>) -> Self {
+        let (s, r) = chan!();
         CancelCtx {
             context: parent,
-            done: AtomicOption::none(),
+            send: s,
+            done: AtomicOption::some(r),
             children: SyncHashMap::new(),
             err: AtomicOption::none(),
         }
@@ -69,13 +72,13 @@ impl Canceler for CancelCtx {
         if self.err.is_some() {
             return;// already canceled
         }
-        self.err.swap(err.clone().unwrap(),Ordering::SeqCst);
-        if let Some(v) = self.done.take(Ordering::SeqCst) {
-            drop(v);
+        self.err.swap(err.clone().unwrap(), Ordering::SeqCst);
+        if let Some(v) = self.done.get() {
+            self.send.send(());
         } else {
             self.done.swap(CLOSE_RECV.clone(), Ordering::SeqCst);
         }
-        for (_,mut v) in self.children.iter_mut() {
+        for (_, mut v) in self.children.iter_mut() {
             v.cancel(err.clone());
         }
         self.children.clear();

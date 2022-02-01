@@ -10,18 +10,20 @@ fn main() {
     let mut ctx = CancelCtx::new_arc(None);
 
     ctx.cancel(Some(Error::from("EOF")));
-
+    ctx.cancel(Some(Error::from("EOF")));
     loop {
         let mut break_self = false;
         select! {
-                v = ctx.done().unwrap().recv() =>{
+                Ok(v) = ctx.done().unwrap().try_recv() =>{
                     println!("done");
-                   break_self = true;
+                    break_self = true;
                 }
-        }
-        ;
+        };
         if break_self {
             break;
+        }else{
+            println!("sleep 1s");
+            sleep(Duration::from_secs(1));
         }
     }
 }
