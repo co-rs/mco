@@ -16,7 +16,7 @@ fn main() {
                     println!("done");
                     break_self = true;
                 }
-        };
+        }
         if break_self {
             break;
         } else {
