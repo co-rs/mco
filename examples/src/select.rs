@@ -4,6 +4,7 @@ extern crate cogo;
 use std::time::Duration;
 
 use cogo::coroutine;
+use cogo::coroutine::sleep;
 use cogo::net::TcpListener;
 
 // general select example that use cqueue
@@ -14,7 +15,7 @@ fn main() {
 
     go!(move || {
         tx2.send("hello").unwrap();
-        coroutine::sleep(Duration::from_millis(100));
+        sleep(Duration::from_millis(100));
         tx1.send(42).unwrap();
     });
 
@@ -22,7 +23,7 @@ fn main() {
         _ = listener.accept() => {
             println!("got connected")
         },
-        _ = coroutine::sleep(Duration::from_millis(1000)) => {
+        _ = sleep(Duration::from_millis(1000)) => {
 
         },
         v = rx1.recv() => {
