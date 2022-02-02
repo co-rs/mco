@@ -103,11 +103,15 @@ impl<T> MPMCBuffer<T> {
         if self.receiver_num.load(Ordering::Acquire) == 0 {
             return Err(SendError(t));
         }
+        loop {
+            if self.buffer.len() >= self.buffer_limit {
+                self.wake_sender.wait();
+            } else {
+                break;
+            }
+        }
         self.buffer.push(t);
         self.wake_recv.post();
-        if self.buffer.len() > self.buffer_limit {
-            self.wake_sender.wait();
-        }
         Ok(())
     }
 
@@ -127,9 +131,7 @@ impl<T> MPMCBuffer<T> {
     /// wake one sender
     #[inline]
     fn wake_sender(&self) {
-        if (self.buffer.len() + 1) > self.buffer_limit {
-            self.wake_sender.post();
-        }
+        self.wake_sender.post();
     }
 
     /// received a message. If the message is empty, a wait is entered, and an error is returned if the channel is closed
@@ -439,12 +441,32 @@ mod tests {
     use std::sync::mpsc::{RecvTimeoutError, TryRecvError};
     use std::thread;
     use std::time::Duration;
+    use crate::coroutine::sleep;
+    use crate::std::sync::WaitGroup;
 
     pub fn stress_factor() -> usize {
         match env::var("RUST_TEST_STRESS") {
             Ok(val) => val.parse().unwrap(),
             Err(..) => 1,
         }
+    }
+
+    #[test]
+    fn wait_test() {
+        let wg = WaitGroup::new();
+        let (tx, rx) = bounded::<i32>(1);
+        let wg1 = wg.clone();
+        go!(move ||{
+            tx.send(1);
+            drop(wg1);
+            let now=std::time::Instant::now();
+            tx.send(2);
+            assert_eq!(now.elapsed().as_secs()>=2,true);
+        });
+        wg.wait();
+        sleep(Duration::from_secs(2));
+        rx.recv().unwrap();
+        rx.recv().unwrap();
     }
 
     #[test]
