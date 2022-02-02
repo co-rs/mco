@@ -147,7 +147,6 @@ fn spawn_inside() {
         yield_now();
         println!("bye from parent: {:?}", me);
     })
-        .unwrap()
         .join()
         .unwrap();
 
@@ -323,7 +322,6 @@ fn go_with_macro() {
     go_with!(8192, move || {
         tx1.send(coroutine::current().stack_size()).unwrap();
     })
-        .unwrap()
         .join()
         .unwrap();
 
@@ -332,7 +330,6 @@ fn go_with_macro() {
         let msg = (task.name().map(ToOwned::to_owned), task.stack_size());
         tx2.send(msg).unwrap();
     })
-        .unwrap()
         .join()
         .unwrap();
 

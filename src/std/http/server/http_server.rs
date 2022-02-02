@@ -60,7 +60,7 @@ pub trait HttpServiceFactory: Send + Sized + 'static {
     /// return a coroutine that you can cancel it when need to stop the service
     fn start<L: ToSocketAddrs>(self, addr: L) -> io::Result<coroutine::JoinHandle<()>> {
         let listener = TcpListener::bind(addr)?;
-        go!(
+        Ok(go!(
             coroutine::Builder::new(),
             move || {
                 for stream in listener.incoming() {
@@ -69,7 +69,7 @@ pub trait HttpServiceFactory: Send + Sized + 'static {
                     go!(move ||  each_connection_loop(stream, service));
                 }
             }
-        )
+        ))
     }
 }
 
@@ -229,7 +229,7 @@ impl<T: HttpService + Clone + Send + Sync + 'static> HttpServer<T> {
     pub fn start<L: ToSocketAddrs>(self, addr: L) -> io::Result<coroutine::JoinHandle<()>> {
         let listener = TcpListener::bind(addr)?;
         let service = self.0;
-        go!(
+        Ok(go!(
             coroutine::Builder::new(),
             move || {
                 for stream in listener.incoming() {
@@ -238,6 +238,6 @@ impl<T: HttpService + Clone + Send + Sync + 'static> HttpServer<T> {
                     go!(move || each_connection_loop(stream, service));
                 }
             }
-        )
+        ))
     }
 }

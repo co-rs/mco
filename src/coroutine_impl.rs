@@ -203,7 +203,7 @@ impl fmt::Debug for Coroutine {
 ///     // coroutine code
 /// };
 ///
-/// let handler = unsafe { builder.spawn(code).unwrap() };
+/// let handler = unsafe { builder.spawn(code) };
 ///
 /// handler.join().unwrap();
 /// ```
@@ -248,7 +248,7 @@ impl Builder {
     /// Spawns a new coroutine, and returns a join handle for it.
     /// The join handle can be used to block on
     /// termination of the child coroutine, including recovering its panics.
-    fn spawn_impl<F, T>(self, f: F) -> io::Result<(CoroutineImpl, JoinHandle<T>)>
+    fn spawn_impl<F, T>(self, f: F) -> (CoroutineImpl, JoinHandle<T>)
         where
             F: FnOnce() -> T + Send + 'static,
             T: Send + 'static,
@@ -304,7 +304,7 @@ impl Builder {
         // attache the local storage to the coroutine
         co.set_local_data(Box::into_raw(local) as *mut u8);
 
-        Ok((co, make_join_handle(handle, join, packet, panic)))
+        (co, make_join_handle(handle, join, packet, panic))
     }
 
     /// Spawns a new coroutine by taking ownership of the `Builder`, and returns an
@@ -338,7 +338,7 @@ impl Builder {
     /// let handler = unsafe {
     ///     builder.spawn(|| {
     ///         // thread code
-    ///     }).unwrap()
+    ///     })
     /// };
     ///
     /// handler.join().unwrap();
@@ -347,7 +347,7 @@ impl Builder {
     /// [`TLS`]: ./index.html#TLS
     /// [`go!`]: ../macro.go.html
     /// [`spawn`]: ./fn.spawn.html
-    pub unsafe fn spawn<F, T>(self, f: F) -> io::Result<JoinHandle<T>>
+    pub fn spawn<F, T>(self, f: F) -> JoinHandle<T>
         where
             F: FnOnce() -> T + Send + 'static,
             T: Send + 'static,
@@ -363,16 +363,16 @@ impl Builder {
     /// Cancel would drop all the resource of the coroutine.
     /// Normally this is safe but for some cases you should
     /// take care of the side effect
-    pub unsafe fn spawn_local<F, T>(self, f: F) -> io::Result<JoinHandle<T>>
+    pub fn spawn_local<F, T>(self, f: F) -> JoinHandle<T>
         where
             F: FnOnce() -> T + Send + 'static,
             T: Send + 'static,
     {
         // we will still get optimizations in spawn_impl
-        let (co, handle) = self.spawn_impl(f)?;
+        let (co, handle) = self.spawn_impl(f);
         // first run the coroutine in current thread
         run_coroutine(co);
-        Ok(handle)
+        handle
     }
 }
 
@@ -426,12 +426,12 @@ impl Builder {
 /// [`join`]: struct.JoinHandle.html#method.join
 /// [`Builder::spawn`]: struct.Builder.html#method.spawn
 /// [`Builder`]: struct.Builder.html
-pub unsafe fn spawn<F, T>(f: F) -> JoinHandle<T>
+pub fn spawn<F, T>(f: F) -> JoinHandle<T>
     where
         F: FnOnce() -> T + Send + 'static,
         T: Send + 'static,
 {
-    Builder::new().spawn(f).unwrap()
+    Builder::new().spawn(f)
 }
 
 /// Gets a handle to the coroutine that invokes it.
