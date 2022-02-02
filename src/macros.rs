@@ -1,7 +1,6 @@
 /// macro used to spawn a coroutine
 ///
 /// this macro is just a convenient wrapper for [`spawn`].
-/// However the supplied coroutine block is not wrapped in `unsafe` block
 ///
 /// [`spawn`]: coroutine/fn.spawn.html
 #[macro_export]

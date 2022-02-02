@@ -308,7 +308,7 @@ impl Builder {
     }
 
     /// Spawns a new coroutine by taking ownership of the `Builder`, and returns an
-    /// `io::Result` to its `JoinHandle`.
+    /// `JoinHandle`.
     ///
     /// The spawned coroutine may outlive the caller. The join handle can be used
     /// to block on termination of the child thread, including recovering its panics.
@@ -325,8 +325,7 @@ impl Builder {
     ///  - If the coroutine exceed the stack during execution, this would trigger
     ///    memory segment fault
     ///
-    /// If you find it annoying to wrap every thing in the unsafe block, you can
-    /// use the [`go!`] macro instead.
+    /// you can use the [`go!`] macro instead.
     ///
     /// # Examples
     ///
