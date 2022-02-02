@@ -26,7 +26,7 @@ fn req_done(buf: &[u8], path: &mut String) -> Option<usize> {
 }
 
 fn main() {
-    let mut file = File::open("examples/cert/mycert.pfx").unwrap();
+    let mut file = File::open("examples/native-tls/mycert.pfx").unwrap();
     let mut identity = vec![];
     file.read_to_end(&mut identity).unwrap();
     let identity = Identity::from_pkcs12(&identity, "password").unwrap();
