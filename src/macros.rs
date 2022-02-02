@@ -177,6 +177,16 @@ macro_rules! join {
 ///
 /// The data associated with each coroutine local is per-coroutine,
 /// so different coroutines will contain different values.
+/// for example:
+/// ```
+///     cogo::coroutine_local!(static FOO: i32 = 3);
+///
+///     // can only be called in coroutine context
+///     FOO.with(|f| {
+///         assert_eq!(*f, 3);
+///     });
+///
+/// ```
 #[macro_export]
 macro_rules! coroutine_local {
     (static $NAME:ident : $t:ty = $e:expr) => {
