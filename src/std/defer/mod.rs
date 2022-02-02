@@ -10,7 +10,7 @@ impl<F: FnOnce()> Drop for Guard<F> {
 
 /// Defers evaluation of a block of code until the end of the scope.
 /// Sort of LIFO(last-in, first-out queue)
-///
+/// If you encounter references to resources that cannot mut more than 2 times, try nesting RefCell and then use.borrow() and.borrow_mut().
 ///
 /// for example:
 /// ```
