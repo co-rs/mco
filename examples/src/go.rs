@@ -1,4 +1,4 @@
-use cogo::coroutine::{Builder, spawn, Spawn};
+use cogo::coroutine::{Builder, spawn, Spawn, yield_now};
 use cogo::go;
 
 fn main() {
@@ -26,4 +26,22 @@ fn main() {
     spawn(|| {
         println!("go with method spawn");
     });
+    go!(move || {
+        println!("hi, I'm parent");
+        let v = (0..100)
+            .map(|i| {
+                go!(move || {
+                    println!("hi, I'm child{:?}", i);
+                    yield_now();
+                    println!("bye from child{:?}", i);
+                })
+            })
+            .collect::<Vec<_>>();
+        yield_now();
+        // wait child finish
+        for i in v {
+            i.join().unwrap();
+        }
+        println!("bye from parent");
+    }).join().unwrap();
 }

@@ -90,10 +90,6 @@ name = "sleep"
 path = "src/sleep.rs"
 
 [[bin]]
-name = "spawn"
-path = "src/spawn.rs"
-
-[[bin]]
 name = "websocket"
 path = "src/websocket.rs"
 
