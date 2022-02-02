@@ -336,6 +336,8 @@ impl<T> Receiver<T> {
         self.inner.try_recv()
     }
 
+    /// received a message. If the message is empty, a wait is entered, and an error is returned if the channel is closed
+    /// If you want to try to receive a message, use try_recv
     pub fn recv(&self) -> Result<T, RecvError> {
         match self.inner.recv(None) {
             Err(RecvTimeoutError::Timeout) => unreachable!("mpmc recv timeout"),
