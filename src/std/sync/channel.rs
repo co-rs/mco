@@ -98,7 +98,7 @@ impl<T> MPMCBuffer<T> {
         }
     }
 
-    /// send one message. If the length limit is exceeded, wait for the message to be consumed
+    /// send one message. If the length limit is exceeded or chan closed, wait for the message to be consumed
     pub fn send(&self, t: T) -> Result<(), SendError<T>> {
         if self.receiver_num.load(Ordering::Acquire) == 0 {
             return Err(SendError(t));
@@ -108,6 +108,19 @@ impl<T> MPMCBuffer<T> {
         if self.buffer.len() > self.buffer_limit {
             self.wake_sender.wait();
         }
+        Ok(())
+    }
+
+    /// try send one message.If the length limit is exceeded or chan closed, return a error
+    pub fn try_send(&self, t: T) -> Result<(), SendError<T>> {
+        if self.receiver_num.load(Ordering::Acquire) == 0 {
+            return Err(SendError(t));
+        }
+        if self.buffer.len() > self.buffer_limit {
+            return Err(SendError(t));
+        }
+        self.buffer.push(t);
+        self.wake_recv.post();
         Ok(())
     }
 
@@ -293,9 +306,14 @@ impl<T> Sender<T> {
         Sender { inner }
     }
 
-    /// send one message. If the length limit is exceeded, wait for the message to be consumed
+    /// send one message. If the length limit is exceeded or chan closed, wait for the message to be consumed
     pub fn send(&self, t: T) -> Result<(), SendError<T>> {
         self.inner.send(t)
+    }
+
+    /// try send one message.If the length limit is exceeded or chan closed, return a error
+    pub fn try_send(&self, t: T) -> Result<(), SendError<T>> {
+        self.inner.try_send(t)
     }
 
     /// return how many elements in the queue that are not consumed by receivers
