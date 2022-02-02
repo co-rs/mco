@@ -456,7 +456,7 @@ mod tests {
         let wg = WaitGroup::new();
         let (tx, rx) = bounded::<i32>(1);
         let wg_clone = wg.clone();
-        let result = Arc::new(Mutex::new(Duration::from_secs(0)));
+        let result = Mutex::new_arc(Duration::from_secs(0));
         let result1 = result.clone();
         go!(move ||{
             tx.send(1);

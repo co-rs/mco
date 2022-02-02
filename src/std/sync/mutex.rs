@@ -42,6 +42,11 @@ pub struct MutexGuard<'a, T: ?Sized + 'a> {
 
 impl<T> Mutex<T> {
     /// Creates a new mutex in an unlocked state ready for use.
+    pub fn new_arc(t: T) -> Arc<Mutex<T>> {
+        Arc::new(Self::new(t))
+    }
+
+    /// Creates a new mutex in an unlocked state ready for use.
     pub fn new(t: T) -> Mutex<T> {
         Mutex {
             to_wake: WaitList::new(),
