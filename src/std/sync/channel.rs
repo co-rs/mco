@@ -98,6 +98,7 @@ impl<T> MPMCBuffer<T> {
         }
     }
 
+    /// send one message. If the length limit is exceeded, wait for the message to be consumed
     pub fn send(&self, t: T) -> Result<(), SendError<T>> {
         if self.receiver_num.load(Ordering::Acquire) == 0 {
             return Err(SendError(t));
@@ -118,6 +119,8 @@ impl<T> MPMCBuffer<T> {
         }
     }
 
+    /// received a message. If the message is empty, a wait is entered, and an error is returned if the channel is closed
+    /// If you want to try to receive a message, use try_recv
     pub fn recv(&self, dur: Option<Duration>) -> Result<T, RecvTimeoutError> {
         match self.try_recv() {
             Ok(data) => return Ok(data),
@@ -290,6 +293,7 @@ impl<T> Sender<T> {
         Sender { inner }
     }
 
+    /// send one message. If the length limit is exceeded, wait for the message to be consumed
     pub fn send(&self, t: T) -> Result<(), SendError<T>> {
         self.inner.send(t)
     }
