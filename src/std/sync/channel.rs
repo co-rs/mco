@@ -116,7 +116,7 @@ impl<T> MPMCBuffer<T> {
         if self.receiver_num.load(Ordering::Acquire) == 0 {
             return Err(SendError(t));
         }
-        if self.buffer.len() > self.buffer_limit {
+        if self.buffer.len() >= self.buffer_limit {
             return Err(SendError(t));
         }
         self.buffer.push(t);
