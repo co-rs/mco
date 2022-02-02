@@ -1,4 +1,4 @@
-use cogo::coroutine::Builder;
+use cogo::coroutine::{Builder, spawn};
 use cogo::go;
 
 fn main() {
@@ -13,5 +13,13 @@ fn main() {
     });
     go!(Builder::new(),||{
        println!("go with Builder");
+    });
+
+    Builder::new().spawn(|| {
+        println!("go with Builder::spawn");
+    });
+
+    spawn(|| {
+        println!("go with method spawn");
     });
 }
