@@ -442,7 +442,7 @@ mod tests {
     use std::thread;
     use std::time::Duration;
     use crate::coroutine::sleep;
-    use crate::std::sync::{Mutex, WaitGroup};
+    use crate::std::sync::{WaitGroup};
 
     pub fn stress_factor() -> usize {
         match env::var("RUST_TEST_STRESS") {
@@ -456,7 +456,7 @@ mod tests {
         let wg = WaitGroup::new();
         let (tx, rx) = bounded::<i32>(1);
         let wg_clone = wg.clone();
-        let result = Mutex::new_arc(Duration::from_secs(0));
+        let result = Arc::new(std::sync::Mutex::new(Duration::from_secs(0)));
         let result1 = result.clone();
         go!(move ||{
             tx.send(1);
