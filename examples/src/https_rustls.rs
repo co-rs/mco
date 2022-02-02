@@ -2,7 +2,6 @@ extern crate bytes;
 extern crate httparse;
 #[macro_use]
 extern crate cogo;
-extern crate native_tls;
 
 use std::convert::TryInto;
 use bytes::BufMut;
