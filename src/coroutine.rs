@@ -28,6 +28,12 @@ impl Spawn for &str {
     }
 }
 
+impl Spawn for (&str, i32) {
+    fn spawn<F, T>(self, f: F) -> JoinHandle<T> where F: FnOnce() -> T + Send + 'static, T: Send + 'static {
+        Builder::new().name(self.0.to_string()).stack_size(self.1 as usize).spawn(f)
+    }
+}
+
 impl Spawn for String {
     fn spawn<F, T>(self, f: F) -> JoinHandle<T> where F: FnOnce() -> T + Send + 'static, T: Send + 'static {
         unsafe {
