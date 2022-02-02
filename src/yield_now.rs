@@ -52,6 +52,8 @@ pub fn get_co_para() -> Option<EventResult> {
     co_get_yield::<EventResult>()
 }
 
+/// Suspends current execution, So that other coroutines can preempt. current may resume at some point in the future.
+/// It is safe to call this method on coroutines/threads
 #[inline]
 pub fn yield_now() {
     if !is_coroutine() {
