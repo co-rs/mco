@@ -54,9 +54,16 @@ massive concurrent programs. It can be thought as the Rust version of the popula
 * Both stable, beta, and nightly channels are supported;
 * x86_64 GNU/Linux, x86_64 Windows, x86_64 Mac, aarch64 Linux OS are supported.
 
-* Support High performance channel(2 times better performance, Support the buffer);
-* Support WaitGroup Support
-* Support defer!()
+* Support High performance chan(like golang)
+* Support WaitGroup Support(like golang)
+* Support defer!() (like golang)
+* Support Rustls
+* Support Time (like golang)
+* Support error/err!() (like golang)
+* Support select match Ok(v)/Err(e)  (like golang)
+* Support Lazy/OnceCell
+* Support SyncMap(like golang)
+* Support Ticker(like golang)
 
 ## Usage
 

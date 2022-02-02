@@ -18,6 +18,9 @@ serde_derive = "1.0"
 serde_json = "1"
 native-tls = "0.2"
 tungstenite = "0.16"
+rustls = "0.20"
+webpki-roots = "0.22.2"
+rustls-pemfile = "0.2.1"
 
 [[bin]]
 name = "channel"
@@ -66,6 +69,10 @@ path = "src/http-tiny.rs"
 [[bin]]
 name = "https"
 path = "src/https.rs"
+
+[[bin]]
+name = "https_rustls"
+path = "src/https_rustls.rs"
 
 [[bin]]
 name = "scoped"
