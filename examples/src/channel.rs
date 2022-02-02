@@ -11,11 +11,8 @@ fn main() {
     println!("recv = {},remain:{}", rv, r.remain());
 
     sleep(Duration::from_secs(1));
-    test_bounded();
-}
 
-//bounded length = 1, If the sender sends more messages than the limit, it waits until the message is consumed
-fn test_bounded() {
+    //bounded length, If the sender sends more messages than the limit, it waits until the message is consumed
     let (s, r) = chan!(1);
     go!(move ||{
        let send_result = s.send(1);
