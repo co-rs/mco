@@ -26,7 +26,7 @@ impl Error {
 }
 
 
-/// warp errors
+/// cogo::std::errors::Error
 #[macro_export]
 macro_rules! err {
      ($($arg:tt)*) => {{

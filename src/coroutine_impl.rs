@@ -12,6 +12,7 @@ use crate::park::Park;
 use crate::scheduler::get_scheduler;
 use crossbeam::atomic::AtomicCell;
 use generator::{Generator, Gn};
+use crate::err;
 
 /// /////////////////////////////////////////////////////////////////////////////
 /// Coroutine framework types
@@ -448,7 +449,7 @@ pub fn current() -> Coroutine {
 #[inline]
 pub fn try_current() -> Result<Coroutine, crate::std::errors::Error> {
     match get_co_local_data() {
-        None => Err(crate::std::errors::Error::from("no current coroutine, did you call `current()` in thread context?")),
+        None => Err(err!("no current coroutine, did you call `current()` in thread context?")),
         Some(local) => Ok(unsafe { local.as_ref() }.get_co().clone()),
     }
 }

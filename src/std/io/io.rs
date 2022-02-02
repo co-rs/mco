@@ -5,13 +5,13 @@ use crate::std::lazy::sync::Lazy;
 
 // ErrShortWrite means that a write accepted fewer bytes than requested
 // but failed to return an explicit error.
-pub static ErrShortWrite: Lazy<Error> = Lazy::new(|| Error::from("short write"));
+pub static ErrShortWrite: Lazy<Error> = Lazy::new(|| err!("short write"));
 
 // errInvalidWrite means that a write returned an impossible count.
-pub static errInvalidWrite: Lazy<Error> = Lazy::new(|| Error::from("invalid write result"));
+pub static errInvalidWrite: Lazy<Error> = Lazy::new(|| err!("invalid write result"));
 
 // ErrShortBuffer means that a read required a longer buffer than was provided.
-pub static ErrShortBuffer: Lazy<Error> = Lazy::new(|| Error::from("short buffer"));
+pub static ErrShortBuffer: Lazy<Error> = Lazy::new(|| err!("short buffer"));
 
 // EOF is the error returned by Read when no more input is available.
 // (Read must return EOF itself, not an error wrapping EOF,
@@ -20,16 +20,16 @@ pub static ErrShortBuffer: Lazy<Error> = Lazy::new(|| Error::from("short buffer"
 // If the EOF occurs unexpectedly in a structured data stream,
 // the appropriate error is either ErrUnexpectedEOF or some other error
 // giving more detail.
-pub static EOF: Lazy<Error> = Lazy::new(|| Error::from("EOF"));
+pub static EOF: Lazy<Error> = Lazy::new(|| err!("EOF"));
 
 // ErrUnexpectedEOF means that EOF was encountered in the
 // middle of reading a fixed-size block or data structure.
-pub static ErrUnexpectedEOF: Lazy<Error> = Lazy::new(|| Error::from("unexpected EOF"));
+pub static ErrUnexpectedEOF: Lazy<Error> = Lazy::new(|| err!("unexpected EOF"));
 
 // ErrNoProgress is returned by some clients of an Reader when
 // many calls to Read have failed to return any data or error,
 // usually the sign of a broken Reader implementation.
-pub static ErrNoProgress: Lazy<Error> = Lazy::new(|| Error::from("multiple Read calls return no data or error"));
+pub static ErrNoProgress: Lazy<Error> = Lazy::new(|| err!("multiple Read calls return no data or error"));
 
 // Closer is the interface that wraps the basic Close method.
 //
