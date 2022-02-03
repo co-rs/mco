@@ -18,16 +18,16 @@ unsafe impl<T: Send> Send for SyncWrapper<T> {}
 unsafe impl<T> Sync for SyncWrapper<T> {}
 
 impl<T> SyncWrapper<T> {
-    pub(crate) fn new(value: T) -> Self {
+    pub fn new(value: T) -> Self {
         Self { inner: value }
     }
 
-    pub(crate) fn into_inner(self) -> T {
+    pub fn into_inner(self) -> T {
         self.inner
     }
 }
 
-impl <T>Deref for SyncWrapper<T> {
+impl<T> Deref for SyncWrapper<T> {
     type Target = T;
 
     fn deref(&self) -> &Self::Target {
@@ -35,7 +35,7 @@ impl <T>Deref for SyncWrapper<T> {
     }
 }
 
-impl <T>DerefMut for SyncWrapper<T> {
+impl<T> DerefMut for SyncWrapper<T> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.inner
     }
