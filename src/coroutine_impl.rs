@@ -434,7 +434,7 @@ pub fn spawn<F, T>(f: F) -> JoinHandle<T>
     Builder::new().spawn(f)
 }
 
-/// spawn a coroutine
+/// spawn a new coroutine(use method spawn)
 pub fn go<F, T>(f: F) -> JoinHandle<T>
     where
         F: FnOnce() -> T + Send + 'static,

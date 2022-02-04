@@ -10,11 +10,13 @@ pub use crate::sleep::sleep;
 pub use crate::yield_now::yield_now;
 
 pub trait Spawn {
+    /// spawn a new coroutine
     fn spawn<F, T>(self, f: F) -> JoinHandle<T>
         where
             F: FnOnce() -> T + Send + 'static,
             T: Send + 'static;
 
+    /// spawn a new coroutine(use method spawn)
     fn go<F, T>(self, f: F) -> JoinHandle<T>
         where
             F: FnOnce() -> T + Send + 'static,
