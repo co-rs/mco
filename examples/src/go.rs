@@ -12,10 +12,10 @@ fn main() {
         println!("go with stack size: {}", cogo::coroutine::current().stack_size());
     });
     go!("go",||{
-       println!("go with name: {}",cogo::coroutine::current().name().unwrap());
+       println!("go with name: {}",cogo::coroutine::current().name().unwrap_or_default());
     });
     "go".go(|| {
-        println!("go with name: {}", cogo::coroutine::current().name().unwrap());
+        println!("go with name: {}", cogo::coroutine::current().name().unwrap_or_default());
     });
     go!(Builder::new(),||{
        println!("go with Builder");

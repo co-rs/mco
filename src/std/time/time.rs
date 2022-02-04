@@ -3,13 +3,15 @@ use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Add, Deref, DerefMut, Sub};
 use std::time::SystemTime;
 use serde::de::Error;
-use time::{format_description, OffsetDateTime, UtcOffset};
+use time::{format_description, OffsetDateTime};
 use time::error::InvalidFormatDescription;
 use time::format_description::FormatItem;
 use crate::std::time::format::{longDayNames, longMonthNames};
 use crate::std::errors::Result;
 use crate::std::lazy::sync::Lazy;
 use crate::std::time::sys::Timespec;
+
+pub use time::UtcOffset;
 
 /// "Mon, 02 Jan 2006 15:04:05 GMT"
 pub const TimeFormat: &'static str = "[weekday repr:short], [day] [month repr:short] [year] [hour]:[minute]:[second] GMT";
@@ -46,6 +48,13 @@ impl Time {
     pub fn local(&self) -> Self {
         Self {
             inner: self.inner.to_offset(GLOBAL_OFFSET.deref().clone())
+        }
+    }
+
+    /// return new offset
+    pub fn to_offset(self, offset: UtcOffset) -> Time {
+        Self {
+            inner: self.inner.to_offset(offset)
         }
     }
 
