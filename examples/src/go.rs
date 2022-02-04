@@ -1,4 +1,4 @@
-use cogo::coroutine::{Builder, go, Spawn, yield_now};
+use cogo::coroutine::{Builder, Spawn, yield_now};
 use cogo::go;
 
 fn main() {
