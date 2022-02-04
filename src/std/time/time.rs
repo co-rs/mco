@@ -541,7 +541,7 @@ mod test {
         let now = Time::now();
         sleep(Duration::from_secs(1));
         println!("{}", now.format(RFC3339Nano));
-        assert_eq!(false, now.before(&Time::now()));
+        assert_eq!(true, now.before(&Time::now()));
     }
 
     #[test]
