@@ -29,7 +29,7 @@ pub static GLOBAL_OFFSET: Lazy<UtcOffset> = Lazy::new(|| {
 });
 
 /// a time wrapper just like golang
-#[derive(Eq, PartialEq, Ord, PartialOrd)]
+#[derive(Eq, PartialEq, Ord, PartialOrd, Clone)]
 pub struct Time {
     pub inner: OffsetDateTime,
 }
@@ -87,12 +87,12 @@ impl Time {
 
     /// after reports whether the time instant t is after u.
     pub fn after(&self, u: &Time) -> bool {
-        self.inner.sub(u.inner).is_negative()
+        self.inner.sub(u.inner).is_positive()
     }
 
     /// before reports whether the time instant t is before u.
     pub fn before(&self, u: &Time) -> bool {
-        self.inner.sub(u.inner).is_positive()
+        u.inner.sub(self.inner).is_positive()
     }
 
 

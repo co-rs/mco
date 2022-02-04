@@ -16,9 +16,14 @@ fn main() {
     assert_eq!(from_js, now);
 
     //add 1 day
-    now.add(1 * 24 * Duration::from_secs(3600));
-    println!("added 1 day:{}", now);
-    assert_ne!(from_js, now);
+    let mut add = now.clone();
+    add.add(1 * 24 * Duration::from_secs(3600));
+    println!("add 1 day:{}", add);
+
+    //sub 1 day
+    let mut sub = now.clone();
+    sub.sub(1 * 24 * Duration::from_secs(3600));
+    println!("sub 1 day:{}", sub);
 
     //is before?
     assert_eq!(true, now.before(&Time::now()));
