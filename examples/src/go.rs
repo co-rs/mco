@@ -1,4 +1,4 @@
-use cogo::coroutine::{Builder, spawn, Spawn, yield_now};
+use cogo::coroutine::{Builder, go, Spawn, yield_now};
 use cogo::go;
 
 fn main() {
@@ -8,22 +8,22 @@ fn main() {
     go!(2*4096,||{
        println!("go with stack size: {}",cogo::coroutine::current().stack_size());
     });
-    (2 * 4096).spawn(|| {
+    (2 * 4096).go(|| {
         println!("go with stack size: {}", cogo::coroutine::current().stack_size());
     });
     go!("go",||{
        println!("go with name: {}",cogo::coroutine::current().name().unwrap());
     });
-    "go".spawn(|| {
+    "go".go(|| {
         println!("go with name: {}", cogo::coroutine::current().name().unwrap());
     });
     go!(Builder::new(),||{
        println!("go with Builder");
     });
-    Builder::new().spawn(|| {
+    Builder::new().go(|| {
         println!("go with Builder::spawn");
     });
-    spawn(|| {
+    go(|| {
         println!("go with method spawn");
     });
     go!(move || {

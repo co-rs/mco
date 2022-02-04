@@ -411,7 +411,7 @@ impl Builder {
 /// ```
 /// use cogo::coroutine;
 ///
-/// let handler = unsafe {
+/// let handler =  {
 ///     coroutine::spawn(|| {
 ///         // coroutine code
 ///     })
@@ -432,6 +432,15 @@ pub fn spawn<F, T>(f: F) -> JoinHandle<T>
         T: Send + 'static,
 {
     Builder::new().spawn(f)
+}
+
+/// spawn a coroutine
+pub fn go<F, T>(f: F) -> JoinHandle<T>
+    where
+        F: FnOnce() -> T + Send + 'static,
+        T: Send + 'static,
+{
+    spawn(f)
 }
 
 /// Gets a handle to the coroutine that invokes it.

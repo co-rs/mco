@@ -1,7 +1,7 @@
 // re-export coroutine interface
 pub use crate::cancel::trigger_cancel_panic;
 pub use crate::coroutine_impl::{
-    current, try_current, is_coroutine, park, park_timeout, spawn, Builder, Coroutine,
+    current, try_current, is_coroutine, park, park_timeout, spawn, go, Builder, Coroutine,
 };
 pub use crate::join::JoinHandle;
 pub use crate::park::ParkError;
@@ -14,6 +14,13 @@ pub trait Spawn {
         where
             F: FnOnce() -> T + Send + 'static,
             T: Send + 'static;
+
+    fn go<F, T>(self, f: F) -> JoinHandle<T>
+        where
+            F: FnOnce() -> T + Send + 'static,
+            T: Send + 'static, Self: Sized {
+        self.spawn(f)
+    }
 }
 
 impl Spawn for i32 {
@@ -47,5 +54,11 @@ impl Spawn for &String {
         unsafe {
             Builder::new().name(self.to_owned()).spawn(f)
         }
+    }
+}
+
+impl Spawn for Builder {
+    fn spawn<F, T>(self, f: F) -> JoinHandle<T> where F: FnOnce() -> T + Send + 'static, T: Send + 'static {
+        self.spawn(f)
     }
 }
