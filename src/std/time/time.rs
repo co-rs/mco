@@ -247,7 +247,7 @@ impl Time {
         }
     }
 
-    // now returns the current local time.
+    /// now returns the current local time.
     pub fn now() -> Time {
         let mut now = time::OffsetDateTime::now_utc();
         now = now.to_offset(GLOBAL_OFFSET.clone());
@@ -256,6 +256,7 @@ impl Time {
         };
     }
 
+    /// current utc time
     pub fn now_utc() -> Time {
         let now = time::OffsetDateTime::now_utc();
         return Time {
