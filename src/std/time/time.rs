@@ -71,6 +71,10 @@ impl Time {
         self.inner = self.inner.add(d);
     }
 
+    pub fn sub(&mut self, d: std::time::Duration) {
+        self.inner = self.inner.sub(d);
+    }
+
     // add_sec adds d seconds to the time.
     pub fn add_sec(&mut self, d: i64) {
         self.inner = self.inner.add(time::Duration::seconds(d));
