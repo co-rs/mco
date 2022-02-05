@@ -39,7 +39,6 @@ pub fn ns_to_ms(ns: u64) -> u64 {
 
 pub static START_TIME: Lazy<Instant> = Lazy::new(|| { Instant::now() });
 
-
 // get the current wall clock in ns
 #[inline]
 pub fn now() -> u64 {

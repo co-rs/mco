@@ -1,4 +1,4 @@
-use once_cell::sync::Lazy;
+use crate::std::lazy::sync::Lazy;
 
 pub static longDayNames: Lazy<Vec<&str>> = Lazy::new(|| {
     vec![
