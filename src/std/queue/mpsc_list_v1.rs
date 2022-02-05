@@ -250,7 +250,9 @@ impl<T> Queue<T> {
             }
 
             assert!((*tail).value.is_none());
-            assert!((*next).value.is_some());
+            if !(*next).value.is_some(){
+                return None;
+            }
 
             let v = (*next).value.as_ref().unwrap();
             if !f(v) {
