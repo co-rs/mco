@@ -62,10 +62,6 @@ name = "http"
 path = "src/http.rs"
 
 [[bin]]
-name = "http-tiny"
-path = "src/http-tiny.rs"
-
-[[bin]]
 name = "https"
 path = "src/https.rs"
 

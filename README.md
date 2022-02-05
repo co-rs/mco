@@ -20,8 +20,6 @@ massive concurrent programs. It can be thought as the Rust version of the popula
 
 > Cogo Powerful standard library
 
-* ``` cogo/std/http/server ``` An HTTP server is available(Body parsing upcoming)
-* ``` cogo/std/http/client ``` An HTTP Client(TODO) upcoming
 * ``` cogo/std/queue ``` Basic queue data structures
 * ``` cogo/std/sync ```  Includes ``` Mutex/RwLock/WaitGroup/Semphore/chan!()/chan!(1000) ```...and more..
 * ``` cogo/std/defer ``` Defers evaluation of a block of code until the end of the scope.
@@ -32,6 +30,7 @@ massive concurrent programs. It can be thought as the Rust version of the popula
 
 > Crates based on cogo implementation
 
+* [cogo-http](https://github.com/co-rs/cogo-http) High-performance coroutine HTTP server and client
 * [cdbc](https://github.com/co-rs/cdbc) Database Drivers include mysql, Postgres, AND SQLite
 * [fast_log](https://github.com/co-rs/fast_log) High-performance log impl
 * [cogo-redis](https://github.com/co-rs/cogo-redis) TODO: an redis client.

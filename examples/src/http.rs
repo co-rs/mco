@@ -4,24 +4,12 @@ extern crate httparse;
 extern crate cogo;
 
 use std::io::{Read, Write};
-
 use bytes::BufMut;
 use httparse::Status;
 use cogo::net::TcpListener;
 
-fn req_done(buf: &[u8], path: &mut String) -> Option<usize> {
-    let mut headers = [httparse::EMPTY_HEADER; 16];
-    let mut req = httparse::Request::new(&mut headers);
-
-    if let Ok(Status::Complete(i)) = req.parse(buf) {
-        path.clear();
-        path.push_str(req.path.unwrap_or("/"));
-        return Some(i);
-    }
-
-    None
-}
-
+// This example is for demonstration only and is suitable for production environment please move on
+// example see https://github.com/co-rs/cogo-http/tree/main/examples
 fn main() {
     println!("bind http://127.0.0.1:8080");
     let listener = TcpListener::bind("0.0.0.0:8080").unwrap();
@@ -70,4 +58,17 @@ fn main() {
             }
         });
     }
+}
+
+fn req_done(buf: &[u8], path: &mut String) -> Option<usize> {
+    let mut headers = [httparse::EMPTY_HEADER; 16];
+    let mut req = httparse::Request::new(&mut headers);
+
+    if let Ok(Status::Complete(i)) = req.parse(buf) {
+        path.clear();
+        path.push_str(req.path.unwrap_or("/"));
+        return Some(i);
+    }
+
+    None
 }
