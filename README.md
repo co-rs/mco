@@ -100,7 +100,7 @@ fn main() {
 * [An echo client](examples/src/echo_client.rs)
 * [simple HTTP](examples/src/http.rs)
 * [simple HTTPS](examples/src/https.rs)
-* [tiny  HTTP](examples/src/http-tiny.rs)
+* [tiny  HTTP](https://github.com/co-rs/cogo-http)
 * [WebSockets](examples/src/websocket.rs)
 
 ## Caveat
