@@ -461,11 +461,14 @@ mod test {
 
     #[test]
     pub fn test_insert2() {
-        let m = SyncHashMap::<i32, i32>::new();
-        let insert = m.insert(1, 2);
-        assert_eq!(insert.is_none(), true);
-        let insert = m.insert(1, 2);
-        assert_eq!(insert.is_none(), false);
+        let m = Arc::new(SyncHashMap::<String, String>::new());
+        m.insert("/".to_string(), "1".to_string());
+        m.insert("/js".to_string(), "2".to_string());
+        m.insert("/fn".to_string(), "3".to_string());
+
+        assert_eq!(&"1".to_string(), m.get("/").unwrap());
+        assert_eq!(&"2".to_string(), m.get("/js").unwrap());
+        assert_eq!(&"3".to_string(), m.get("/fn").unwrap());
     }
 
     #[test]
