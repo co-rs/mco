@@ -10,11 +10,12 @@ use std::time::Duration;
 use crate::std::sync::{Mutex, MutexGuard};
 use std::marker::PhantomData;
 
-use std::collections::{BTreeMap as Map, btree_map::IntoIter as IntoIter, btree_map::Iter as MapIter, btree_map::IterMut as MapIterMut};
+use std::collections::{BTreeMap as Map, btree_map::IntoIter as IntoIter, btree_map::Iter as MapIter, btree_map::IterMut as MapIterMut, HashMap};
 use serde::{Deserializer, Serialize, Serializer};
 use serde::ser::SerializeMap;
 
 pub type SyncBtreeMap<K, V> = SyncMapImpl<K, V>;
+
 
 /// this sync map used to many reader,writer less.space-for-time strategy
 ///
@@ -35,7 +36,7 @@ pub type SyncBtreeMap<K, V> = SyncMapImpl<K, V>;
 /// The zero Map is empty and ready for use. A Map must not be copied after first use.
 pub struct SyncMapImpl<K, V> {
     read: UnsafeCell<Map<K, *const V>>,
-    dirty: Mutex<Map<K, V>>,
+    dirty: Mutex<HashMap<K, V>>,
 }
 
 /// this is safety, dirty mutex ensure
@@ -52,7 +53,7 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
     pub fn new() -> Self {
         Self {
             read: UnsafeCell::new(Map::new()),
-            dirty: Mutex::new(Map::new()),
+            dirty: Mutex::new(HashMap::new()),
         }
     }
 
@@ -129,11 +130,9 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
         }
     }
 
-    pub fn shrink_to_fit(&self) {
-        //nothing to do
-    }
+    pub fn shrink_to_fit(&self) {}
 
-    pub fn from(map: Map<K, V>) -> Self where K: Clone + Eq + Hash + Ord {
+    pub fn from(map: HashMap<K, V>) -> Self where K: Clone + Eq + Hash + std::cmp::Ord {
         let s = Self::new();
         match s.dirty.lock() {
             Ok(mut m) => {
@@ -152,12 +151,22 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
         s
     }
 
+
+    /// Returns a reference to the value corresponding to the key.
+    ///
+    /// The key may be any borrowed form of the map's key type, but
+    /// [`Hash`] and [`Eq`] on the borrowed form *must* match those for
+    /// the key type.
+    ///
+    /// Since reading a map is unlocked, it is very fast
+    ///
+    /// test bench_sync_hash_map_read   ... bench:           8 ns/iter (+/- 0)
     /// # Examples
     ///
     /// ```
-    /// use cogo::std::sync::{SyncBtreeMap};
+    /// use cogo::std::sync::{SyncHashMap};
     ///
-    /// let map = SyncBtreeMap::new();
+    /// let map = SyncHashMap::new();
     /// map.insert(1, "a");
     /// assert_eq!(*map.get(&1).unwrap(), "a");
     /// assert_eq!(map.get(&2).is_none(), true);
@@ -251,9 +260,8 @@ pub unsafe fn change_lifetime_mut<'a, 'b, T>(x: &'a mut T) -> &'b mut T {
     &mut *(x as *mut T)
 }
 
-
 pub struct SyncMapRefMut<'a, K, V> {
-    g: MutexGuard<'a, Map<K, V>>,
+    g: MutexGuard<'a, HashMap<K, V>>,
     value: Option<&'a mut V>,
 }
 
@@ -313,12 +321,12 @@ impl<'a, K, V> Iterator for Iter<'a, K, V> {
 }
 
 pub struct IterMut<'a, K, V> {
-    g: MutexGuard<'a, Map<K, V>>,
-    inner: Option<MapIterMut<'a, K, V>>,
+    g: MutexGuard<'a, HashMap<K, V>>,
+    inner: Option<std::collections::hash_map::IterMut<'a, K, V>>,
 }
 
 impl<'a, K, V> Deref for IterMut<'a, K, V> {
-    type Target = MapIterMut<'a, K, V>;
+    type Target = std::collections::hash_map::IterMut<'a, K, V>;
 
     fn deref(&self) -> &Self::Target {
         self.inner.as_ref().unwrap()
@@ -369,6 +377,7 @@ impl<K, V> IntoIterator for SyncMapImpl<K, V> where
     }
 }
 
+
 impl<K, V> From<Map<K, V>> for SyncMapImpl<K, V> {
     fn from(arg: Map<K, V>) -> Self {
         Self::from(arg)
@@ -386,9 +395,9 @@ impl<K, V> serde::Serialize for SyncMapImpl<K, V> where K: Eq + Hash + Clone + S
     }
 }
 
-impl<'de, K, V> serde::Deserialize<'de> for SyncMapImpl<K, V> where K: Eq + Hash + Clone + Ord + serde::Deserialize<'de>, V: serde::Deserialize<'de> {
+impl<'de, K, V> serde::Deserialize<'de> for SyncMapImpl<K, V> where K: Eq + Hash + Clone + serde::Deserialize<'de> + std::cmp::Ord, V: serde::Deserialize<'de> {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: Deserializer<'de> {
-        let m = Map::deserialize(deserializer)?;
+        let m = HashMap::deserialize(deserializer)?;
         Ok(Self::from(m))
     }
 }
@@ -425,6 +434,41 @@ mod test {
         let m = SyncBtreeMap::<i32, i32>::new();
         let insert = m.insert(1, 2);
         assert_eq!(insert.is_none(), true);
+    }
+
+    #[test]
+    pub fn test_insert2() {
+        let m = Arc::new(SyncBtreeMap::<String, String>::new());
+        m.insert("/".to_string(), "1".to_string());
+        m.insert("/js".to_string(), "2".to_string());
+        m.insert("/fn".to_string(), "3".to_string());
+
+        assert_eq!(&"1".to_string(), m.get("/").unwrap());
+        assert_eq!(&"2".to_string(), m.get("/js").unwrap());
+        assert_eq!(&"3".to_string(), m.get("/fn").unwrap());
+    }
+
+    #[test]
+    pub fn test_insert3() {
+        let m = Arc::new(SyncBtreeMap::<i32, i32>::new());
+        let wg = WaitGroup::new();
+        for _ in 0..100000 {
+            let wg1 = wg.clone();
+            let wg2 = wg.clone();
+            let m1 = m.clone();
+            let m2 = m.clone();
+            go!(move ||{
+                 m1.remove(&1);
+                 let insert = m1.insert(1, 2);
+                 drop(wg1);
+            });
+            go!(move ||{
+                 m2.remove(&1);
+                 let insert = m2.insert(1, 2);
+                 drop(wg2);
+            });
+        }
+        wg.wait();
     }
 
     #[test]
