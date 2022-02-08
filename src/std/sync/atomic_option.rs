@@ -6,21 +6,6 @@ use std::sync::Arc;
 use crossbeam_utils::atomic::AtomicCell;
 use generator::Generator;
 
-#[macro_export]
-macro_rules! impl_wrapper {
-    ($t:ty) => {
-        impl $crate::std::sync::Wrapped for $t {
-    type Data = $t;
-    fn into_raw(self) -> *mut Self::Data {
-        Box::into_raw(Box::new(self)) as _
-    }
-    unsafe fn from_raw(p: *mut Self::Data) -> $t {
-        *Box::from_raw(p as _)
-    }
-}
-    };
-}
-
 pub struct AtomicOption<T> {
     inner: AtomicCell<Option<T>>,
 }
