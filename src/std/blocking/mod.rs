@@ -4,6 +4,14 @@ use crate::std::sync::channel;
 use crate::std::errors::Result;
 
 
+/// will spawn a thread to doing and return value by channel
+/// for example:
+/// ```rust
+///     let v = cogo::spawn_blocking!(|| {
+///         return 1;
+///     });
+///     assert_eq!(v.unwrap(), 1);
+/// ```
 #[macro_export]
 macro_rules! spawn_blocking {
     ($task:expr) => {
@@ -16,8 +24,7 @@ macro_rules! spawn_blocking {
 }
 
 
-
-/// will spawn an thread to doing and return value by channel
+/// will spawn a thread to doing and return value by channel
 pub fn spawn_blocking<F, T>(f: F) -> Result<T>
     where
         F: FnOnce() -> T,
