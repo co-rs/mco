@@ -60,7 +60,7 @@ impl<'a> EventSource for TcpListenerAccept<'a> {
         let cancel = handle.get_cancel();
         let io_data = (*self.io_data).clone();
         // if there is no timer we don't need to call add_io_timer
-        self.io_data.co.swap(co, Ordering::Release);
+        self.io_data.co.swap(co);
 
         // there is event happened
         if io_data.io_flag.load(Ordering::Acquire) {

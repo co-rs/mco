@@ -70,7 +70,7 @@ impl<'a> EventSource for SocketWriteVectored<'a> {
                 .get_selector()
                 .add_io_timer(self.io_data, dur);
         }
-        self.io_data.co.swap(co, Ordering::Release);
+        self.io_data.co.swap(co);
 
         // there is event, re-run the coroutine
         if io_data.io_flag.load(Ordering::Acquire) {
