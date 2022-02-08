@@ -131,3 +131,8 @@ should follow when writing programs that use coroutines:
 cogo::config().set_stack_size(8*1024);//default is 4k=4*1024,Multiple of 4kb is recommended
 ```
 
+* We are in urgent need of financial support and cooperation, welcome to contact us
+* email: zhuxiujia@qq.com
+* wechat: zxj347284221
+* Financial support:
+  <img style="width: 400px;height: 600px;" width="400" height="600" src="https://raw.githubusercontent.com/rbatis/rbatis.io/master/docs/_media/wx_account.png" alt="zxj347284221" />
