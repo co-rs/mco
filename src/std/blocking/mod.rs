@@ -9,6 +9,7 @@ use crate::std::errors::Result;
 /// for example:
 /// ```rust
 ///     let v = cogo::spawn_blocking!(|| {
+///         //do something Heavy CPU arithmetic and blocking APIS
 ///         return 1;
 ///     });
 ///     assert_eq!(v.unwrap(), 1);
@@ -26,6 +27,14 @@ macro_rules! spawn_blocking {
 
 
 /// will spawn a thread to doing and return value by channel
+/// for example:
+/// ```rust
+///     let v = cogo::std::blocking::spawn_blocking(|| {
+///         //do something Heavy CPU arithmetic and blocking APIS
+///         return 1;
+///     });
+///     assert_eq!(v.unwrap(), 1);
+/// ```
 pub fn spawn_blocking<F, T>(f: F) -> Result<T>
     where
         F: FnOnce() -> T,
