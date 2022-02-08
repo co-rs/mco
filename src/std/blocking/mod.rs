@@ -41,7 +41,7 @@ pub fn spawn_blocking<F, T>(f: F) -> Result<T>
         }));
         s.send(Ok(f()));
     });
-    return r.recv().unwrap();
+    return r.recv()?;
 }
 
 

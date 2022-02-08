@@ -1,5 +1,6 @@
 use std::fmt::{self, Debug, Display, Formatter};
 use std::io::ErrorKind::UnexpectedEof;
+use std::sync::mpsc::RecvError;
 use crate::std::io::io;
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -115,5 +116,17 @@ impl From<time::error::InvalidFormatDescription> for Error {
 impl From<time::error::Parse> for Error {
     fn from(arg: time::error::Parse) -> Self {
         return new(arg.to_string());
+    }
+}
+
+impl From<std::sync::mpsc::RecvError> for Error{
+    fn from(e: RecvError) -> Self {
+       return new(e.to_string());
+    }
+}
+
+impl <T>From<std::sync::mpsc::SendError<T>> for Error{
+    fn from(e: std::sync::mpsc::SendError<T>) -> Self {
+        return new(e.to_string());
     }
 }
