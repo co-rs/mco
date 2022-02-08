@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+use std::panic::set_hook;
 use crate::std::errors::Error;
 use crate::std::sync::channel;
 use crate::std::errors::Result;
@@ -33,14 +34,12 @@ pub fn spawn_blocking<F, T>(f: F) -> Result<T>
 {
     let (s, r) = channel::<Result<T>>();
     std::thread::spawn(move || {
-        let mut finish = RefCell::new(false);
-        defer!(||{
-           if finish.borrow().eq(&false){
-                s.send(Err(Error::from("spawn_blocking panic!")));
-            }
-        });
+        let send_e = s.clone();
+        set_hook(Box::new(move |panic_info|{
+            let e= err!("{}",panic_info.payload().downcast_ref::<&str>().unwrap_or(&"spawn_blocking panic!"));
+            send_e.send(Err(e));
+        }));
         s.send(Ok(f()));
-        *finish.borrow_mut() = true;
     });
     return r.recv().unwrap();
 }
