@@ -74,7 +74,7 @@ fn timeout_handler(data: TimerData) {
     event_data.timer.borrow_mut().take();
 
     // get and check the coroutine
-    let mut co = match event_data.co.take(Ordering::Relaxed) {
+    let mut co = match event_data.co.take() {
         Some(co) => co,
         None => return,
     };
@@ -126,7 +126,7 @@ impl EventData {
     #[inline]
     pub fn schedule(&self) {
         //info!("event schedul");
-        let co = match self.co.take(Ordering::Acquire) {
+        let co = match self.co.take() {
             None => return, // it's already take by selector
             Some(co) => co,
         };

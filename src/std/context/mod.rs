@@ -72,11 +72,11 @@ impl Canceler for CancelCtx {
         if self.err.is_some() {
             return;// already canceled
         }
-        self.err.swap(err.clone().unwrap(), Ordering::SeqCst);
+        self.err.swap(err.clone().unwrap());
         if let Some(v) = self.done.get() {
             self.send.send(());
         } else {
-            self.done.swap(CLOSE_RECV.clone(), Ordering::SeqCst);
+            self.done.swap(CLOSE_RECV.clone());
         }
         for (_, mut v) in self.children.iter_mut() {
             v.cancel(err.clone());

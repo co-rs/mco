@@ -1,6 +1,9 @@
+use std::borrow::Borrow;
+use std::fmt::{Debug, Formatter};
 use std::ptr;
 use std::sync::atomic::{AtomicPtr, Ordering};
 use std::sync::Arc;
+use crossbeam_utils::atomic::AtomicCell;
 
 use generator::Generator;
 
@@ -11,15 +14,6 @@ pub trait Wrapped {
     unsafe fn from_raw(_: *mut Self::Data) -> Self;
 }
 
-// impl<T> Wrapped for T {
-//     default type Data = T;
-//     default fn into_raw(self) -> *mut Self::Data {
-//         Box::into_raw(Box::new(self)) as _
-//     }
-//     default unsafe fn from_raw(p: *mut Self::Data) -> T {
-//         *Box::from_raw(p as _)
-//     }
-// }
 
 #[macro_export]
 macro_rules! impl_wrapper {
@@ -77,80 +71,94 @@ impl<'a, A, T> Wrapped for Generator<'a, A, T> {
     }
 }
 
-#[derive(Debug)]
-pub struct AtomicOption<T: Wrapped> {
-    inner: AtomicPtr<T::Data>,
+pub struct AtomicOption<T> {
+    inner: AtomicCell<Option<T>>,
 }
 
-unsafe impl<T: Wrapped + Send> Send for AtomicOption<T> {}
-
-unsafe impl<T: Wrapped + Send> Sync for AtomicOption<T> {}
-
-impl<T: Wrapped> AtomicOption<T> {
-    pub fn none() -> AtomicOption<T> {
-        AtomicOption {
-            inner: AtomicPtr::new(ptr::null_mut()),
-        }
-    }
-
-    pub fn some(t: T) -> AtomicOption<T> {
-        AtomicOption {
-            inner: AtomicPtr::new(t.into_raw()),
-        }
-    }
-
-    #[inline]
-    fn swap_inner(&self, ptr: *mut T::Data, order: Ordering) -> Option<T> {
-        let old = self.inner.swap(ptr, order);
-        if old.is_null() {
-            None
-        } else {
-            Some(unsafe { T::from_raw(old) })
-        }
-    }
-
-    #[inline]
-    pub fn swap(&self, t: T, order: Ordering) -> Option<T> {
-        self.swap_inner(t.into_raw(), order)
-    }
-
-    #[inline]
-    pub fn take(&self, order: Ordering) -> Option<T> {
-        self.swap_inner(ptr::null_mut(), order)
-    }
-
-    #[inline]
-    pub fn is_none(&self) -> bool {
-        self.inner.load(Ordering::Acquire).is_null()
-    }
-
-    #[inline]
-    pub fn is_some(&self) -> bool {
-        !self.is_none()
-    }
-
-
-    #[inline]
-    pub fn get(&self) -> Option<&<T as Wrapped>::Data> {
-        unsafe {
-            let s = self.inner.load(Ordering::Acquire);
-            if s.is_null() {
-                return None;
-            } else {
-                return s.as_ref();
+impl<T: std::fmt::Debug> Debug for AtomicOption<T> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self.get() {
+            None => {
+                f.debug_struct("AtomicOption")
+                    .field("inner", &Option::<T>::None)
+                    .finish()
+            }
+            Some(s) => {
+                f.debug_struct("AtomicOption")
+                    .field("inner", s)
+                    .finish()
             }
         }
     }
 }
 
-impl<T: Wrapped> Default for AtomicOption<T> {
+unsafe impl<T> Send for AtomicOption<T> {}
+
+unsafe impl<T> Sync for AtomicOption<T> {}
+
+impl<T> AtomicOption<T> {
+    pub fn none() -> AtomicOption<T> {
+        AtomicOption {
+            inner: AtomicCell::new(None),
+        }
+    }
+
+    pub fn some(t: T) -> AtomicOption<T> {
+        AtomicOption {
+            inner: AtomicCell::new(Some(t)),
+        }
+    }
+
+    #[inline]
+    pub fn store(&self, t: T) {
+        self.inner.store(Some(t))
+    }
+
+    #[inline]
+    pub fn swap(&self, t: T) -> Option<T> {
+        self.inner.swap(Some(t))
+    }
+
+    #[inline]
+    pub fn take(&self) -> Option<T> {
+        self.inner.take()
+    }
+
+    #[inline]
+    pub fn is_none(&self) -> bool {
+        unsafe {
+            (&(*self.inner.borrow().as_ptr())).is_none()
+        }
+    }
+
+    #[inline]
+    pub fn is_some(&self) -> bool {
+        unsafe {
+            (&(*self.inner.borrow().as_ptr())).is_some()
+        }
+    }
+
+    #[inline]
+    pub fn get(&self) -> Option<&T> {
+        match unsafe { (&(*self.inner.borrow().as_ptr())) } {
+            None => {
+                None
+            }
+            Some(v) => {
+                Some(v)
+            }
+        }
+    }
+}
+
+impl<T> Default for AtomicOption<T> {
     fn default() -> Self {
         Self::none()
     }
 }
 
-impl<T: Wrapped> Drop for AtomicOption<T> {
+impl<T> Drop for AtomicOption<T> {
     fn drop(&mut self) {
-        self.take(Ordering::Acquire);
+        self.inner.store(None)
     }
 }

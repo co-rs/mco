@@ -100,9 +100,9 @@ impl<T: CancelIo> CancelImpl<T> {
     // async cancel for a coroutine
     pub unsafe fn cancel(&self) {
         self.state.fetch_or(1, Ordering::Release);
-        match self.co.take(Ordering::Acquire) {
+        match self.co.take() {
             Some(co) => {
-                co.take(Ordering::Acquire)
+                co.take()
                     .map(|mut co| {
                         // set the cancel result for the coroutine
                         set_co_para(&mut co, io::Error::new(io::ErrorKind::Other, "Canceled"));
@@ -129,13 +129,13 @@ impl<T: CancelIo> CancelImpl<T> {
     // set the cancel co data
     // can't both set_io and set_co
     pub fn set_co(&self, co: Arc<AtomicOption<CoroutineImpl>>) {
-        self.co.swap(co, Ordering::Release);
+        self.co.swap(co);
     }
 
     // clear the cancel io data
     // should be called after io completion
     pub fn clear(&self) {
-        if self.co.take(Ordering::Acquire).is_none() {
+        if self.co.take().is_none() {
             self.io.clear();
         }
     }

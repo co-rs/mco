@@ -16,16 +16,16 @@ impl CancelIo for CancelIoImpl {
     }
 
     fn set(&self, data: Arc<EventData>) {
-        self.0.swap(data, Ordering::Release);
+        self.0.swap(data);
     }
 
     fn clear(&self) {
-        self.0.take(Ordering::Relaxed);
+        self.0.take();
     }
 
     unsafe fn cancel(&self) {
-        if let Some(e) = self.0.take(Ordering::Acquire) {
-            if let Some(co) = e.co.take(Ordering::Acquire) {
+        if let Some(e) = self.0.take() {
+            if let Some(co) = e.co.take() {
                 get_scheduler().schedule(co);
             }
         }
