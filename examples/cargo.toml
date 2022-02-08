@@ -125,6 +125,10 @@ path = "src/context.rs"
 name = "error"
 path = "src/error.rs"
 
+[[bin]]
+name = "blocking"
+path = "src/blocking.rs"
+
 [profile.release]
 lto = true
 opt-level = 3
