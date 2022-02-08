@@ -4,16 +4,7 @@ use std::ptr;
 use std::sync::atomic::{AtomicPtr, Ordering};
 use std::sync::Arc;
 use crossbeam_utils::atomic::AtomicCell;
-
 use generator::Generator;
-
-// heap based wrapper for a type
-pub trait Wrapped {
-    type Data;
-    fn into_raw(self) -> *mut Self::Data;
-    unsafe fn from_raw(_: *mut Self::Data) -> Self;
-}
-
 
 #[macro_export]
 macro_rules! impl_wrapper {
@@ -28,47 +19,6 @@ macro_rules! impl_wrapper {
     }
 }
     };
-}
-
-
-impl<T> Wrapped for *mut T {
-    type Data = T;
-    fn into_raw(self) -> *mut T {
-        self
-    }
-    unsafe fn from_raw(p: *mut T) -> *mut T {
-        p
-    }
-}
-
-impl<T> Wrapped for Arc<T> {
-    type Data = T;
-    fn into_raw(self) -> *mut T {
-        Arc::into_raw(self) as *mut _
-    }
-    unsafe fn from_raw(p: *mut T) -> Arc<T> {
-        Arc::from_raw(p)
-    }
-}
-
-impl<T> Wrapped for Box<T> {
-    type Data = T;
-    fn into_raw(self) -> *mut T {
-        Box::into_raw(self)
-    }
-    unsafe fn from_raw(p: *mut T) -> Box<T> {
-        Box::from_raw(p)
-    }
-}
-
-impl<'a, A, T> Wrapped for Generator<'a, A, T> {
-    type Data = usize;
-    fn into_raw(self) -> *mut usize {
-        Generator::into_raw(self)
-    }
-    unsafe fn from_raw(p: *mut usize) -> Self {
-        Generator::from_raw(p)
-    }
 }
 
 pub struct AtomicOption<T> {

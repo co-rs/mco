@@ -8,7 +8,7 @@ use crate::std::time::time::Time;
 use crate::std::errors::{Error, Result};
 use crate::std::lazy::sync::Lazy;
 use crate::std::map::SyncHashMap;
-use crate::std::sync::{AtomicOption, Mutex, Receiver, Sender, Wrapped};
+use crate::std::sync::{AtomicOption, Mutex, Receiver, Sender};
 
 /// A Context carries a deadline, a cancellation signal, and other values across
 /// API boundaries.
@@ -42,10 +42,6 @@ pub struct CancelCtx {
 unsafe impl Send for CancelCtx {}
 
 unsafe impl Sync for CancelCtx {}
-
-
-impl_wrapper!(Receiver<()>);
-impl_wrapper!(Error);
 
 impl CancelCtx {
     pub fn new_arc(parent: Option<Box<dyn Context>>) -> Arc<Self> {
