@@ -148,7 +148,7 @@ impl Coroutine {
     /// This function would force a coroutine exist when next scheduling
     /// And would drop all the resource tha the coroutine currently holding
     /// This may have unexpected side effects if you are not fully aware it
-    pub unsafe fn cancel(&self) {
+    pub fn cancel(&self) {
         self.inner.cancel.cancel();
     }
 

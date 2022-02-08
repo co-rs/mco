@@ -1,5 +1,6 @@
-use cogo::coroutine::{Builder, Spawn, yield_now};
-use cogo::go;
+use std::time::Duration;
+use cogo::coroutine::{Builder, sleep, Spawn, yield_now};
+use cogo::{defer, go};
 
 fn main() {
     go!(||{
@@ -44,4 +45,15 @@ fn main() {
         }
         println!("bye from parent");
     }).join().unwrap();
+
+    sleep(Duration::from_secs(1));
+    let g = go!(||{
+        defer!(||{ println!("cancel done!")});
+        for idx in 0..1000{
+            sleep(Duration::from_secs(1));
+            println!("{}",idx);
+        }
+    });
+    sleep(Duration::from_secs(2));
+    g.coroutine().cancel();
 }

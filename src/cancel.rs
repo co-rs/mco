@@ -33,7 +33,7 @@ pub trait CancelIo {
     fn new() -> Self;
     fn set(&self, _: Self::Data);
     fn clear(&self);
-    unsafe fn cancel(&self);
+    fn cancel(&self) -> Result<(),std::io::Error>;
 }
 
 // each coroutine has it's own Cancel data
@@ -98,7 +98,7 @@ impl<T: CancelIo> CancelImpl<T> {
     }
 
     // async cancel for a coroutine
-    pub unsafe fn cancel(&self) {
+    pub fn cancel(&self) -> Result<(),std::io::Error> {
         self.state.fetch_or(1, Ordering::Release);
         match self.co.take() {
             Some(co) => {
@@ -108,9 +108,10 @@ impl<T: CancelIo> CancelImpl<T> {
                         set_co_para(&mut co, io::Error::new(io::ErrorKind::Other, "Canceled"));
                         get_scheduler().schedule(co);
                     })
-                    .unwrap_or(())
+                    .unwrap_or(());
+                Ok(())
             }
-            None => self.io.cancel(),
+            None => Ok(self.io.cancel()?),
         }
     }
 

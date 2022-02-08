@@ -1,4 +1,7 @@
 use std::io;
+use std::io::ErrorKind;
+use std::panic::catch_unwind;
+use std::sync::LockResult;
 
 use crate::cancel::CancelIo;
 use crate::std::sync::Mutex;
@@ -16,13 +19,19 @@ impl CancelIoData {
         }
     }
 
-    pub unsafe fn cancel(&self) -> io::Result<()> {
+    pub fn cancel(&self) -> io::Result<()> {
         use winapi::um::ioapiset::CancelIoEx;
-
-        let ev = &mut *self.ev_data;
+        if self.ev_data.is_null() {
+            return Err(io::Error::new(ErrorKind::NotFound, "ev_data is null"));
+        }
+        let ev = unsafe { &mut *self.ev_data };
         let handle = ev.handle;
         let overlapped = ev.get_overlapped();
-        let ret = CancelIoEx(handle, overlapped);
+        if handle.is_null() {
+            return Err(io::Error::new(ErrorKind::NotFound, "ev_data.handle is null"));
+        }
+        //safety
+        let ret = unsafe { CancelIoEx(handle, overlapped) };
         if ret == 0 {
             let err = io::Error::last_os_error();
             error!("cancel err={:?}", err);
@@ -53,11 +62,24 @@ impl CancelIo for CancelIoImpl {
         *self.0.lock().expect("failed to get CancelIo lock") = None;
     }
 
-    unsafe fn cancel(&self) {
-        self.0
-            .lock()
-            .expect("failed to get CancelIo lock")
-            .take()
-            .map(|d| d.cancel());
+    fn cancel(&self) -> Result<(), std::io::Error> {
+        match self.0.lock() {
+            Ok(mut v) => {
+                v.take().map(|d| {
+                    match d.cancel() {
+                        Ok(_) => {
+                            return Ok(());
+                        }
+                        Err(e) => {
+                            return Err("failed to get CancelIo lock".to_string());
+                        }
+                    }
+                });
+                return Ok(());
+            }
+            Err(e) => {
+                return Err(std::io::Error::new(ErrorKind::Other,e.to_string()));
+            }
+        }
     }
 }
