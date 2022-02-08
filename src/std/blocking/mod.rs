@@ -3,6 +3,20 @@ use crate::std::errors::Error;
 use crate::std::sync::channel;
 use crate::std::errors::Result;
 
+
+#[macro_export]
+macro_rules! spawn_blocking {
+    ($task:expr) => {
+        if true{
+            $crate::std::blocking::spawn_blocking($task)
+        }else{
+            Ok($task())
+        }
+    };
+}
+
+
+
 /// will spawn an thread to doing and return value by channel
 pub fn spawn_blocking<F, T>(f: F) -> Result<T>
     where
