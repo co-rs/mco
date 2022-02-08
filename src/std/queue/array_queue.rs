@@ -433,6 +433,46 @@ impl<T> fmt::Debug for ArrayQueue<T> {
     }
 }
 
+#[derive(Debug)]
+pub struct IntoIter<T> {
+    value: ArrayQueue<T>,
+}
+
+impl<T> Iterator for IntoIter<T> {
+    type Item = T;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        let value = &mut self.value;
+        let head = *value.head.get_mut();
+        if value.head.get_mut() != value.tail.get_mut() {
+            let index = head & (value.one_lap - 1);
+            let lap = head & !(value.one_lap - 1);
+            // SAFETY: We have mutable access to this, so we can read without
+            // worrying about concurrency. Furthermore, we know this is
+            // initialized because it is the value pointed at by `value.head`
+            // and this is a non-empty queue.
+            let val = unsafe {
+                debug_assert!(index < value.buffer.len());
+                let slot = value.buffer.get_unchecked_mut(index);
+                slot.value.get().read().assume_init()
+            };
+            let new = if index + 1 < value.cap {
+                // Same lap, incremented index.
+                // Set to `{ lap: lap, index: index + 1 }`.
+                head + 1
+            } else {
+                // One lap forward, index wraps around to zero.
+                // Set to `{ lap: lap.wrapping_add(1), index: 0 }`.
+                lap.wrapping_add(value.one_lap)
+            };
+            *value.head.get_mut() = new;
+            Option::Some(val)
+        } else {
+            Option::None
+        }
+    }
+}
+
 
 #[cfg(test)]
 mod test {
