@@ -27,4 +27,6 @@ Cargo.lock
 #log
 *.log
 
+*.DS_Store
+
 
