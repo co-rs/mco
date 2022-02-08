@@ -1,6 +1,7 @@
 use std::alloc::Layout;
 use std::fmt::{Debug, Display, Formatter};
 use std::ops::{Add, Deref, DerefMut, Sub};
+use std::str::FromStr;
 use std::time::SystemTime;
 use serde::de::Error;
 use time::{format_description, OffsetDateTime};
@@ -314,6 +315,15 @@ impl<'de> serde::Deserialize<'de> for Time {
         }
     }
 }
+
+impl FromStr for Time{
+    type Err = crate::std::errors::Error;
+
+    fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
+        Time::parse(RFC3339Nano,s)
+    }
+}
+
 
 // A month specifies a month of the year (January = 1, ...).
 #[derive(Eq, PartialEq, Debug, PartialOrd)]
