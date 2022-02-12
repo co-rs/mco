@@ -1,5 +1,5 @@
 use std::time::Duration;
-use cogo::coroutine::{Builder, sleep, Spawn, yield_now};
+use cogo::coroutine::{Builder, sleep, Spawn, spawn, yield_now};
 use cogo::{defer, go};
 
 fn main() {
@@ -9,22 +9,22 @@ fn main() {
     go!(2*4096,||{
        println!("go with stack size: {}",cogo::coroutine::current().stack_size());
     });
-    (2 * 4096).go(|| {
+    (2 * 4096).spawn(|| {
         println!("go with stack size: {}", cogo::coroutine::current().stack_size());
     });
     go!("go",||{
        println!("go with name: {}",cogo::coroutine::current().name().unwrap_or_default());
     });
-    "go".go(|| {
+    "go".spawn(|| {
         println!("go with name: {}", cogo::coroutine::current().name().unwrap_or_default());
     });
     go!(Builder::new(),||{
        println!("go with Builder");
     });
-    Builder::new().go(|| {
+    Builder::new().spawn(|| {
         println!("go with Builder::spawn");
     });
-    go(|| {
+    spawn(|| {
         println!("go with method spawn");
     });
     go!(move || {

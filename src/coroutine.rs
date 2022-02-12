@@ -15,14 +15,6 @@ pub trait Spawn {
         where
             F: FnOnce() -> T + Send + 'static,
             T: Send + 'static;
-
-    /// spawn a new coroutine(use method spawn)
-    fn go<F, T>(self, f: F) -> JoinHandle<T>
-        where
-            F: FnOnce() -> T + Send + 'static,
-            T: Send + 'static, Self: Sized {
-        self.spawn(f)
-    }
 }
 
 impl Spawn for i32 {
