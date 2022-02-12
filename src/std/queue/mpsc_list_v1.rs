@@ -239,7 +239,7 @@ impl<T> Queue<T> {
             let mut i = 0;
             loop {
                 next = (*tail).next.load(Ordering::Acquire);
-                if !next.is_null() {
+                if !next.is_null() && (*next).value.is_some(){
                     break;
                 }
                 i += 1;
