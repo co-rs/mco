@@ -10,6 +10,8 @@ mod sync_flag;
 mod wait_group;
 mod sync_map;
 mod once;
+mod sync_vec;
+mod sync_slice;
 
 pub(crate) mod atomic_dur;
 #[cfg(not(unix))]
@@ -28,3 +30,5 @@ pub use self::wait_group::*;
 pub use self::sync_map::*;
 pub use self::once::*;
 pub use self::channel::*;
+pub use self::sync_vec::*;
+pub use self::sync_slice::*;
