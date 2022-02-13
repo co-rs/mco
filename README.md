@@ -63,7 +63,9 @@ massive concurrent programs. It can be thought as the Rust version of the popula
 * Support Ticker(like golang)
 
 ## Usage
-
+```toml
+cogo = "0.1"
+```
 A naive echo server implemented with Cogo:
 
 ```rust
