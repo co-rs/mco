@@ -16,7 +16,7 @@ generator = "0.7"
 
 ## Usage
 ```rust
-use generator::{done, Gn};
+use cogo_gen::{done, Gn};
 
 fn main() {
     let g = Gn::new_scoped(|mut s| {

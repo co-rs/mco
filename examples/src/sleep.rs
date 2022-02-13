@@ -1,10 +1,9 @@
-extern crate generator;
 #[macro_use]
 extern crate cogo;
 
 use std::time::Duration;
 
-use generator::Gn;
+use cogo::cogo_gen::Gn;
 use cogo::coroutine;
 
 fn main() {

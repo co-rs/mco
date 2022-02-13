@@ -1,12 +1,12 @@
 use std::thread;
 use std::time::{Duration, Instant};
 
-extern crate generator;
+extern crate cogo_gen;
 #[macro_use]
 extern crate cogo;
 
 use crate::coroutine::yield_now;
-use generator::Gn;
+use cogo_gen::Gn;
 use cogo::coroutine;
 
 #[test]
@@ -42,7 +42,7 @@ fn cancel_coroutine() {
     match j.join() {
         Ok(_) => panic!("test should return panic"),
         Err(panic) => {
-            use generator::Error;
+            use cogo_gen::Error;
             match panic.downcast_ref::<Error>() {
                 Some(&Error::Cancel) => return println!("coroutine cancelled"),
                 _ => panic!("panic type wrong"),
@@ -73,7 +73,7 @@ fn cancel_io_coroutine() {
     match j.join() {
         Ok(_) => panic!("test should return panic"),
         Err(panic) => {
-            use generator::Error;
+            use cogo_gen::Error;
             match panic.downcast_ref::<Error>() {
                 Some(&Error::Cancel) => return println!("coroutine cancelled"),
                 _ => panic!("panic type wrong"),

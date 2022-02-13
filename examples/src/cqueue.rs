@@ -1,4 +1,3 @@
-extern crate generator;
 #[macro_use]
 extern crate cogo;
 
@@ -23,7 +22,7 @@ fn main() {
 
     // create the event producers
     for i in 0..10 {
-        let g = generator::Gn::new_scoped(move |mut s| {
+        let g = cogo::cogo_gen::Gn::new_scoped(move |mut s| {
             let mut data = 10;
             loop {
                 coroutine::sleep(Duration::from_millis(500 * (i + 1)));

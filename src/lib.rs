@@ -44,6 +44,8 @@ mod scheduler;
 mod scoped;
 mod timeout_list;
 mod yield_now;
+#[macro_use]
+pub extern crate cogo_gen;
 
 pub mod coroutine;
 pub mod cqueue;
