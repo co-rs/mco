@@ -1,6 +1,6 @@
 # cogo
 
-<img style="width: 100px;height: 100px;" width="100" height="100" src="docs/logo.png" />
+<img style="width: 100px;height: 100px;" width="100" height="100" src="docs/imgs/logo.png" />
 
 Cogo is a high-performance library for programming stackful coroutines with which you can easily develop and maintain
 massive concurrent programs. It can be thought as the Rust version of the popular [Goroutine][go].
@@ -12,7 +12,7 @@ massive concurrent programs. It can be thought as the Rust version of the popula
 * platform(16CPU/32 thread AMD Ryzen 9 5950X,32GB mem,Os:Unbutu-20.04)
 * [TechEmpowerBench fork project](https://github.com/zhuxiujia/FrameworkBenchmarks)
 
-![per](docs/629a066aaa37b4c295fa794c5ebdf31.png)
+![per](docs/imgs/629a066aaa37b4c295fa794c5ebdf31.png)
 
 # cogo crates
 
