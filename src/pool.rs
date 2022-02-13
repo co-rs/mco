@@ -1,7 +1,7 @@
 use crate::config::config;
 use crate::coroutine_impl::CoroutineImpl;
 use crossbeam::queue::ArrayQueue as Queue;
-use generator::Gn;
+use cogo_gen::Gn;
 
 /// the raw coroutine pool, with stack and register prepared
 /// you need to tack care of the local storage

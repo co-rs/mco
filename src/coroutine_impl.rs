@@ -11,7 +11,7 @@ use crate::local::CoroutineLocal;
 use crate::park::Park;
 use crate::scheduler::get_scheduler;
 use crossbeam::atomic::AtomicCell;
-use generator::{Generator, Gn};
+use cogo_gen::{Generator, Gn};
 use crate::err;
 
 /// /////////////////////////////////////////////////////////////////////////////

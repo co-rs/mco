@@ -39,7 +39,7 @@ type TimerThread = timeout_list::TimerThread<TimerData>;
 
 // filter out the cancel panic, don't print anything for it
 fn filter_cancel_panic() {
-    use generator::Error;
+    use cogo_gen::Error;
     use std::panic;
     if thread::panicking() {
         return;

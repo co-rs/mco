@@ -203,7 +203,7 @@ impl Cqueue {
             return;
         }
 
-        use generator::Error;
+        use cogo_gen::Error;
         match self.selectors.lock().unwrap()[id]
             .take()
             .expect("join handler not set")

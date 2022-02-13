@@ -4,7 +4,7 @@ use std::ptr;
 use std::sync::atomic::{AtomicPtr, Ordering};
 use std::sync::Arc;
 use crossbeam_utils::atomic::AtomicCell;
-use generator::Generator;
+use cogo_gen::Generator;
 
 pub struct AtomicOption<T> {
     inner: AtomicCell<Option<T>>,
