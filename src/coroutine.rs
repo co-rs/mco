@@ -43,17 +43,13 @@ impl Spawn for (String, i32) {
 
 impl Spawn for String {
     fn spawn<F, T>(self, f: F) -> JoinHandle<T> where F: FnOnce() -> T + Send + 'static, T: Send + 'static {
-        unsafe {
-            Builder::new().name(self).spawn(f)
-        }
+        Builder::new().name(self).spawn(f)
     }
 }
 
 impl Spawn for &String {
     fn spawn<F, T>(self, f: F) -> JoinHandle<T> where F: FnOnce() -> T + Send + 'static, T: Send + 'static {
-        unsafe {
-            Builder::new().name(self.to_owned()).spawn(f)
-        }
+        Builder::new().name(self.to_owned()).spawn(f)
     }
 }
 
