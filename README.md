@@ -31,7 +31,7 @@ massive concurrent programs. It can be thought as the Rust version of the popula
 * [cogo-http](https://github.com/co-rs/cogo-http) High-performance coroutine HTTP server and client
 * [cdbc](https://github.com/co-rs/cdbc) Database Drivers include mysql, Postgres, AND SQLite
 * [fast_log](https://github.com/co-rs/fast_log) High-performance log impl
-* [cogo-redis](https://github.com/co-rs/cogo-redis) TODO: an redis client.
+* [cogo-redis](https://github.com/co-rs/cogo-redis) Redis client for cogo
 * [cogo-grpc](https://github.com/co-rs/cogo-grpc) TODO: an grpc server/client.
 
 ## Features
