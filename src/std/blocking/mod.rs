@@ -42,14 +42,14 @@ pub fn spawn_blocking<F, T>(f: F) -> Result<T>
         T: Send + 'static,
 {
     let (s, r) = channel::<Result<T>>();
-    std::thread::spawn(move || {
+    std::thread::Builder::new().spawn(move || {
         let send_e = s.clone();
         set_hook(Box::new(move |panic_info|{
             let e= err!("{}",panic_info.payload().downcast_ref::<&str>().unwrap_or(&"spawn_blocking panic!"));
             send_e.send(Err(e));
         }));
         s.send(Ok(f()));
-    });
+    })?;
     return r.recv()?;
 }
 
