@@ -276,7 +276,7 @@ mod tests {
         let (tx, rx) = chan!();
         for _ in 0..10 {
             let tx = tx.clone();
-            go!(move || {
+            co!(move || {
                 for _ in 0..4 {
                     crate::coroutine::yield_now();
                 }
@@ -338,7 +338,7 @@ mod tests {
         // make sure someone's waiting inside the once via a force
         let (tx1, rx1) = chan!();
         let (tx2, rx2) = chan!();
-        let t1 = go!(move || {
+        let t1 = co!(move || {
             O.init(|| {
                 tx1.send(()).unwrap();
                 rx2.recv().unwrap();
@@ -348,7 +348,7 @@ mod tests {
         rx1.recv().unwrap();
 
         // put another waiter on the once
-        let t2 = go!(|| {
+        let t2 = co!(|| {
             let mut called = false;
             O.init(|| {
                 called = true;

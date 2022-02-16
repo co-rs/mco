@@ -11,7 +11,7 @@ use crate::local::CoroutineLocal;
 use crate::park::Park;
 use crate::scheduler::get_scheduler;
 use crossbeam::atomic::AtomicCell;
-use cogo_gen::{Generator, Gn};
+use mco_gen::{Generator, Gn};
 use crate::err;
 
 /// /////////////////////////////////////////////////////////////////////////////
@@ -197,7 +197,7 @@ impl fmt::Debug for Coroutine {
 /// # Examples
 ///
 /// ```
-/// use cogo::coroutine;
+/// use mco::coroutine;
 ///
 /// let builder = coroutine::Builder::new();
 /// let code = || {
@@ -331,7 +331,7 @@ impl Builder {
     /// # Examples
     ///
     /// ```
-    /// use cogo::coroutine;
+    /// use mco::coroutine;
     ///
     /// let builder = coroutine::Builder::new();
     ///
@@ -409,7 +409,7 @@ impl Builder {
 /// Creating a coroutine.
 ///
 /// ```
-/// use cogo::coroutine;
+/// use mco::coroutine;
 ///
 /// let handler =  {
 ///     coroutine::spawn(|| {

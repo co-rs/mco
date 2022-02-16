@@ -7,7 +7,7 @@ publish = false
 
 
 [dependencies]
-cogo = { path = "../" }
+mco = { path = "../" }
 bytes = "1.0"
 serde = { version = "1", features = ["derive"] }
 docopt = "1.0"

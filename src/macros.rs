@@ -4,7 +4,31 @@
 ///
 /// [`spawn`]: coroutine/fn.spawn.html
 #[macro_export]
-macro_rules! go {
+macro_rules! co {
+    // for free spawn
+    ($func:expr) => {{
+        unsafe { $crate::coroutine::spawn($func) }
+    }};
+
+    // for builder/scope spawn
+    ($builder:expr, $func:expr) => {{
+        use $crate::coroutine::Spawn;
+        unsafe { $builder.spawn($func) }
+    }};
+
+    // for cqueue add spawn
+    ($cqueue:expr, $token:expr, $func:expr) => {{
+        unsafe { $cqueue.add($token, $func) }
+    }};
+}
+
+/// macro used to spawn a coroutine
+///
+/// this macro is just a convenient wrapper for [`spawn`].
+///
+/// [`spawn`]: coroutine/fn.spawn.html
+#[macro_export]
+macro_rules! spawn {
     // for free spawn
     ($func:expr) => {{
         unsafe { $crate::coroutine::spawn($func) }
@@ -29,7 +53,7 @@ macro_rules! go {
 ///
 /// [`spawn`]: coroutine/fn.spawn.html
 #[macro_export]
-macro_rules! go_with {
+macro_rules! spawn_with {
     // for stack_size
     ($stack_size:expr, $func:expr) => {{
         fn _go_check<F, T>(stack_size: usize, f: F) -> F
@@ -67,7 +91,7 @@ macro_rules! go_with {
 #[macro_export]
 macro_rules! cqueue_add {
     ($cqueue:ident, $token:expr, $name:pat = $top:expr => $bottom:expr) => {{
-        $crate::go!($cqueue, $token, |es| loop {
+        $crate::co!($cqueue, $token, |es| loop {
             let $name = $top;
             es.send(es.get_token());
             $bottom
@@ -77,12 +101,12 @@ macro_rules! cqueue_add {
 
 /// macro used to create the select coroutine
 /// that will run only once, thus generate only one event
-/// use cogo::select;
+/// use mco::select;
 ///
 #[macro_export]
 macro_rules! cqueue_add_oneshot {
     ($cqueue:ident, $token:expr, $name:pat = $top:expr => $bottom:expr) => {{
-        $crate::go!($cqueue, $token, |es| {
+        $crate::co!($cqueue, $token, |es| {
             if let $name = $top{
                 $bottom
             }
@@ -95,7 +119,7 @@ macro_rules! cqueue_add_oneshot {
 /// it will return the index of which event happens first
 /// for example:
 /// ```rust
-/// use cogo::{chan, select};
+/// use mco::{chan, select};
 ///
 ///     let (s, r) = chan!();
 ///     s.send(1);
@@ -118,7 +142,7 @@ macro_rules! select {
 /// it will return the index of which event happens first
 /// for example:
 /// ```rust
-/// use cogo::{chan, select_token};
+/// use mco::{chan, select_token};
 ///
 ///     let (s, r) = chan!();
 ///     s.send(1);
@@ -150,7 +174,7 @@ macro_rules! select_token {
 /// macro used to join all scoped sub coroutines
 /// for example:
 /// ```rust
-/// use cogo::join;
+/// use mco::join;
 /// join!({  },
 ///       {  },
 ///       {  }
@@ -164,7 +188,7 @@ macro_rules! join {
         use $crate::coroutine;
         coroutine::scope(|s| {
             $(
-                $crate::go!(s, || $body);
+                $crate::co!(s, || $body);
             )+
         })
     })
@@ -179,7 +203,7 @@ macro_rules! join {
 /// so different coroutines will contain different values.
 /// for example:
 /// ```
-///     cogo::coroutine_local!(static FOO: i32 = 3);
+///     mco::coroutine_local!(static FOO: i32 = 3);
 ///
 ///     // can only be called in coroutine context
 ///     FOO.with(|f| {

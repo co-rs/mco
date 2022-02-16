@@ -1,9 +1,9 @@
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 
 use std::time::Duration;
 
-use cogo::{coroutine, cqueue};
+use mco::{coroutine, cqueue};
 
 // this is wrapper to work around the compile error
 // we are safe to share the data in bottom half since we run them orderly
@@ -22,7 +22,7 @@ fn main() {
 
     // create the event producers
     for i in 0..10 {
-        let g = cogo::cogo_gen::Gn::new_scoped(move |mut s| {
+        let g = mco::mco_gen::Gn::new_scoped(move |mut s| {
             let mut data = 10;
             loop {
                 coroutine::sleep(Duration::from_millis(500 * (i + 1)));
@@ -39,7 +39,7 @@ fn main() {
     cqueue::scope(|cqueue| {
         // registe select coroutines
         for t in 0..10 {
-            go!(cqueue, t, |es| {
+            co!(cqueue, t, |es| {
                 let mut last = 0;
                 let token = es.get_token();
                 while let Some(data) = gv[token].next() {

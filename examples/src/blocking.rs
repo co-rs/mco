@@ -1,4 +1,4 @@
-use cogo::{defer, spawn_blocking};
+use mco::{defer, spawn_blocking};
 
 fn main(){
     let v = spawn_blocking!(|| {

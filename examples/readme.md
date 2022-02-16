@@ -1,4 +1,4 @@
 
 Note
 
-* http server and http client see [cogo-http](https://github.com/co-rs/cogo-http/tree/main/examples)
+* http server and http client see [mco-http](https://github.com/co-rs/mco-http/tree/main/examples)

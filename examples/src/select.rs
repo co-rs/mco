@@ -1,11 +1,11 @@
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 
 use std::time::Duration;
 
-use cogo::coroutine;
-use cogo::coroutine::sleep;
-use cogo::net::TcpListener;
+use mco::coroutine;
+use mco::coroutine::sleep;
+use mco::net::TcpListener;
 
 // general select example that use cqueue
 fn main() {
@@ -13,7 +13,7 @@ fn main() {
     let (tx2, rx2) = chan!();
     let listener = TcpListener::bind(("0.0.0.0", 1234)).unwrap();
 
-    go!(move || {
+    co!(move || {
         tx2.send("hello").unwrap();
         sleep(Duration::from_millis(100));
         tx1.send(42).unwrap();

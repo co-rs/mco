@@ -1,20 +1,20 @@
 extern crate bytes;
 extern crate httparse;
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 
 use std::io::{Read, Write};
 use bytes::BufMut;
 use httparse::Status;
-use cogo::net::TcpListener;
+use mco::net::TcpListener;
 
 // This example is for demonstration only and is suitable for production environment please move on
-// example see https://github.com/co-rs/cogo-http/tree/main/examples
+// example see https://github.com/co-rs/mco-http/tree/main/examples
 fn main() {
     println!("bind http://127.0.0.1:8080");
     let listener = TcpListener::bind("0.0.0.0:8080").unwrap();
     while let Ok((mut stream, _)) = listener.accept() {
-        go!(move || {
+        co!(move || {
             let mut buf = Vec::new();
             let mut path = String::new();
 
@@ -30,7 +30,7 @@ fn main() {
                     let s = format!(
                         "\
                          HTTP/1.1 200 OK\r\n\
-                         Server: Cogo\r\n\
+                         Server: mco\r\n\
                          Content-Length: {}\r\n\
                          date: 1-1-2000\r\n\
                          \r\n\

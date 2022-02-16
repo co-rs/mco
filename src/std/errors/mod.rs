@@ -27,7 +27,7 @@ impl Error {
 }
 
 
-/// cogo::std::errors::Error
+/// mco::std::errors::Error
 #[macro_export]
 macro_rules! err {
      ($($arg:tt)*) => {{

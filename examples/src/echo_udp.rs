@@ -1,14 +1,14 @@
 extern crate docopt;
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 #[macro_use]
 extern crate serde_derive;
 
 // use std::time::Duration;
 // use std::io::ErrorKind;
 
-use cogo::coroutine;
-use cogo::net::UdpSocket;
+use mco::coroutine;
+use mco::net::UdpSocket;
 
 use docopt::Docopt;
 
@@ -60,7 +60,7 @@ fn main() {
 
     let port = args.flag_p;
     let threads = args.flag_t;
-    cogo::config().set_workers(threads);
+    mco::config().set_workers(threads);
 
     let sock = UdpSocket::bind(("0.0.0.0", port)).unwrap();
     println!(
@@ -72,7 +72,7 @@ fn main() {
     let mut handlers = Vec::new();
     for _ in 0..threads {
         let sock = t!(sock.try_clone());
-        let h: coroutine::JoinHandle<()> = go!(move || {
+        let h: coroutine::JoinHandle<()> = co!(move || {
             let mut buf = vec![0u8; 1024 * 16];
             loop {
                 let (len, addr) = t!(sock.recv_from(&mut buf));

@@ -1,4 +1,4 @@
-//! `Cogo` Configuration interface
+//! `mco` Configuration interface
 //!
 
 use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
@@ -12,7 +12,7 @@ static WORKERS: AtomicUsize = AtomicUsize::new(0);
 static STACK_SIZE: AtomicUsize = AtomicUsize::new(DEFAULT_STACK_SIZE);
 static POOL_CAPACITY: AtomicUsize = AtomicUsize::new(DEFAULT_POOL_CAPACITY);
 
-/// `Cogo` Configuration type
+/// `mco` Configuration type
 pub struct Config;
 
 /// get the may configuration instance

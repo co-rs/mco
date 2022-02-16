@@ -1,7 +1,7 @@
 // extern crate rustc_serialize;
 extern crate docopt;
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 #[macro_use]
 extern crate serde_derive;
 
@@ -10,8 +10,8 @@ use std::net::ToSocketAddrs;
 use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
 use std::time::Duration;
 
-use cogo::coroutine;
-use cogo::net::TcpStream;
+use mco::coroutine;
+use mco::net::TcpStream;
 
 use docopt::Docopt;
 
@@ -69,7 +69,7 @@ fn main() {
     let test_seconds = args.flag_d;
     // let io_timeout = 2;
 
-    cogo::config().set_workers(args.flag_t);
+    mco::config().set_workers(args.flag_t);
 
     let stop = AtomicBool::new(false);
     let in_num = AtomicUsize::new(0);
@@ -83,13 +83,13 @@ fn main() {
         .unwrap();
 
     coroutine::scope(|scope| {
-        go!(scope, || {
+        co!(scope, || {
             coroutine::sleep(Duration::from_secs(test_seconds as u64));
             stop.store(true, Ordering::Release);
         });
 
         // print the result every one second
-        go!(scope, || {
+        co!(scope, || {
             let mut time = 0;
             let mut last_num = 0;
             while !stop.load(Ordering::Relaxed) {
@@ -111,7 +111,7 @@ fn main() {
         });
 
         for _ in 0..test_conn_num {
-            go!(scope, || {
+            co!(scope, || {
                 let mut conn = t!(TcpStream::connect(addr));
                 // t!(conn.set_read_timeout(Some(Duration::from_secs(io_timeout))));
                 // t!(conn.set_write_timeout(Some(Duration::from_secs(io_timeout))));

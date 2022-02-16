@@ -1,7 +1,7 @@
 use std::ops::Deref;
 use std::sync::Arc;
-use cogo::{go};
-use cogo::std::sync::{SyncHashMap, WaitGroup};
+use mco::{co};
+use mco::std::sync::{SyncHashMap, WaitGroup};
 
 pub fn main() {
     //or SyncBtreeMap::new_arc()
@@ -12,7 +12,7 @@ pub fn main() {
         let m = map.clone();
         let wg = wg.clone();
 
-        go!(move || {
+        co!(move || {
             m.insert(i, i);
             if i == 100 {
                 drop(wg);

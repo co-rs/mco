@@ -14,7 +14,7 @@ size for it, it will use this default stack size.
 The unit is by `word`. the flowing code would set the default stack size as 8k bytes.
 
 ```rust
-cogo::config().set_stack_size(0x400);
+mco::config().set_stack_size(0x400);
 // this coroutine would use 8K bytes stack
 go!(...);
 ```
@@ -28,7 +28,7 @@ The following code would spawn a coroutine with 16k bytes stack
 
 ```rust
 // this coroutine would use 16K bytes stack
-let builder = cogo::coroutine::Builder::new().stack_size(0x800);
+let builder = mco::coroutine::Builder::new().stack_size(0x800);
 unsafe { builder.spawn(...) }.unwrap();
 ```
 
@@ -42,12 +42,12 @@ finished, [MAY][may] would print out the actual usage.
 For example the blow code
 
 ```rust
-extern crate cogo;
+extern crate mco;
 use std::io::{self, Read};
 
 fn main() {
     go!(
-        cogo::coroutine::Builder::new()
+        mco::coroutine::Builder::new()
             .name("test".to_owned())
             .stack_size(0x1000 - 1),
         || {

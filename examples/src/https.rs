@@ -1,12 +1,12 @@
 extern crate bytes;
 extern crate httparse;
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 extern crate native_tls;
 
 use bytes::BufMut;
 use httparse::Status;
-use cogo::net::TcpListener;
+use mco::net::TcpListener;
 use native_tls::{Identity, TlsAcceptor};
 use std::fs::File;
 use std::io::{Read, Write};
@@ -38,14 +38,14 @@ fn main() {
         let acceptor = acceptor.clone();
         let mut stream = acceptor.accept(stream).unwrap();
 
-        go!(move || {
+        co!(move || {
             let mut buf = Vec::new();
             let mut path = String::new();
 
             loop {
                 if let Some(i) = req_done(&buf, &mut path) {
                     let response = match &*path {
-                        "/" => "Welcome to Cogo http demo\n",
+                        "/" => "Welcome to mco http demo\n",
                         "/hello" => "Hello, World!\n",
                         "/quit" => std::process::exit(1),
                         _ => "Cannot find page\n",
@@ -54,7 +54,7 @@ fn main() {
                     let s = format!(
                         "\
                          HTTP/1.1 200 OK\r\n\
-                         Server: Cogo\r\n\
+                         Server: mco\r\n\
                          Content-Length: {}\r\n\
                          date: 1-1-2000\r\n\
                          \r\n\

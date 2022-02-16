@@ -1,14 +1,14 @@
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 
 use std::time::Duration;
 
-use cogo::cogo_gen::Gn;
-use cogo::coroutine;
+use mco::mco_gen::Gn;
+use mco::coroutine;
 
 fn main() {
     coroutine::scope(|scope| {
-        go!(scope, || {
+        co!(scope, || {
             let g = Gn::<()>::new_scoped(|mut scope| {
                 let (mut a, mut b) = (0, 1);
                 while b < 200 {

@@ -1,5 +1,5 @@
-use cogo::coroutine::sleep;
-use cogo::{defer, go};
+use mco::coroutine::sleep;
+use mco::{defer, co};
 
 fn main() {
     defer!{
@@ -12,7 +12,7 @@ fn main() {
         println!("guard: 3");
     }
     defer! {
-        go!(||{
+        co!(||{
             println!("-----------------go spawn success-------------------");
         });
     }

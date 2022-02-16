@@ -1,4 +1,4 @@
-use cogo::err;
+use mco::err;
 
 fn main() {
     let e = err!("EOF");

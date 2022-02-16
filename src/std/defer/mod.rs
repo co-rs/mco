@@ -14,7 +14,7 @@ impl<F: FnOnce()> Drop for Guard<F> {
 ///
 /// for example:
 /// ```
-///  use cogo::defer;
+///  use mco::defer;
 ///  //LIFO, so it will print: guard: 3  guard: 2   guard: 1
 ///  fn main(){
 ///     defer!({

@@ -363,7 +363,7 @@ mod tests {
                 drop(tx);
             };
             if i % 2 == 0 {
-                go!(f);
+                co!(f);
             } else {
                 thread::spawn(f);
             }
@@ -592,7 +592,7 @@ mod tests {
             let sync = sync.clone();
             let tx = tx.clone();
             let rwlock = rwlock.clone();
-            let h = go!(move || {
+            let h = co!(move || {
                 // tell master that we started
                 tx.send(0).unwrap();
                 // first get the wlock
@@ -657,7 +657,7 @@ mod tests {
         let h = {
             let tx = tx.clone();
             let rwlock = rwlock.clone();
-            go!(move || {
+            co!(move || {
                 // tell master that we started
                 tx.send(0).unwrap();
                 // first get the rlock

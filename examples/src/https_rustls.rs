@@ -1,12 +1,12 @@
 extern crate bytes;
 extern crate httparse;
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 
 use std::convert::TryInto;
 use bytes::BufMut;
 use httparse::Status;
-use cogo::net::TcpListener;
+use mco::net::TcpListener;
 use std::fs::File;
 use std::io::{BufReader, Read, Write};
 use std::sync::Arc;
@@ -53,14 +53,14 @@ fn main() {
     while let Ok((mut stream, _)) = listener.accept() {
         let mut conn = rustls::ServerConnection::new(cfg.clone()).unwrap();
         let mut stream = rustls::StreamOwned::new(conn, stream);
-        go!(2*4096,move || {
+        co!(2*4096,move || {
             let mut buf = Vec::new();
             let mut path = String::new();
 
             loop {
                 if let Some(i) = req_done(&buf, &mut path) {
                     let response = match &*path {
-                        "/" => "Welcome to Cogo http demo\n",
+                        "/" => "Welcome to mco http demo\n",
                         "/hello" => "Hello, World!\n",
                         "/quit" => std::process::exit(1),
                         _ => "Cannot find page\n",
@@ -69,7 +69,7 @@ fn main() {
                     let s = format!(
                         "\
                          HTTP/1.1 200 OK\r\n\
-                         Server: Cogo\r\n\
+                         Server: mco\r\n\
                          Content-Length: {}\r\n\
                          date: 1-1-2000\r\n\
                          \r\n\

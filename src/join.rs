@@ -7,7 +7,7 @@ use std::thread::Result;
 use crate::coroutine_impl::Coroutine;
 use crate::std::sync::{AtomicOption, Blocker};
 use crossbeam::atomic::AtomicCell;
-use cogo_gen::Error;
+use mco_gen::Error;
 
 pub struct Join {
     // the coroutine that waiting for this join handler

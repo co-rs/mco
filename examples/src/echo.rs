@@ -1,6 +1,6 @@
 extern crate docopt;
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 #[macro_use]
 extern crate serde_derive;
 
@@ -8,7 +8,7 @@ extern crate serde_derive;
 use std::io::{Read, Write};
 
 use docopt::Docopt;
-use cogo::net::{TcpListener, TcpStream};
+use mco::net::{TcpListener, TcpStream};
 
 const VERSION: &str = "0.1.0";
 
@@ -70,11 +70,11 @@ fn main() {
 
     let port = args.flag_p;
     let threads = args.flag_t;
-    cogo::config().set_workers(threads);
+    mco::config().set_workers(threads);
 
-    cogo::coroutine::scope(|s| {
+    mco::coroutine::scope(|s| {
         for i in 0..threads {
-            go!(s, move || {
+            co!(s, move || {
                 // let listener = TcpListener::bind("127.0.0.1:8080").unwrap();
                 let listener = TcpListener::bind(("0.0.0.0", port)).unwrap();
 
@@ -87,7 +87,7 @@ fn main() {
                 for stream in listener.incoming() {
                     match stream {
                         Ok(s) => {
-                            go!(move || handle_client(s));
+                            co!(move || handle_client(s));
                         }
                         Err(e) => println!("err = {:?}", e),
                     }

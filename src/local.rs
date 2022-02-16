@@ -7,7 +7,7 @@ use std::sync::Arc;
 
 use crate::coroutine_impl::Coroutine;
 use crate::join::Join;
-use cogo_gen::get_local_data;
+use mco_gen::get_local_data;
 
 // thread local map storage
 thread_local! {static LOCALMAP: LocalMap = RefCell::new(HashMap::default());}

@@ -7,7 +7,7 @@ pub use btree_map::*;
 /// make an hash map
 /// for example:
 /// ```
-/// use cogo::hash_map;
+/// use mco::hash_map;
 ///
 /// let f=1;
 /// let v=7;

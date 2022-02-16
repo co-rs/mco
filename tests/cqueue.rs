@@ -1,8 +1,8 @@
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 
 use crate::cqueue::PollError::*;
-use cogo::{coroutine, cqueue};
+use mco::{coroutine, cqueue};
 
 use std::time::Duration;
 
@@ -11,7 +11,7 @@ fn cqueue_drop() {
     let v = (0..10).map(|x| x * x).collect::<Vec<usize>>();
     cqueue::scope(|cqueue| {
         for token in 0..10 {
-            go!(cqueue, token, |es| {
+            co!(cqueue, token, |es| {
                 let token = es.get_token();
                 let j = v[token];
                 es.send(0);
@@ -29,10 +29,10 @@ fn cqueue_drop() {
 #[test]
 fn cqueue_in_coroutine() {
     let v = (0..10).map(|x| x * x).collect::<Vec<usize>>();
-    go!(move || {
+    co!(move || {
         cqueue::scope(|cqueue| {
             for token in 0..10 {
-                go!(cqueue, token, |es| {
+                co!(cqueue, token, |es| {
                     let token = es.get_token();
                     let j = v[token];
                     es.send(0);
@@ -60,7 +60,7 @@ fn cqueue_panic() {
     let v = (0..10).map(|x| x * x).collect::<Vec<usize>>();
     cqueue::scope(|cqueue| {
         for token in 0..10 {
-            go!(cqueue, token, |es| {
+            co!(cqueue, token, |es| {
                 let token = es.get_token();
                 let j = v[token];
                 es.send(0);
@@ -80,7 +80,7 @@ fn cqueue_panic() {
 #[should_panic]
 fn cqueue_panic_in_select() {
     cqueue::scope(|cqueue| {
-        go!(cqueue, 0, |_es| {
+        co!(cqueue, 0, |_es| {
             panic!("painc in selector");
         });
     });
@@ -93,7 +93,7 @@ fn cqueue_poll() {
     let v = (0..10).map(|x| x * x).collect::<Vec<usize>>();
     cqueue::scope(|cqueue| {
         for token in 0..10 {
-            go!(cqueue, token, |es| {
+            co!(cqueue, token, |es| {
                 let token = es.get_token();
                 let j = v[token];
                 es.send(token + 100);
@@ -115,7 +115,7 @@ fn cqueue_poll() {
 #[test]
 fn cqueue_oneshot() {
     // oneshot only support open set_work_steal true
-    use cogo::std::sync::channel::channel;
+    use mco::std::sync::channel::channel;
 
     let (tx1, rx1) = channel();
     let (tx2, rx2) = channel();
@@ -145,12 +145,12 @@ fn cqueue_oneshot() {
 
 #[test]
 fn cqueue_select() {
-    use cogo::std::sync::channel::channel;
+    use mco::std::sync::channel::channel;
 
     let (tx1, rx1) = channel();
     let (tx2, rx2) = channel();
 
-    go!(move || {
+    co!(move || {
         tx2.send("hello").unwrap();
         coroutine::sleep(Duration::from_millis(100));
         tx1.send(42).unwrap();
@@ -179,13 +179,13 @@ fn cqueue_timeout() {
 
 #[test]
 fn cqueue_loop() {
-    use cogo::std::sync::channel::channel;
+    use mco::std::sync::channel::channel;
 
     let (tx1, rx1) = channel();
     let (tx2, rx2) = channel();
     let mut result = 0;
 
-    go!(move || {
+    co!(move || {
         tx1.send(10).unwrap();
         tx1.send(20).unwrap();
         tx1.send(30).unwrap();

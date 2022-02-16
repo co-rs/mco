@@ -1,17 +1,17 @@
 use std::thread;
 use std::time::{Duration, Instant};
 
-extern crate cogo_gen;
+extern crate mco_gen;
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 
 use crate::coroutine::yield_now;
-use cogo_gen::Gn;
-use cogo::coroutine;
+use mco_gen::Gn;
+use mco::coroutine;
 
 #[test]
 fn panic_coroutine() {
-    let j: coroutine::JoinHandle<()> = go!(move || {
+    let j: coroutine::JoinHandle<()> = co!(move || {
         panic!("panic inside coroutine");
     });
     match j.join() {
@@ -25,7 +25,7 @@ fn panic_coroutine() {
 
 #[test]
 fn cancel_coroutine() {
-    let j = go!(move || {
+    let j = co!(move || {
         // suspend the coroutine to simulate an endless loop
         println!("before cancel");
         coroutine::park();
@@ -42,7 +42,7 @@ fn cancel_coroutine() {
     match j.join() {
         Ok(_) => panic!("test should return panic"),
         Err(panic) => {
-            use cogo_gen::Error;
+            use mco_gen::Error;
             match panic.downcast_ref::<Error>() {
                 Some(&Error::Cancel) => return println!("coroutine cancelled"),
                 _ => panic!("panic type wrong"),
@@ -53,8 +53,8 @@ fn cancel_coroutine() {
 
 #[test]
 fn cancel_io_coroutine() {
-    let j = go!(move || {
-        let listener = cogo::net::TcpListener::bind(("0.0.0.0", 1234)).unwrap();
+    let j = co!(move || {
+        let listener = mco::net::TcpListener::bind(("0.0.0.0", 1234)).unwrap();
         println!("listening on {:?}", listener.local_addr().unwrap());
 
         for stream in listener.incoming() {
@@ -73,7 +73,7 @@ fn cancel_io_coroutine() {
     match j.join() {
         Ok(_) => panic!("test should return panic"),
         Err(panic) => {
-            use cogo_gen::Error;
+            use mco_gen::Error;
             match panic.downcast_ref::<Error>() {
                 Some(&Error::Cancel) => return println!("coroutine cancelled"),
                 _ => panic!("panic type wrong"),
@@ -84,7 +84,7 @@ fn cancel_io_coroutine() {
 
 #[test]
 fn one_coroutine() {
-    let j = go!(move || {
+    let j = co!(move || {
         println!("hello, coroutine");
     });
     j.join().unwrap();
@@ -92,7 +92,7 @@ fn one_coroutine() {
 
 #[test]
 fn coroutine_result() {
-    let j = go!(move || {
+    let j = co!(move || {
         println!("hello, coroutine");
         100
     });
@@ -103,7 +103,7 @@ fn coroutine_result() {
 #[test]
 fn multi_coroutine() {
     for i in 0..10 {
-        go!(move || {
+        co!(move || {
             println!("hi, coroutine{}", i);
         });
     }
@@ -112,7 +112,7 @@ fn multi_coroutine() {
 
 #[test]
 fn test_yield() {
-    let j = go!(move || {
+    let j = co!(move || {
         println!("hello, coroutine");
         yield_now();
         println!("goodbye, coroutine");
@@ -123,7 +123,7 @@ fn test_yield() {
 #[test]
 fn multi_yield() {
     for i in 0..10 {
-        go!(move || {
+        co!(move || {
             println!("hi, coroutine{}", i);
             yield_now();
             println!("bye, coroutine{}", i);
@@ -134,11 +134,11 @@ fn multi_yield() {
 
 #[test]
 fn spawn_inside() {
-    go!(coroutine::Builder::new().name("parent".to_owned()), || {
+    co!(coroutine::Builder::new().name("parent".to_owned()), || {
         let me = coroutine::current();
         println!("hi, I'm parent: {:?}", me);
         for i in 0..10 {
-            go!(move || {
+            co!(move || {
                 println!("hi, I'm child{:?}", i);
                 yield_now();
                 println!("bye from child{:?}", i);
@@ -155,11 +155,11 @@ fn spawn_inside() {
 
 #[test]
 fn wait_join() {
-    let j = go!(move || {
+    let j = co!(move || {
         println!("hi, I'm parent");
         let join = (0..10)
             .map(|i| {
-                go!(move || {
+                co!(move || {
                     println!("hi, I'm child{:?}", i);
                     yield_now();
                     println!("bye from child{:?}", i);
@@ -180,7 +180,7 @@ fn scoped_coroutine() {
     let mut array = [1, 2, 3];
     coroutine::scope(|scope| {
         for i in &mut array {
-            go!(scope, move || {
+            co!(scope, move || {
                 *i += 1;
             });
         }
@@ -195,7 +195,7 @@ fn scoped_coroutine() {
 fn yield_from_gen() {
     let mut a = 0;
     coroutine::scope(|scope| {
-        go!(scope, || {
+        co!(scope, || {
             let g = Gn::<()>::new_scoped(|mut scope| {
                 while a < 10 {
                     scope.yield_(a);
@@ -219,7 +219,7 @@ fn yield_from_gen() {
 fn unpark() {
     let mut a = 0;
     coroutine::scope(|scope| {
-        let h = go!(scope, || {
+        let h = co!(scope, || {
             let co = coroutine::current();
             println!("child coroutine name:{:?}", co);
             co.unpark();
@@ -244,7 +244,7 @@ fn unpark() {
 fn park_timeout() {
     let mut a = 0;
     coroutine::scope(|scope| {
-        let h = go!(scope, || {
+        let h = co!(scope, || {
             let co = coroutine::current();
             co.unpark();
             a = 5;
@@ -274,7 +274,7 @@ fn test_sleep() {
 
     coroutine::scope(|scope| {
         for _ in 0..1000 {
-            go!(scope, || {
+            co!(scope, || {
                 let now = Instant::now();
                 coroutine::sleep(Duration::from_millis(100));
                 assert!(now.elapsed() >= Duration::from_millis(100));
@@ -285,12 +285,12 @@ fn test_sleep() {
 
 #[test]
 fn join_macro() {
-    use cogo::std::sync::channel::channel;
+    use mco::std::sync::channel::channel;
 
     let (tx1, rx1) = channel();
     let (tx2, rx2) = channel();
 
-    go!(move || {
+    co!(move || {
         tx2.send("hello").unwrap();
         coroutine::sleep(Duration::from_millis(100));
         tx1.send(42).unwrap();
@@ -314,18 +314,18 @@ fn join_macro() {
 
 #[test]
 fn go_with_macro() {
-    use cogo::std::sync::channel::channel;
+    use mco::std::sync::channel::channel;
 
     let (tx1, rx1) = channel();
     let (tx2, rx2) = channel();
 
-    go_with!(8192, move || {
+    spawn_with!(8192, move || {
         tx1.send(coroutine::current().stack_size()).unwrap();
     })
         .join()
         .unwrap();
 
-    go_with!("test_task", 10240, move || {
+    spawn_with!("test_task", 10240, move || {
         let task = coroutine::current();
         let msg = (task.name().map(ToOwned::to_owned), task.stack_size());
         tx2.send(msg).unwrap();

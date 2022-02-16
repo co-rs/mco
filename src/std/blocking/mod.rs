@@ -8,7 +8,7 @@ use crate::std::errors::Result;
 /// will spawn a thread to doing and return value by channel
 /// for example:
 /// ```rust
-///     let v = cogo::spawn_blocking!(|| {
+///     let v = mco::spawn_blocking!(|| {
 ///         //do something Heavy CPU arithmetic and blocking APIS
 ///         return 1;
 ///     });
@@ -29,7 +29,7 @@ macro_rules! spawn_blocking {
 /// will spawn a thread to doing and return value by channel
 /// for example:
 /// ```rust
-///     let v = cogo::std::blocking::spawn_blocking(|| {
+///     let v = mco::std::blocking::spawn_blocking(|| {
 ///         //do something Heavy CPU arithmetic and blocking APIS
 ///         return 1;
 ///     });

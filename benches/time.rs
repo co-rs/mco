@@ -6,8 +6,8 @@ mod bench {
     extern crate test;
 
     use test::Bencher;
-    use cogo::std::sync::WaitGroup;
-    use cogo::std::time::time::Time;
+    use mco::std::sync::WaitGroup;
+    use mco::std::time::time::Time;
 
     //test bench::single_thread_test ... bench:          44 ns/iter (+/- 1)
     #[bench]

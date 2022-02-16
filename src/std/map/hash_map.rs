@@ -177,7 +177,7 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
     /// # Examples
     ///
     /// ```
-    /// use cogo::std::sync::{SyncHashMap};
+    /// use mco::std::sync::{SyncHashMap};
     ///
     /// let map = SyncHashMap::new();
     /// map.insert(1, "a");
@@ -480,12 +480,12 @@ mod test {
             let wg2 = wg.clone();
             let m1 = m.clone();
             let m2 = m.clone();
-            go!(move ||{
+            co!(move ||{
                  m1.remove(&1);
                  let insert = m1.insert(1, 2);
                  drop(wg1);
             });
-            go!(move ||{
+            co!(move ||{
                  m2.remove(&1);
                  let insert = m2.insert(1, 2);
                  drop(wg2);
@@ -503,14 +503,14 @@ mod test {
             let wg2 = wg.clone();
             let m1 = m.clone();
             let m2 = m.clone();
-            go!(move ||{
+            co!(move ||{
                  for i in 0..10000{
                      m1.remove(&i);
                      let insert = m1.insert(i, i);
                  }
                  drop(wg1);
             });
-            go!(move ||{
+            co!(move ||{
                  for i in 0..10000{
                      m2.remove(&i);
                      let insert = m2.insert(i, i);
@@ -609,14 +609,14 @@ mod test {
 
             let wg2 = wait1.clone();
             let m2 = m1.clone();
-            go!(move ||{
+            co!(move ||{
                 let insert = m.insert(i, i);
                 let g = m.get(&i).unwrap();
                 assert_eq!(i, *g.deref());
                 drop(wg);
                 println!("done{}",i);
             });
-            go!(move ||{
+            co!(move ||{
                  let g = m2.remove(&i);
                   if g.is_some(){
                   println!("done remove {}",i);
@@ -633,7 +633,7 @@ mod test {
             i = 1;
             let wg = wait1.clone();
             let m = m1.clone();
-            go!(move ||{
+            co!(move ||{
                 let insert = m.insert(i, i);
                 let g = m.get(&i).unwrap();
                 assert_eq!(i, *g.deref());
@@ -642,7 +642,7 @@ mod test {
             });
             let wg2 = wait1.clone();
             let m2 = m1.clone();
-            go!(move ||{
+            co!(move ||{
                  let g = m2.remove(&i);
                  drop(wg2);
             });

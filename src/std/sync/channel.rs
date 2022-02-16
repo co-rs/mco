@@ -38,7 +38,7 @@ pub fn bounded<T>(buf: usize) -> (Sender<T>, Receiver<T>) {
 /// create an channel(mpmc)
 ///  for example:
 /// ```
-///   use cogo::chan;
+///   use mco::chan;
 ///   //bounded
 ///   let (sender, receiver) = chan!(2);
 ///   sender.send(1);//send msg
@@ -458,7 +458,7 @@ mod tests {
         let wg_clone = wg.clone();
         let result = Arc::new(std::sync::Mutex::new(Duration::from_secs(0)));
         let result1 = result.clone();
-        go!(move ||{
+        co!(move ||{
             tx.send(1);
             drop(wg_clone);
             let now = std::time::Instant::now();
@@ -517,7 +517,7 @@ mod tests {
     #[test]
     fn smoke_coroutine() {
         let (tx, rx) = channel::<i32>();
-        let _t = go!(move || {
+        let _t = co!(move || {
             tx.send(1).unwrap();
         });
         assert_eq!(rx.recv().unwrap(), 1);
@@ -551,7 +551,7 @@ mod tests {
     #[test]
     fn port_gone_concurrent1() {
         let (tx, rx) = channel::<i32>();
-        let _t = go!(move || {
+        let _t = co!(move || {
             rx.recv().unwrap();
         });
         while tx.send(1).is_ok() {}
@@ -586,7 +586,7 @@ mod tests {
     #[test]
     fn chan_gone_concurrent() {
         let (tx, rx) = channel::<i32>();
-        let _t = go!(move || {
+        let _t = co!(move || {
             tx.send(1).unwrap();
             tx.send(1).unwrap();
         });
@@ -625,7 +625,7 @@ mod tests {
 
         for _ in 0..NTHREADS {
             let tx = tx.clone();
-            go!(move || for _ in 0..AMT {
+            co!(move || for _ in 0..AMT {
                 tx.send(1).unwrap();
             });
         }
@@ -637,7 +637,7 @@ mod tests {
     fn send_from_outside_runtime() {
         let (tx1, rx1) = channel::<()>();
         let (tx2, rx2) = channel::<i32>();
-        let t1 = go!(move || {
+        let t1 = co!(move || {
             tx1.send(()).unwrap();
             for _ in 0..40 {
                 let r = rx2.recv();
@@ -645,7 +645,7 @@ mod tests {
             }
         });
         rx1.recv().unwrap();
-        let t2 = go!(move || for _ in 0..40 {
+        let t2 = co!(move || for _ in 0..40 {
             tx2.send(1).unwrap();
         });
         t1.join().ok().unwrap();
@@ -674,7 +674,7 @@ mod tests {
             assert_eq!(rx1.recv().unwrap(), 1);
             tx2.send(2).unwrap();
         });
-        let t2 = go!(move || {
+        let t2 = co!(move || {
             tx1.send(1).unwrap();
             assert_eq!(rx2.recv().unwrap(), 2);
         });
@@ -707,7 +707,7 @@ mod tests {
     #[test]
     fn oneshot_single_thread_recv_chan_close() {
         // Receiving on a closed chan will panic
-        let res = go!(move || {
+        let res = co!(move || {
             let (tx, rx) = channel::<i32>();
             drop(tx);
             rx.recv().unwrap();

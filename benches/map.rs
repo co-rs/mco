@@ -1,12 +1,12 @@
 #![cfg(nightly)]
 #![feature(test)]
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 extern crate test;
 
 use std::collections::HashMap;
 use test::Bencher;
-use cogo::std::sync::{Mutex, SyncHashMap};
+use mco::std::sync::{Mutex, SyncHashMap};
 
 #[bench]
 fn bench_sync_hash_map_write(b: &mut Bencher) {

@@ -48,8 +48,8 @@ stack.
 
 And you also should avoid calling functions that internally use a big stack space like `std::io::copy()`.
 
-`cogo::config()::set_stack_size()` can be used to set the default stack size for all coroutines. And you can
-use `cogo::coroutine::Builder` to specify a single coroutine stack size.
+`mco::config()::set_stack_size()` can be used to set the default stack size for all coroutines. And you can
+use `mco::coroutine::Builder` to specify a single coroutine stack size.
 
 ```rust
 Builder::new().stack_size(0x2000).spawn(...)

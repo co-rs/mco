@@ -34,7 +34,7 @@ struct Slot<T> {
 /// # Examples
 ///
 /// ```
-/// use cogo::std::queue::array_queue::ArrayQueue;
+/// use mco::std::queue::array_queue::ArrayQueue;
 ///
 /// let q = ArrayQueue::new(2);
 ///
@@ -87,7 +87,7 @@ impl<T> ArrayQueue<T> {
     /// # Examples
     ///
     /// ```
-    /// use cogo::std::queue::array_queue::ArrayQueue;
+    /// use mco::std::queue::array_queue::ArrayQueue;
     ///
     /// let q = ArrayQueue::<i32>::new(100);
     /// ```
@@ -146,7 +146,7 @@ impl<T> ArrayQueue<T> {
     /// # Examples
     ///
     /// ```
-    /// use cogo::std::queue::array_queue::ArrayQueue;
+    /// use mco::std::queue::array_queue::ArrayQueue;
     ///
     /// let q = ArrayQueue::new(1);
     ///
@@ -225,7 +225,7 @@ impl<T> ArrayQueue<T> {
     /// # Examples
     ///
     /// ```
-    /// use cogo::std::queue::array_queue::ArrayQueue;
+    /// use mco::std::queue::array_queue::ArrayQueue;
     ///
     /// let q = ArrayQueue::new(1);
     /// assert_eq!(q.push(10), Ok(()));
@@ -301,7 +301,7 @@ impl<T> ArrayQueue<T> {
     /// # Examples
     ///
     /// ```
-    /// use cogo::std::queue::array_queue::ArrayQueue;
+    /// use mco::std::queue::array_queue::ArrayQueue;
     ///
     /// let q = ArrayQueue::<i32>::new(100);
     ///
@@ -316,7 +316,7 @@ impl<T> ArrayQueue<T> {
     /// # Examples
     ///
     /// ```
-    /// use cogo::std::queue::array_queue::ArrayQueue;
+    /// use mco::std::queue::array_queue::ArrayQueue;
     ///
     /// let q = ArrayQueue::new(100);
     ///
@@ -341,7 +341,7 @@ impl<T> ArrayQueue<T> {
     /// # Examples
     ///
     /// ```
-    /// use cogo::std::queue::array_queue::ArrayQueue;
+    /// use mco::std::queue::array_queue::ArrayQueue;
     ///
     /// let q = ArrayQueue::new(1);
     ///
@@ -365,7 +365,7 @@ impl<T> ArrayQueue<T> {
     /// # Examples
     ///
     /// ```
-    /// use cogo::std::queue::array_queue::ArrayQueue;
+    /// use mco::std::queue::array_queue::ArrayQueue;
     ///
     /// let q = ArrayQueue::new(100);
     /// assert_eq!(q.len(), 0);

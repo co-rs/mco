@@ -1,7 +1,7 @@
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 
-use cogo::coroutine;
+use mco::coroutine;
 
 #[test]
 fn local_in_thread() {
@@ -20,7 +20,7 @@ fn coroutine_local() {
     }
     coroutine_local!(static FOO: i32 = square(3));
 
-    go!(|| {
+    co!(|| {
         FOO.with(|f| {
             assert_eq!(*f, 9);
         });
@@ -36,7 +36,7 @@ fn coroutine_local_many() {
 
     coroutine::scope(|scope| {
         for i in 0..10 {
-            go!(scope, move || {
+            co!(scope, move || {
                 FOO.with(|f| {
                     assert_eq!(f.load(Ordering::Relaxed), 0);
                     f.store(i, Ordering::Relaxed);

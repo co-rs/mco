@@ -1,8 +1,8 @@
-# cogo
+# mco
 
 <img style="width: 100px;height: 100px;" width="100" height="100" src="docs/imgs/logo.png" />
 
-Cogo is a high-performance library for programming stackful coroutines with which you can easily develop and maintain
+mco is a high-performance library for programming stackful coroutines with which you can easily develop and maintain
 massive concurrent programs. It can be thought as the Rust version of the popular [Goroutine][go].
 
 > Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Many improvements(Inspired by [Golang](https://golang.google.cn/),  [parking_lot](https://github.com/Amanieu/parking_lot)  and [crossbeam](https://github.com/crossbeam-rs/crossbeam)) and more...
@@ -14,25 +14,25 @@ massive concurrent programs. It can be thought as the Rust version of the popula
 
 ![per](docs/imgs/629a066aaa37b4c295fa794c5ebdf31.png)
 
-# cogo crates
+# mco crates
 
-> Cogo Powerful standard library
+> mco Powerful standard library
 
-* ``` cogo/std/queue ``` Basic queue data structures
-* ``` cogo/std/sync ```  Includes ``` Mutex/RwLock/WaitGroup/Semphore/chan!()/chan!(1000) ```...and more..
-* ``` cogo/std/defer ``` Defers evaluation of a block of code until the end of the scope.
-* ``` cogo/std/map ```  Provides the same concurrency map as Golang, with ```SyncHashMap``` and ```SyncBtreeMap```.It is
+* ``` mco/std/queue ``` Basic queue data structures
+* ``` mco/std/sync ```  Includes ``` Mutex/RwLock/WaitGroup/Semphore/chan!()/chan!(1000) ```...and more..
+* ``` mco/std/defer ``` Defers evaluation of a block of code until the end of the scope.
+* ``` mco/std/map ```  Provides the same concurrency map as Golang, with ```SyncHashMap``` and ```SyncBtreeMap```.It is
   suitable for concurrent environments with too many reads and too few writes
-* ``` cogo/std/time ``` Improve the implementation of a high performance time
-* ``` cogo/std/lazy ``` Thread/coroutine safe global variable,Lazy struct,OnceCell
+* ``` mco/std/time ``` Improve the implementation of a high performance time
+* ``` mco/std/lazy ``` Thread/coroutine safe global variable,Lazy struct,OnceCell
 
-> Crates based on cogo implementation
+> Crates based on mco implementation
 
-* [cogo-http](https://github.com/co-rs/cogo-http) High-performance coroutine HTTP server and client
+* [mco-http](https://github.com/co-rs/mco-http) High-performance coroutine HTTP server and client
 * [cdbc](https://github.com/co-rs/cdbc) Database Drivers include mysql, Postgres, AND SQLite
 * [fast_log](https://github.com/co-rs/fast_log) High-performance log impl
-* [cogo-redis](https://github.com/co-rs/cogo-redis) Redis client for cogo
-* [cogo-grpc](https://github.com/co-rs/cogo-grpc) TODO: an grpc server/client.
+* [mco-redis](https://github.com/co-rs/mco-redis) Redis client for mco
+* [mco-grpc](https://github.com/co-rs/mco-grpc) TODO: an grpc server/client.
 
 ## Features
 
@@ -64,15 +64,15 @@ massive concurrent programs. It can be thought as the Rust version of the popula
 
 ## Usage
 ```toml
-cogo = "0.1"
+mco = "0.1"
 ```
-A naive echo server implemented with Cogo:
+A naive echo server implemented with mco:
 
 ```rust
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 
-use cogo::net::TcpListener;
+use mco::net::TcpListener;
 use std::io::{Read, Write};
 
 fn main() {
@@ -100,12 +100,12 @@ fn main() {
 * [An echo client](examples/src/echo_client.rs)
 * [simple HTTP](examples/src/http.rs)
 * [simple HTTPS](examples/src/https.rs)
-* [tiny  HTTP](https://github.com/co-rs/cogo-http)
+* [tiny  HTTP](https://github.com/co-rs/mco-http)
 * [WebSockets](examples/src/websocket.rs)
 
 ## Caveat
 
-There is a detailed [document][caveat] that describes Cogo's main restrictions. In general, there are four things you
+There is a detailed [document][caveat] that describes mco's main restrictions. In general, there are four things you
 should follow when writing programs that use coroutines:
 
 * Don't call thread-blocking API (It will hurt the performance);
@@ -130,7 +130,7 @@ should follow when writing programs that use coroutines:
 ## How to tune a stack size
 
 ```rust
-cogo::config().set_stack_size(8*1024);//default is 4k=4*1024,Multiple of 4kb is recommended
+mco::config().set_stack_size(8*1024);//default is 4k=4*1024,Multiple of 4kb is recommended
 ```
 
 * We are in urgent need of financial support and cooperation, welcome to contact us
@@ -140,6 +140,6 @@ cogo::config().set_stack_size(8*1024);//default is 4k=4*1024,Multiple of 4kb is 
 
 <img style="width: 400px;height: 600px;" width="400" height="600" src="https://raw.githubusercontent.com/rbatis/rbatis.io/master/docs/_media/wx_account.png" alt="zxj347284221" />
 
-> 联系方式(添加好友请备注'cogo') 微信群：先加微信，然后拉进群
+> 联系方式(添加好友请备注'mco') 微信群：先加微信，然后拉进群
 
 <img style="width: 400px;height: 500px;" width="400" height="500" src="https://raw.githubusercontent.com/rbatis/rbatis.io/master/docs/_media/wechat.jpg" alt="zxj347284221" />

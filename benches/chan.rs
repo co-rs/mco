@@ -10,8 +10,8 @@ mod bench {
     use self::test::Bencher;
 
     use std::thread;
-    use cogo::chan;
-    use cogo::std::queue::mpmc_bounded::Queue;
+    use mco::chan;
+    use mco::std::queue::mpmc_bounded::Queue;
 
     #[bench]
     fn bounded_mpmc(b: &mut Bencher) {

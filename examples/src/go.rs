@@ -1,24 +1,24 @@
 use std::time::Duration;
-use cogo::coroutine::{Builder, sleep, Spawn, spawn, yield_now};
-use cogo::{defer, go};
+use mco::coroutine::{Builder, sleep, Spawn, spawn, yield_now};
+use mco::{defer, co};
 
 fn main() {
-    go!(||{
+    co!(||{
        println!("go");
     });
-    go!(2*4096,||{
-       println!("go with stack size: {}",cogo::coroutine::current().stack_size());
+    co!(2*4096,||{
+       println!("go with stack size: {}",mco::coroutine::current().stack_size());
     });
     (2 * 4096).spawn(|| {
-        println!("go with stack size: {}", cogo::coroutine::current().stack_size());
+        println!("go with stack size: {}", mco::coroutine::current().stack_size());
     });
-    go!("go",||{
-       println!("go with name: {}",cogo::coroutine::current().name().unwrap_or_default());
+    co!("go",||{
+       println!("go with name: {}",mco::coroutine::current().name().unwrap_or_default());
     });
     "go".spawn(|| {
-        println!("go with name: {}", cogo::coroutine::current().name().unwrap_or_default());
+        println!("go with name: {}", mco::coroutine::current().name().unwrap_or_default());
     });
-    go!(Builder::new(),||{
+    co!(Builder::new(),||{
        println!("go with Builder");
     });
     Builder::new().spawn(|| {
@@ -27,11 +27,11 @@ fn main() {
     spawn(|| {
         println!("go with method spawn");
     });
-    go!(move || {
+    co!(move || {
         println!("hi, I'm parent");
         let v = (0..100)
             .map(|i| {
-                go!(move || {
+                co!(move || {
                     println!("hi, I'm child{:?}", i);
                     yield_now();
                     println!("bye from child{:?}", i);
@@ -47,7 +47,7 @@ fn main() {
     }).join().unwrap();
 
     sleep(Duration::from_secs(1));
-    let g = go!(||{
+    let g = co!(||{
         defer!(||{ println!("cancel done!")});
         for idx in 0..1000{
             sleep(Duration::from_secs(1));

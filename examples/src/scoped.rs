@@ -1,17 +1,17 @@
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 
 use crate::coroutine::yield_now;
-use cogo::coroutine;
+use mco::coroutine;
 
 fn main() {
     let mut array = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
     println!("old array: {:?}", array);
     coroutine::scope(|scope| {
         for i in &mut array {
-            go!(scope, move || {
+            co!(scope, move || {
                 coroutine::scope(|scope| {
-                    go!(scope, || {
+                    co!(scope, || {
                         println!("another scope get as {:?}", *i);
                         yield_now();
                         *i += 1;

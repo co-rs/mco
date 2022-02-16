@@ -199,7 +199,7 @@ impl Time {
     ///
     /// for example:
     /// ```rust
-    ///     use cogo::std::time::Time;
+    ///     use mco::std::time::Time;
     ///
     ///     let mut t = Time::now();
     ///     let formatted = t.format(
@@ -242,7 +242,7 @@ impl Time {
     ///
     /// for example:
     /// ```rust
-    ///     use cogo::std::time::{RFC3339Nano,Time};
+    ///     use mco::std::time::{RFC3339Nano,Time};
     ///
     ///     let parsed = Time::parse("[year]-[month] [ordinal] [weekday] [week_number]-[day] [hour]:[minute] [period]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]","2022-02 033 Wednesday 05-02 01:49 AM:22.1210536 +08:00:00").unwrap();
     ///

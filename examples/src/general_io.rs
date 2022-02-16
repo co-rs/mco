@@ -1,10 +1,10 @@
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 
 use std::io::{self, Read, Write};
 use std::time::Duration;
 
-use cogo::io::CoIo;
+use mco::io::CoIo;
 
 // create the io object that can be used in coroutine
 // note that we can only access the io ojbect in one thread/coroutin
@@ -12,7 +12,7 @@ use cogo::io::CoIo;
 // because stdin/stdout can't resiger on IOCP
 fn main() {
     // run every thing in a single thread to verify the aysnc io
-    cogo::config().set_workers(1);
+    mco::config().set_workers(1);
     let b_run = true;
 
     let r = join!(
@@ -32,7 +32,7 @@ fn main() {
             let mut stdout = CoIo::new(io::stdout()).expect("failed to create stdout");
             while b_run {
                 write!(stdout, "write from coroutine\n").expect("failed to write");
-                cogo::coroutine::sleep(Duration::from_millis(500));
+                mco::coroutine::sleep(Duration::from_millis(500));
             }
         }
     );

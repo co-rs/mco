@@ -23,8 +23,8 @@ use crate::std::queue::seg_queue::SegQueue as WaitList;
 ///
 /// ```rust
 /// use std::sync::Arc;
-/// use cogo::coroutine;
-/// use cogo::std::sync::Semphore;
+/// use mco::coroutine;
+/// use mco::std::sync::Semphore;
 ///
 /// let sem = Arc::new(Semphore::new(0));
 /// let sem2 = sem.clone();
@@ -207,7 +207,7 @@ mod tests {
         for i in 0..total {
             let sem2 = sem.clone();
             let tx2 = tx.clone();
-            go!(move || {
+            co!(move || {
                 sem2.wait();
                 tx2.send(i).unwrap();
             });
@@ -244,11 +244,11 @@ mod tests {
         let sem2 = sem1.clone();
         let sem3 = sem1.clone();
 
-        let h1 = go!(move || {
+        let h1 = co!(move || {
             sem2.wait();
         });
 
-        let h2 = go!(move || {
+        let h2 = co!(move || {
             // let h1 enqueue
             sleep(Duration::from_millis(50));
             sem3.wait();
@@ -273,12 +273,12 @@ mod tests {
         let sem2 = sem1.clone();
         let sem3 = sem1.clone();
 
-        let h1 = go!(move || {
+        let h1 = co!(move || {
             let r = sem2.wait_timeout(Duration::from_millis(10));
             assert_eq!(r, false);
         });
 
-        let h2 = go!(move || {
+        let h2 = co!(move || {
             // let h1 enqueue
             sleep(Duration::from_millis(50));
             sem3.wait();

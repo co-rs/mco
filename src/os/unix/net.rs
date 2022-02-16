@@ -18,7 +18,7 @@ use crate::yield_now::yield_with;
 /// # Examples
 ///
 /// ```no_run
-/// use cogo::os::unix::net::UnixStream;
+/// use mco::os::unix::net::UnixStream;
 /// use std::io::prelude::*;
 ///
 /// let mut stream = UnixStream::connect("/path/to/my/socket").unwrap();
@@ -54,7 +54,7 @@ impl UnixStream {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixStream;
+    /// use mco::os::unix::net::UnixStream;
     ///
     /// let socket = match UnixStream::connect("/tmp/sock") {
     ///     Ok(sock) => sock,
@@ -87,7 +87,7 @@ impl UnixStream {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixStream;
+    /// use mco::os::unix::net::UnixStream;
     ///
     /// let (sock1, sock2) = match UnixStream::pair() {
     ///     Ok((sock1, sock2)) => (sock1, sock2),
@@ -114,7 +114,7 @@ impl UnixStream {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixStream;
+    /// use mco::os::unix::net::UnixStream;
     ///
     /// let socket = UnixStream::connect("/tmp/sock").unwrap();
     /// let sock_copy = socket.try_clone().expect("Couldn't clone socket");
@@ -129,7 +129,7 @@ impl UnixStream {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixStream;
+    /// use mco::os::unix::net::UnixStream;
     ///
     /// let socket = UnixStream::connect("/tmp/sock").unwrap();
     /// let addr = socket.local_addr().expect("Couldn't get local address");
@@ -143,7 +143,7 @@ impl UnixStream {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixStream;
+    /// use mco::os::unix::net::UnixStream;
     ///
     /// let socket = UnixStream::connect("/tmp/sock").unwrap();
     /// let addr = socket.peer_addr().expect("Couldn't get peer address");
@@ -161,7 +161,7 @@ impl UnixStream {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixStream;
+    /// use mco::os::unix::net::UnixStream;
     /// use std::time::Duration;
     ///
     /// let socket = UnixStream::connect("/tmp/sock").unwrap();
@@ -181,7 +181,7 @@ impl UnixStream {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixStream;
+    /// use mco::os::unix::net::UnixStream;
     /// use std::time::Duration;
     ///
     /// let socket = UnixStream::connect("/tmp/sock").unwrap();
@@ -197,7 +197,7 @@ impl UnixStream {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixStream;
+    /// use mco::os::unix::net::UnixStream;
     /// use std::time::Duration;
     ///
     /// let socket = UnixStream::connect("/tmp/sock").unwrap();
@@ -213,7 +213,7 @@ impl UnixStream {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixStream;
+    /// use mco::os::unix::net::UnixStream;
     /// use std::time::Duration;
     ///
     /// let socket = UnixStream::connect("/tmp/sock").unwrap();
@@ -229,7 +229,7 @@ impl UnixStream {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixStream;
+    /// use mco::os::unix::net::UnixStream;
     ///
     /// let socket = UnixStream::connect("/tmp/sock").unwrap();
     /// socket.set_nonblocking(true).expect("Couldn't set nonblocking");
@@ -243,7 +243,7 @@ impl UnixStream {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixStream;
+    /// use mco::os::unix::net::UnixStream;
     ///
     /// let socket = UnixStream::connect("/tmp/sock").unwrap();
     /// if let Ok(Some(err)) = socket.take_error() {
@@ -263,7 +263,7 @@ impl UnixStream {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixStream;
+    /// use mco::os::unix::net::UnixStream;
     /// use std::net::Shutdown;
     ///
     /// let socket = UnixStream::connect("/tmp/sock").unwrap();
@@ -331,7 +331,7 @@ impl IntoRawFd for UnixStream {
 ///
 /// ```no_run
 /// use std::thread;
-/// use cogo::os::unix::net::{UnixStream, UnixListener};
+/// use mco::os::unix::net::{UnixStream, UnixListener};
 ///
 /// fn handle_client(stream: UnixStream) {
 ///     // ...
@@ -372,7 +372,7 @@ impl UnixListener {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixListener;
+    /// use mco::os::unix::net::UnixListener;
     ///
     /// let listener = match UnixListener::bind("/path/to/the/socket") {
     ///     Ok(sock) => sock,
@@ -396,7 +396,7 @@ impl UnixListener {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixListener;
+    /// use mco::os::unix::net::UnixListener;
     ///
     /// let listener = UnixListener::bind("/path/to/the/socket").unwrap();
     ///
@@ -439,7 +439,7 @@ impl UnixListener {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixListener;
+    /// use mco::os::unix::net::UnixListener;
     ///
     /// let listener = UnixListener::bind("/path/to/the/socket").unwrap();
     ///
@@ -455,7 +455,7 @@ impl UnixListener {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixListener;
+    /// use mco::os::unix::net::UnixListener;
     ///
     /// let listener = UnixListener::bind("/path/to/the/socket").unwrap();
     ///
@@ -470,7 +470,7 @@ impl UnixListener {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixListener;
+    /// use mco::os::unix::net::UnixListener;
     ///
     /// let listener = UnixListener::bind("/path/to/the/socket").unwrap();
     ///
@@ -485,7 +485,7 @@ impl UnixListener {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixListener;
+    /// use mco::os::unix::net::UnixListener;
     ///
     /// let listener = UnixListener::bind("/tmp/sock").unwrap();
     ///
@@ -506,7 +506,7 @@ impl UnixListener {
     ///
     /// ```no_run
     /// use std::thread;
-    /// use cogo::os::unix::net::{UnixStream, UnixListener};
+    /// use mco::os::unix::net::{UnixStream, UnixListener};
     ///
     /// fn handle_client(stream: UnixStream) {
     ///     // ...
@@ -566,7 +566,7 @@ impl<'a> IntoIterator for &'a UnixListener {
 ///
 /// ```no_run
 /// use std::thread;
-/// use cogo::os::unix::net::{UnixStream, UnixListener};
+/// use mco::os::unix::net::{UnixStream, UnixListener};
 ///
 /// fn handle_client(stream: UnixStream) {
 ///     // ...
@@ -607,7 +607,7 @@ impl<'a> Iterator for Incoming<'a> {
 /// # Examples
 ///
 /// ```no_run
-/// use cogo::os::unix::net::UnixDatagram;
+/// use mco::os::unix::net::UnixDatagram;
 ///
 /// let socket = UnixDatagram::bind("/path/to/my/socket").unwrap();
 /// socket.send_to(b"hello world", "/path/to/other/socket").unwrap();
@@ -637,7 +637,7 @@ impl UnixDatagram {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     ///
     /// let sock = match UnixDatagram::bind("/path/to/the/socket") {
     ///     Ok(sock) => sock,
@@ -657,7 +657,7 @@ impl UnixDatagram {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     ///
     /// let sock = match UnixDatagram::unbound() {
     ///     Ok(sock) => sock,
@@ -679,7 +679,7 @@ impl UnixDatagram {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     ///
     /// let (sock1, sock2) = match UnixDatagram::pair() {
     ///     Ok((sock1, sock2)) => (sock1, sock2),
@@ -708,7 +708,7 @@ impl UnixDatagram {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     ///
     /// let sock = UnixDatagram::unbound().unwrap();
     /// match sock.connect("/path/to/the/socket") {
@@ -734,7 +734,7 @@ impl UnixDatagram {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     ///
     /// let sock = UnixDatagram::bind("/path/to/the/socket").unwrap();
     ///
@@ -750,7 +750,7 @@ impl UnixDatagram {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     ///
     /// let sock = UnixDatagram::bind("/path/to/the/socket").unwrap();
     ///
@@ -769,7 +769,7 @@ impl UnixDatagram {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     ///
     /// let sock = UnixDatagram::unbound().unwrap();
     /// sock.connect("/path/to/the/socket").unwrap();
@@ -788,7 +788,7 @@ impl UnixDatagram {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     ///
     /// let sock = UnixDatagram::unbound().unwrap();
     /// let mut buf = vec![0; 10];
@@ -830,7 +830,7 @@ impl UnixDatagram {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     ///
     /// let sock = UnixDatagram::bind("/path/to/the/socket").unwrap();
     /// let mut buf = vec![0; 10];
@@ -869,7 +869,7 @@ impl UnixDatagram {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     ///
     /// let sock = UnixDatagram::unbound().unwrap();
     /// sock.send_to(b"omelette au fromage", "/some/sock").expect("send_to function failed");
@@ -910,7 +910,7 @@ impl UnixDatagram {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     ///
     /// let sock = UnixDatagram::unbound().unwrap();
     /// sock.connect("/some/sock").expect("Couldn't connect");
@@ -954,7 +954,7 @@ impl UnixDatagram {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     /// use std::time::Duration;
     ///
     /// let sock = UnixDatagram::unbound().unwrap();
@@ -977,7 +977,7 @@ impl UnixDatagram {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     /// use std::time::Duration;
     ///
     /// let sock = UnixDatagram::unbound().unwrap();
@@ -994,7 +994,7 @@ impl UnixDatagram {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     /// use std::time::Duration;
     ///
     /// let sock = UnixDatagram::unbound().unwrap();
@@ -1010,7 +1010,7 @@ impl UnixDatagram {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     /// use std::time::Duration;
     ///
     /// let sock = UnixDatagram::unbound().unwrap();
@@ -1027,7 +1027,7 @@ impl UnixDatagram {
     /// # Examples
     ///
     /// ```
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     ///
     /// let sock = UnixDatagram::unbound().unwrap();
     /// sock.set_nonblocking(true).expect("set_nonblocking function failed");
@@ -1041,7 +1041,7 @@ impl UnixDatagram {
     /// # Examples
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     ///
     /// let sock = UnixDatagram::unbound().unwrap();
     /// if let Ok(Some(err)) = sock.take_error() {
@@ -1059,7 +1059,7 @@ impl UnixDatagram {
     /// (see the documentation of libstd `Shutdown`).
     ///
     /// ```no_run
-    /// use cogo::os::unix::net::UnixDatagram;
+    /// use mco::os::unix::net::UnixDatagram;
     /// use std::net::Shutdown;
     ///
     /// let sock = UnixDatagram::unbound().unwrap();
@@ -1119,7 +1119,7 @@ mod test {
         let msg2 = b"world!";
 
         let listener = or_panic!(UnixListener::bind(&socket_path));
-        let thread = go!(move || {
+        let thread = co!(move || {
             let mut stream = or_panic!(listener.accept()).0;
             let mut buf = [0; 5];
             or_panic!(stream.read(&mut buf));
@@ -1147,7 +1147,7 @@ mod test {
         let msg2 = b"world!";
 
         let (mut s1, mut s2) = or_panic!(UnixStream::pair());
-        let thread = go!(move || {
+        let thread = co!(move || {
             // s1 must be moved in or the test will hang!
             let mut buf = [0; 5];
             or_panic!(s1.read(&mut buf));
@@ -1172,7 +1172,7 @@ mod test {
         let msg2 = b"world";
 
         let listener = or_panic!(UnixListener::bind(&socket_path));
-        let thread = go!(move || {
+        let thread = co!(move || {
             let mut stream = or_panic!(listener.accept()).0;
             or_panic!(stream.write_all(msg1));
             or_panic!(stream.write_all(msg2));
@@ -1196,7 +1196,7 @@ mod test {
         let socket_path = dir.path().join("sock");
 
         let listener = or_panic!(UnixListener::bind(&socket_path));
-        let thread = go!(move || for stream in listener.incoming().take(2) {
+        let thread = co!(move || for stream in listener.incoming().take(2) {
             let mut stream = or_panic!(stream);
             let mut buf = [0];
             or_panic!(stream.read(&mut buf));
@@ -1381,7 +1381,7 @@ mod test {
         let msg2 = b"world!";
 
         let (s1, s2) = or_panic!(UnixDatagram::pair());
-        let thread = go!(move || {
+        let thread = co!(move || {
             // s1 must be moved in or the test will hang!
             let mut buf = [0; 5];
             or_panic!(s1.recv(&mut buf));

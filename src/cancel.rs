@@ -8,7 +8,7 @@ use crate::io::cancel::CancelIoImpl;
 use crate::scheduler::get_scheduler;
 use crate::std::sync::AtomicOption;
 use crate::yield_now::{get_co_para, set_co_para};
-use cogo_gen::Error;
+use mco_gen::Error;
 
 // the cancel is implemented by triggering a Cancel panic
 // if drop is called due to a Cancel panic, it's not safe

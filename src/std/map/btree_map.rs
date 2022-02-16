@@ -164,7 +164,7 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
     /// # Examples
     ///
     /// ```
-    /// use cogo::std::sync::{SyncHashMap};
+    /// use mco::std::sync::{SyncHashMap};
     ///
     /// let map = SyncHashMap::new();
     /// map.insert(1, "a");
@@ -457,12 +457,12 @@ mod test {
             let wg2 = wg.clone();
             let m1 = m.clone();
             let m2 = m.clone();
-            go!(move ||{
+            co!(move ||{
                  m1.remove(&1);
                  let insert = m1.insert(1, 2);
                  drop(wg1);
             });
-            go!(move ||{
+            co!(move ||{
                  m2.remove(&1);
                  let insert = m2.insert(1, 2);
                  drop(wg2);

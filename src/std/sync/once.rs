@@ -96,7 +96,7 @@ mod test {
             let oc = once.clone();
             let s = sender.clone();
             let o = one.clone();
-            go!(move ||{unsafe {run(oc,o,s);}});
+            co!(move ||{unsafe {run(oc,o,s);}});
         }
         for i in 0..n {
             r.recv();

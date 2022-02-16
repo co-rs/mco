@@ -1,21 +1,21 @@
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 
 use std::io::{Read, Write};
 
-use cogo::coroutine;
-use cogo::net::{TcpListener, TcpStream};
+use mco::coroutine;
+use mco::net::{TcpListener, TcpStream};
 
 fn main() {
     // below config would schedule all the coroutines
     // on the single worker thread
-    cogo::config().set_workers(1);
+    mco::config().set_workers(1);
 
     // start the server
-    let _server = go!(|| {
+    let _server = co!(|| {
         let listener = TcpListener::bind("0.0.0.0:8000").unwrap();
         while let Ok((mut stream, _)) = listener.accept() {
-            go!(move || {
+            co!(move || {
                 let mut buf = vec![0; 1024 * 8]; // alloc in heap!
                 while let Ok(n) = stream.read(&mut buf) {
                     if n == 0 {
@@ -30,7 +30,7 @@ fn main() {
     // run some client until all finish
     coroutine::scope(|s| {
         for i in 0..100 {
-            go!(s, move || {
+            co!(s, move || {
                 let mut buf = [i; 100];
                 let mut conn = TcpStream::connect("0.0.0.0:8000").unwrap();
                 conn.write_all(&buf).unwrap();

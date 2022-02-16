@@ -1,5 +1,5 @@
 use std::time::Duration;
-use cogo::std::sync::WaitGroup;
+use mco::std::sync::WaitGroup;
 
 fn main() {
     let wg = WaitGroup::new();
@@ -11,7 +11,7 @@ fn main() {
         std::thread::spawn(move || {
             // Do some work
             println!("sleep 1s");
-            cogo::coroutine::sleep(Duration::from_secs(1));
+            mco::coroutine::sleep(Duration::from_secs(1));
             // Drop the reference to the wait group.
             drop(wg);
         });
@@ -21,10 +21,10 @@ fn main() {
         // Create another reference to the wait group.
         let wg = wg.clone();
 
-        cogo::go!(move || {
+        mco::co!(move || {
         // Do some work.
             println!("sleep 1s");
-            cogo::coroutine::sleep(Duration::from_secs(1));
+            mco::coroutine::sleep(Duration::from_secs(1));
 
         // Drop the reference to the wait group.
         drop(wg);

@@ -1,6 +1,6 @@
 use std::time::Duration;
-use cogo::coroutine::sleep;
-use cogo::{chan, go};
+use mco::coroutine::sleep;
+use mco::{chan, co};
 
 fn main() {
     //unbounded
@@ -14,7 +14,7 @@ fn main() {
 
     //bounded length, If the sender sends more messages than the limit, it waits until the message is consumed
     let (s, r) = chan!(1);
-    go!(move ||{
+    co!(move ||{
        let send_result = s.send(1);
        println!("send 1 is_ok:{}", send_result.is_ok());
        //will blocking until the excess messages are consumed or the channel is closed

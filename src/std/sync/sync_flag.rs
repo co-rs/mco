@@ -25,8 +25,8 @@ use crate::std::queue::seg_queue::SegQueue;
 ///
 /// ```rust
 /// use std::sync::Arc;
-/// use cogo::coroutine;
-/// use cogo::std::sync::SyncFlag;
+/// use mco::coroutine;
+/// use mco::std::sync::SyncFlag;
 ///
 /// let flag = Arc::new(SyncFlag::new());
 /// let flag2 = flag.clone();
@@ -182,11 +182,11 @@ mod tests {
         let flag2 = flag1.clone();
         let flag3 = flag1.clone();
 
-        let h1 = go!(move || {
+        let h1 = co!(move || {
             flag2.wait();
         });
 
-        let h2 = go!(move || {
+        let h2 = co!(move || {
             // let h1 enqueue
             sleep(Duration::from_millis(50));
             flag3.wait();
@@ -211,12 +211,12 @@ mod tests {
         let flag2 = flag1.clone();
         let flag3 = flag1.clone();
 
-        let h1 = go!(move || {
+        let h1 = co!(move || {
             let r = flag2.wait_timeout(Duration::from_millis(10));
             assert_eq!(r, false);
         });
 
-        let h2 = go!(move || {
+        let h2 = co!(move || {
             // let h1 enqueue
             sleep(Duration::from_millis(50));
             flag3.wait();

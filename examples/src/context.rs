@@ -1,9 +1,9 @@
 use std::sync::mpsc::RecvError;
 use std::time::Duration;
-use cogo::{err, go, select};
-use cogo::coroutine::sleep;
-use cogo::std::context::{CancelCtx, Canceler};
-use cogo::std::errors::Error;
+use mco::{err, go, select};
+use mco::coroutine::sleep;
+use mco::std::context::{CancelCtx, Canceler};
+use mco::std::errors::Error;
 
 //TODO Context is not stable yet
 fn main() {

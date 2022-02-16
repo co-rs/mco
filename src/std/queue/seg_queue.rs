@@ -135,7 +135,7 @@ struct Position<T> {
 /// # Examples
 ///
 /// ```
-/// use cogo::std::queue::seg_queue::SegQueue;
+/// use mco::std::queue::seg_queue::SegQueue;
 ///
 /// let q = SegQueue::new();
 ///
@@ -167,7 +167,7 @@ impl<T> SegQueue<T> {
     /// # Examples
     ///
     /// ```
-    /// use cogo::std::queue::seg_queue::SegQueue;
+    /// use mco::std::queue::seg_queue::SegQueue;
     ///
     /// let q = SegQueue::<i32>::new();
     /// ```
@@ -190,7 +190,7 @@ impl<T> SegQueue<T> {
     /// # Examples
     ///
     /// ```
-    /// use cogo::std::queue::seg_queue::SegQueue;
+    /// use mco::std::queue::seg_queue::SegQueue;
     ///
     /// let q = SegQueue::new();
     ///
@@ -284,7 +284,7 @@ impl<T> SegQueue<T> {
     /// # Examples
     ///
     /// ```
-    /// use cogo::std::queue::seg_queue::SegQueue;
+    /// use mco::std::queue::seg_queue::SegQueue;
     ///
     /// let q = SegQueue::new();
     ///
@@ -384,7 +384,7 @@ impl<T> SegQueue<T> {
     /// # Examples
     ///
     /// ```
-    /// use cogo::std::queue::seg_queue::SegQueue;
+    /// use mco::std::queue::seg_queue::SegQueue;
     ///
     /// let q = SegQueue::new();
     ///
@@ -403,7 +403,7 @@ impl<T> SegQueue<T> {
     /// # Examples
     ///
     /// ```
-    /// use cogo::std::queue::seg_queue::SegQueue;
+    /// use mco::std::queue::seg_queue::SegQueue;
     ///
     /// let q = SegQueue::new();
     /// assert_eq!(q.len(), 0);

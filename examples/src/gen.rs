@@ -1,14 +1,14 @@
 #[macro_use]
-extern crate cogo;
+extern crate mco;
 
 use crate::coroutine::yield_now;
-use cogo::cogo_gen::Gn;
-use cogo::coroutine;
+use mco::mco_gen::Gn;
+use mco::coroutine;
 
 fn main() {
     coroutine::scope(|scope| {
-        go!(scope, || {
-            let g = cogo::cogo_gen::Gn::<()>::new_scoped(|mut scope| {
+        co!(scope, || {
+            let g = mco::mco_gen::Gn::<()>::new_scoped(|mut scope| {
                 let (mut a, mut b) = (0, 1);
                 while b < 200 {
                     std::mem::swap(&mut a, &mut b);

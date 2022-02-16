@@ -1,6 +1,6 @@
 //! # A library for programming stackful coroutines in Rust.
 //!
-//! Cogo is a high-performant library for programming stackful coroutines with which
+//! mco is a high-performant library for programming stackful coroutines with which
 //! you can easily develop and maintain massive concurrent programs. It can be thought
 //! as the Rust version of the popular Goroutine.
 //!
@@ -45,7 +45,7 @@ mod scoped;
 mod timeout_list;
 mod yield_now;
 #[macro_use]
-pub extern crate cogo_gen;
+pub extern crate mco_gen;
 
 pub mod coroutine;
 pub mod cqueue;

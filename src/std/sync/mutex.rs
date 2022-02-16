@@ -296,7 +296,7 @@ mod tests {
             });
             let tx2 = tx.clone();
             let m2 = m.clone();
-            go!(move || {
+            co!(move || {
                 inc(&m2);
                 tx2.send(()).unwrap();
             });
@@ -506,12 +506,12 @@ mod tests {
         let mutex3 = mutex1.clone();
         let g = mutex1.lock().unwrap();
 
-        let h1 = go!(move || {
+        let h1 = co!(move || {
             let mut g = mutex2.lock().unwrap();
             *g += 1;
         });
 
-        let h2 = go!(move || {
+        let h2 = co!(move || {
             // let h1 enqueue
             sleep(Duration::from_millis(50));
             let mut g = mutex3.lock().unwrap();
@@ -541,7 +541,7 @@ mod tests {
         let mutex3 = mutex1.clone();
         let g = mutex1.lock().unwrap();
 
-        let h1 = go!(move || {
+        let h1 = co!(move || {
             let mut g = mutex2.lock().unwrap();
             // test cancel when holding the mutex
             // this should not be poision
@@ -549,7 +549,7 @@ mod tests {
             *g += 1;
         });
 
-        let h2 = go!(move || {
+        let h2 = co!(move || {
             // let h1 enqueue
             sleep(Duration::from_millis(50));
             let mut g = mutex3.lock().unwrap();

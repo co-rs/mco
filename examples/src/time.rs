@@ -1,6 +1,6 @@
 use std::time::Duration;
-use cogo::std::time::time::Time;
-use cogo::std::time::{time, UtcOffset};
+use mco::std::time::time::Time;
+use mco::std::time::{time, UtcOffset};
 
 fn main() {
     let mut now = Time::now();
