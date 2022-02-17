@@ -5,6 +5,7 @@ use mco::std::sync::{SyncHashMap, WaitGroup};
 
 pub fn main() {
     //or SyncBtreeMap::new_arc()
+
     let map = SyncHashMap::new_arc();
     let wg = WaitGroup::new();
 

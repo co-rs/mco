@@ -52,6 +52,19 @@ macro_rules! btree_map {
     };
 }
 
+/// for example:
+/// ```
+/// use mco::sync_hash_map;
+///
+/// let f=1;
+/// let v=7;
+/// let m = sync_hash_map!{
+///         1:1,
+///         2:2,
+///         f:v,
+///         6:9*2
+///     };
+/// ```
 #[macro_export]
 macro_rules! sync_hash_map {
     {$(,)?} => {
@@ -69,6 +82,19 @@ macro_rules! sync_hash_map {
     };
 }
 
+/// for example:
+/// ```
+/// use mco::sync_btree_map;
+///
+/// let f=1;
+/// let v=7;
+/// let m = sync_btree_map!{
+///         1:1,
+///         2:2,
+///         f:v,
+///         6:9*2
+///     };
+/// ```
 #[macro_export]
 macro_rules! sync_btree_map {
     {$(,)?} => {
