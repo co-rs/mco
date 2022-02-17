@@ -1,8 +1,8 @@
-pub struct Guard<F: FnOnce()>(pub Option<F>);
+pub struct Guard<F: FnMut()>(pub Option<F>);
 
-impl<F: FnOnce()> Drop for Guard<F> {
+impl<F: FnMut()> Drop for Guard<F> {
     fn drop(&mut self) {
-        if let Some(f) = (self.0).take() {
+        if let Some(mut f) = (self.0).take() {
             f()
         }
     }
@@ -33,12 +33,12 @@ impl<F: FnOnce()> Drop for Guard<F> {
 #[macro_export]
 macro_rules! defer {
     ($func:block) => {
-       let _guard = $crate::std::defer::Guard(Some(||$func));
+       let _guard = $crate::std::defer::Guard(Some( ||$func));
     };
     ($func:expr) => {
         let _guard = $crate::std::defer::Guard(Some($func));
     };
     { $($func:expr$(;)?)+ } => {
-       let _guard = $crate::std::defer::Guard(Some(||{$($func;)+}));
+       let _guard = $crate::std::defer::Guard(Some( ||{$($func;)+}));
     }
 }

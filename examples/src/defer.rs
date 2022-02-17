@@ -12,11 +12,10 @@ fn main() {
     defer! {
         println!("guard: 3");
     }
-    let complete = RefCell::new(false);
-    let c = complete.clone();
+    let mut complete = false;
     defer!(move|| {
-        if c.borrow().eq(&false){
-            *c.borrow_mut() = true;
+        if complete.eq(&false){
+            complete = true;
             println!("tx complete");
         }
     });
@@ -24,5 +23,5 @@ fn main() {
     if true {
         panic!("None Exception!");
     }
-    *complete.borrow_mut() = true;
+    complete = true;
 }
