@@ -38,7 +38,7 @@ macro_rules! defer {
     ($func:expr) => {
         let _guard = $crate::std::defer::Guard(Some($func));
     };
-    { $($func:expr;)+ } => {
+    { $($func:expr$(;)?)+ } => {
        let _guard = $crate::std::defer::Guard(Some(||{$($func;)+}));
     }
 }
