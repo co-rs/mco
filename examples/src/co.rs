@@ -27,6 +27,7 @@ fn main() {
     spawn(|| {
         println!("go with method spawn");
     });
+    //yield example
     co!(move || {
         println!("hi, I'm parent");
         let v = (0..100)
@@ -47,6 +48,7 @@ fn main() {
     }).join().unwrap();
 
     sleep(Duration::from_secs(1));
+    //cancel example
     let g = co!(||{
         defer!(||{ println!("cancel done!")});
         for idx in 0..1000{

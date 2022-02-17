@@ -113,8 +113,8 @@ name = "time_tick"
 path = "src/time_tick.rs"
 
 [[bin]]
-name = "go"
-path = "src/go.rs"
+name = "co"
+path = "src/co.rs"
 
 [[bin]]
 name = "context"
