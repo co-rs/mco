@@ -4,28 +4,28 @@ use mco::{defer, co};
 
 fn main() {
     co!(||{
-       println!("go");
+       println!("coroutine");
     });
     co!(2*4096,||{
-       println!("go with stack size: {}",mco::coroutine::current().stack_size());
+       println!("coroutine with stack size: {}",mco::coroutine::current().stack_size());
     });
     (2 * 4096).spawn(|| {
-        println!("go with stack size: {}", mco::coroutine::current().stack_size());
+        println!("coroutine with stack size: {}", mco::coroutine::current().stack_size());
     });
-    co!("go",||{
-       println!("go with name: {}",mco::coroutine::current().name().unwrap_or_default());
+    co!("coroutine",||{
+       println!("coroutine with name: {}",mco::coroutine::current().name().unwrap_or_default());
     });
-    "go".spawn(|| {
-        println!("go with name: {}", mco::coroutine::current().name().unwrap_or_default());
+    "coroutine".spawn(|| {
+        println!("coroutine with name: {}", mco::coroutine::current().name().unwrap_or_default());
     });
     co!(Builder::new(),||{
-       println!("go with Builder");
+       println!("coroutine with Builder");
     });
     Builder::new().spawn(|| {
-        println!("go with Builder::spawn");
+        println!("coroutine with Builder::spawn");
     });
     spawn(|| {
-        println!("go with method spawn");
+        println!("coroutine with method spawn");
     });
     //yield example
     co!(move || {
