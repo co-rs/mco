@@ -77,22 +77,26 @@ impl Time {
         self.inner.unix_timestamp_nanos() as i64
     }
 
-    pub fn add(&mut self, d: std::time::Duration) {
+    pub fn add(mut self, d: std::time::Duration) -> Self {
         self.inner = self.inner.add(d);
+        self
     }
 
-    pub fn sub(&mut self, d: std::time::Duration) {
+    pub fn sub(mut self, d: std::time::Duration) -> Self {
         self.inner = self.inner.sub(d);
+        self
     }
 
     // add_sec adds d seconds to the time.
-    pub fn add_sec(&mut self, d: i64) {
+    pub fn add_sec(mut self, d: i64) -> Self {
         self.inner = self.inner.add(time::Duration::seconds(d));
+        self
     }
 
     /// set_loc sets the location associated with the time.
-    pub fn set_loc(&mut self, loc: time::UtcOffset) {
+    pub fn set_loc(mut self, loc: time::UtcOffset) -> Self {
         self.inner = self.inner.to_offset(loc);
+        self
     }
 
     /// after reports whether the time instant t is after u.
@@ -316,11 +320,11 @@ impl<'de> serde::Deserialize<'de> for Time {
     }
 }
 
-impl FromStr for Time{
+impl FromStr for Time {
     type Err = crate::std::errors::Error;
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        Time::parse(RFC3339Nano,s)
+        Time::parse(RFC3339Nano, s)
     }
 }
 
