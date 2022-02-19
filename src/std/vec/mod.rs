@@ -87,7 +87,12 @@ impl<V> SyncVecImpl<V> {
                     Some(s) => {
                         unsafe {
                             let r = (&mut *self.read.get()).pop();
-                            std::mem::forget(r);
+                            match r{
+                                None => {}
+                                Some(r) => {
+                                    std::mem::forget(r);
+                                }
+                            }
                         }
                         return Some(s);
                     }
@@ -172,9 +177,6 @@ impl<V> SyncVecImpl<V> {
         let s = Self::with_capacity(map.capacity());
         match s.dirty.lock() {
             Ok(mut m) => {
-                unsafe {
-                    (&mut *s.read.get()).clear();
-                }
                 *m = map;
                 unsafe {
                     for v in m.iter() {
