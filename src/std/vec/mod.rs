@@ -14,7 +14,7 @@ pub type SyncVec<V> = SyncVecImpl<V>;
 
 
 pub struct SyncVecImpl<V> {
-    read: UnsafeCell<Vec<*const V>>,
+    read: UnsafeCell<Vec<V>>,
     dirty: Mutex<Vec<V>>,
 }
 
@@ -50,7 +50,7 @@ impl<V> SyncVecImpl<V> {
                 let len = m.len();
                 unsafe {
                     let r = m.get_unchecked(len - 1);
-                    (&mut *self.read.get()).insert(index, r);
+                    (&mut *self.read.get()).insert(index, std::ptr::read(r));
                 }
                 None
             }
@@ -67,7 +67,7 @@ impl<V> SyncVecImpl<V> {
                 let len = m.len();
                 unsafe {
                     let r = m.get_unchecked(len - 1);
-                    (&mut *self.read.get()).push(r);
+                    (&mut *self.read.get()).push(std::ptr::read(r));
                 }
                 None
             }
@@ -86,7 +86,8 @@ impl<V> SyncVecImpl<V> {
                     }
                     Some(s) => {
                         unsafe {
-                            (&mut *self.read.get()).pop();
+                            let r = (&mut *self.read.get()).pop();
+                            std::mem::forget(r);
                         }
                         return Some(s);
                     }
@@ -108,7 +109,8 @@ impl<V> SyncVecImpl<V> {
                     Ok(mut m) => {
                         let v = m.remove(index);
                         unsafe {
-                            (&mut *self.read.get()).remove(index);
+                            let r = (&mut *self.read.get()).remove(index);
+                            std::mem::forget(r);
                         }
                         Some(v)
                     }
@@ -136,10 +138,19 @@ impl<V> SyncVecImpl<V> {
     pub fn clear(&self) {
         match self.dirty.lock() {
             Ok(mut m) => {
+                m.clear();
                 unsafe {
-                    (&mut *self.read.get()).clear()
+                    loop {
+                        match (&mut *self.read.get()).pop() {
+                            None => {
+                                break;
+                            }
+                            Some(v) => {
+                                std::mem::forget(v)
+                            }
+                        }
+                    }
                 }
-                m.clear()
             }
             Err(_) => {}
         }
@@ -167,7 +178,7 @@ impl<V> SyncVecImpl<V> {
                 *m = map;
                 unsafe {
                     for v in m.iter() {
-                        (&mut *s.read.get()).push(v);
+                        (&mut *s.read.get()).push(std::ptr::read(v));
                     }
                 }
             }
@@ -183,10 +194,7 @@ impl<V> SyncVecImpl<V> {
             match k {
                 None => { None }
                 Some(s) => {
-                    if s.is_null() {
-                        return None;
-                    }
-                    Some(&**s)
+                    Some(s)
                 }
             }
         }
@@ -196,10 +204,7 @@ impl<V> SyncVecImpl<V> {
     {
         unsafe {
             let k = (&*self.read.get()).get_unchecked(index);
-            if k.is_null() {
-                return None;
-            }
-            Some(&**k)
+            Some(k)
         }
     }
 
@@ -223,12 +228,9 @@ impl<V> SyncVecImpl<V> {
         }
     }
 
-    pub fn iter(&self) -> Iter<'_, V> {
+    pub fn iter(&self) -> SliceIter<'_, V> {
         unsafe {
-            let iter = (&*self.read.get()).iter();
-            Iter {
-                inner: Some(iter)
-            }
+            (&*self.read.get()).iter()
         }
     }
 
@@ -252,12 +254,9 @@ impl<V> SyncVecImpl<V> {
         }
     }
 
-    pub fn into_iter(self) -> Iter<'static, V> {
+    pub fn into_iter(self) -> SliceIter<'static, V> {
         unsafe {
-            let iter = (&*self.read.get()).iter();
-            Iter {
-                inner: Some(iter)
-            }
+            (&*self.read.get()).iter()
         }
     }
 }
@@ -352,7 +351,7 @@ impl<'a, V> Iterator for IterMut<'a, V> {
 
 impl<'a, V> IntoIterator for &'a SyncVecImpl<V> {
     type Item = &'a V;
-    type IntoIter = Iter<'a, V>;
+    type IntoIter = SliceIter<'a, V>;
 
     fn into_iter(self) -> Self::IntoIter {
         self.iter()
@@ -371,7 +370,7 @@ impl<'a, V> IntoIterator for &'a mut SyncVecImpl<V> {
 
 impl<V> IntoIterator for SyncVecImpl<V> where V: 'static {
     type Item = &'static V;
-    type IntoIter = Iter<'static, V>;
+    type IntoIter = SliceIter<'static, V>;
 
     fn into_iter(mut self) -> Self::IntoIter {
         self.into_iter()
