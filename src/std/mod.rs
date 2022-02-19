@@ -14,3 +14,4 @@ pub mod lazy;
 pub mod context;
 pub mod wrapper;
 pub mod blocking;
+pub mod vec;
