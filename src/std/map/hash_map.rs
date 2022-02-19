@@ -45,6 +45,7 @@ unsafe impl<K, V> Send for SyncMapImpl<K, V> {}
 /// this is safety, dirty mutex ensure
 unsafe impl<K, V> Sync for SyncMapImpl<K, V> {}
 
+//TODO maybe K will use transmute_copy replace Clone?
 impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
     pub fn new_arc() -> Arc<Self> {
         Arc::new(Self::new())
@@ -63,6 +64,7 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
             dirty: Mutex::new(Map::with_capacity(capacity)),
         }
     }
+
 
     pub fn insert(&self, k: K, v: V) -> Option<V> where K: Clone {
         match self.dirty.lock() {
