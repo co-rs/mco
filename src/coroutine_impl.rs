@@ -434,15 +434,6 @@ pub fn spawn<F, T>(f: F) -> JoinHandle<T>
     Builder::new().spawn(f)
 }
 
-/// spawn a new coroutine(use method spawn)
-pub fn go<F, T>(f: F) -> JoinHandle<T>
-    where
-        F: FnOnce() -> T + Send + 'static,
-        T: Send + 'static,
-{
-    spawn(f)
-}
-
 /// Gets a handle to the coroutine that invokes it.
 /// it will panic if you call it in a thead context
 #[inline]

@@ -313,7 +313,7 @@ fn join_macro() {
 }
 
 #[test]
-fn go_with_macro() {
+fn co_with_macro() {
     use mco::std::sync::channel::channel;
 
     let (tx1, rx1) = channel();

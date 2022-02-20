@@ -1,6 +1,6 @@
 use std::sync::mpsc::RecvError;
 use std::time::Duration;
-use mco::{err, go, select};
+use mco::{err, select};
 use mco::coroutine::sleep;
 use mco::std::context::{CancelCtx, Canceler};
 use mco::std::errors::Error;
