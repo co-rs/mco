@@ -1,12 +1,11 @@
 use std::ops::Deref;
 use std::sync::Arc;
-use mco::{co};
+use mco::{co, sync_btree_map, sync_hash_map};
 use mco::std::sync::{SyncHashMap, WaitGroup};
-
 pub fn main() {
-    //or SyncBtreeMap::new_arc()
-
-    let map = SyncHashMap::new_arc();
+    //or SyncBtreeMap
+    let btree = sync_btree_map!{1:1};
+    let map = Arc::new(sync_hash_map!{});
     let wg = WaitGroup::new();
 
     for i in 0..100 {

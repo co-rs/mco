@@ -99,13 +99,13 @@ macro_rules! sync_hash_map {
 macro_rules! sync_btree_map {
     {$(,)?} => {
        {
-            let mut temp_table_data = $crate::std::map::SyncBTreeMap::new();
+            let mut temp_table_data = $crate::std::map::SyncBtreeMap::new();
             temp_table_data
         }
     };
     { $($key:tt:$value:expr),+   $(,)?} => {
        {
-            let mut temp_table_data = $crate::std::map::SyncBTreeMap::new();
+            let mut temp_table_data = $crate::std::map::SyncBtreeMap::new();
              $(temp_table_data.insert($key,$value);)+
             temp_table_data
         }
