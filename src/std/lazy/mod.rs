@@ -4,13 +4,13 @@
 //! might store arbitrary non-`Copy` types, can be assigned to at most once and provides direct access
 //! to the stored contents. The core API looks *roughly* like this (and there's much more inside, read on!):
 //!
-//! ```rust,ignore
+//!
 //! impl<T> OnceCell<T> {
 //!     const fn new() -> OnceCell<T> { ... }
 //!     fn set(&self, value: T) -> Result<(), T> { ... }
 //!     fn get(&self) -> Option<&T> { ... }
 //! }
-//! ```
+//!
 //!
 //! Note that, like with [`RefCell`] and [`Mutex`], the `set` method requires only a shared reference.
 //! Because of the single assignment restriction `get` can return a `&T` instead of `Ref<T>`

@@ -34,16 +34,33 @@ pub type SyncHashMap<K, V> = SyncMapImpl<K, V>;
 /// contention compared to a Go map paired with a separate Mutex or RWMutex.
 ///
 /// The zero Map is empty and ready for use. A Map must not be copied after first use.
-pub struct SyncMapImpl<K, V> {
+pub struct SyncMapImpl<K:Eq+Hash+Clone, V> {
     read: UnsafeCell<Map<K, V>>,
     dirty: Mutex<Map<K, V>>,
 }
 
-/// this is safety, dirty mutex ensure
-unsafe impl<K, V> Send for SyncMapImpl<K, V> {}
+impl <K:Eq+Hash+Clone, V>Drop for SyncMapImpl<K,V> {
+    fn drop(&mut self) {
+        unsafe {
+            let k=(&mut *self.read.get()).keys().clone();
+            for x in k {
+                let v=(&mut *self.read.get()).remove(x);
+                match v{
+                    None => {}
+                    Some(v) => {
+                        std::mem::forget(v);
+                    }
+                }
+            }
+        }
+    }
+}
 
 /// this is safety, dirty mutex ensure
-unsafe impl<K, V> Sync for SyncMapImpl<K, V> {}
+unsafe impl<K:Eq+Hash+Clone, V> Send for SyncMapImpl<K, V> {}
+
+/// this is safety, dirty mutex ensure
+unsafe impl<K:Eq+Hash+Clone, V> Sync for SyncMapImpl<K, V> {}
 
 //TODO maybe K will use transmute_copy replace Clone?
 impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
@@ -134,8 +151,10 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
             Ok(mut m) => {
                 m.clear();
                 unsafe {
-                    for x in (&*self.read.get()).keys() {
-                        match (&mut *self.read.get()).remove(x){
+                    let k=(&mut *self.read.get()).keys().clone();
+                    for x in k {
+                        let v=(&mut *self.read.get()).remove(x);
+                        match v{
                             None => {}
                             Some(v) => {
                                 std::mem::forget(v);
@@ -144,7 +163,8 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
                     }
                 }
             }
-            Err(_) => {}
+            Err(_) => {
+            }
         }
     }
 
@@ -394,7 +414,7 @@ impl<K, V> IntoIterator for SyncMapImpl<K, V> where
 }
 
 
-impl<K, V> From<Map<K, V>> for SyncMapImpl<K, V> {
+impl<K:Eq+Hash+Clone, V> From<Map<K, V>> for SyncMapImpl<K, V> {
     fn from(arg: Map<K, V>) -> Self {
         Self::from(arg)
     }

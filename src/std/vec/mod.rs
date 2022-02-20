@@ -18,6 +18,23 @@ pub struct SyncVecImpl<V> {
     dirty: Mutex<Vec<V>>,
 }
 
+impl<V> Drop for SyncVecImpl<V> {
+    fn drop(&mut self) {
+        unsafe {
+            loop {
+                match (&mut *self.read.get()).pop() {
+                    None => {
+                        break;
+                    }
+                    Some(v) => {
+                        std::mem::forget(v)
+                    }
+                }
+            }
+        }
+    }
+}
+
 /// this is safety, dirty mutex ensure
 unsafe impl<V> Send for SyncVecImpl<V> {}
 
@@ -87,7 +104,7 @@ impl<V> SyncVecImpl<V> {
                     Some(s) => {
                         unsafe {
                             let r = (&mut *self.read.get()).pop();
-                            match r{
+                            match r {
                                 None => {}
                                 Some(r) => {
                                     std::mem::forget(r);

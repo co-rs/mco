@@ -571,8 +571,10 @@ mod test {
     fn test_smoke() {
         let mut now = Time::now();
         //is before?
+        sleep(Duration::from_secs(1));
         assert_eq!(true, now.before(&Time::now()));
         //is after?
+        sleep(Duration::from_secs(1));
         assert_eq!(true, Time::now().after(&now));
         //parse from str
         let parsed = Time::parse(RFC3339Nano, &now.to_string()).unwrap();
