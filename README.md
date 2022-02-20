@@ -7,12 +7,6 @@ massive concurrent programs. It can be thought as the Rust version of the popula
 
 > Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Many improvements(Inspired by [Golang](https://golang.google.cn/),  [parking_lot](https://github.com/Amanieu/parking_lot)  and [crossbeam](https://github.com/crossbeam-rs/crossbeam)) and more...
 
-## Performance
-
-* platform(16CPU/32 thread AMD Ryzen 9 5950X,32GB mem,Os:Unbutu-20.04)
-* [TechEmpowerBench fork project](https://github.com/zhuxiujia/FrameworkBenchmarks)
-
-![per](docs/imgs/629a066aaa37b4c295fa794c5ebdf31.png)
 
 # mco crates
 
