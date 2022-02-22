@@ -2,7 +2,7 @@ use std::cell::RefCell;
 use std::mem::take;
 use std::sync::Arc;
 use std::sync::atomic::{AtomicBool, AtomicI32, Ordering};
-use std::sync::mpsc::RecvError;
+use std::sync::mpsc::{RecvError, SendError};
 use crate::coroutine::spawn;
 use crate::std::errors::Error;
 use crate::std::sync::{Receiver, Sender};
@@ -72,7 +72,7 @@ impl Pool {
     }
 
     pub fn run(&self) {
-        let mut current = Arc::new(AtomicI32::new(self.worker_num));
+        let mut current = Arc::new(chan!(self.worker_num as usize));
         loop {
             match self.idle.1.recv() {
                 Ok(mut task) => {
@@ -82,22 +82,18 @@ impl Pool {
                             break;
                         }
                         Some(task) => {
-                            let n = current.load(Ordering::SeqCst);
-                            if n != 0 {
-                                current.store(n - 1, Ordering::SeqCst);
-                                let c = current.clone();
-                                spawn(move || {
-                                    defer!(||{
-                                          let n = c.load(Ordering::SeqCst);
-                                          c.store(n+1,Ordering::SeqCst);
-                                     });
-                                    let r = task.execute();
-                                    if r.is_err() {
-                                        log::error!("task run fail:{}",r.err().unwrap());
-                                    }
-                                });
-                            } else {
-                                self.idle.0.send(Some(task));
+                            match current.0.send(()) {
+                                Ok(_) => {
+                                    let rv = current.1.clone();
+                                    spawn(move || {
+                                        defer!(move ||{  rv.try_recv(); });
+                                        let r = task.execute();
+                                        if r.is_err() {
+                                            log::error!("task run fail:{}",r.err().unwrap());
+                                        }
+                                    });
+                                }
+                                Err(_) => {}
                             }
                         }
                     }
