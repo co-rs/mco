@@ -46,10 +46,16 @@ impl Pool {
         self.idle.0.send(Some(Arc::new(task)));
     }
 
+    /// close just now
     pub fn close(&self) {
         while self.idle.1.remain() > 0 {
             self.idle.1.try_recv();
         }
+        self.idle.0.send(None);
+    }
+
+    /// close when all task finish
+    pub fn close_finish(&self) {
         self.idle.0.send(None);
     }
 
