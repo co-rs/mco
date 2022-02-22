@@ -42,7 +42,7 @@ impl Pool {
         }
     }
 
-    pub fn new_limit(worker_num: i32, waiter_num: i32) -> Self {
+    pub fn new_bounded(worker_num: i32, waiter_num: i32) -> Self {
         Self {
             worker_num: worker_num,
             idle: chan!(waiter_num as usize),
