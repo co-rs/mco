@@ -26,6 +26,7 @@ impl Task {
     }
 }
 
+/// an coroutines pool
 pub struct Pool {
     pub worker_num: i32,
     pub idle: (Sender<Option<Arc<Task>>>, Receiver<Option<Arc<Task>>>),
