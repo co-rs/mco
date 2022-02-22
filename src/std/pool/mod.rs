@@ -29,7 +29,7 @@ impl Task {
 /// an coroutines pool
 pub struct Pool {
     pub worker_num: i32,
-    pub idle: (Sender<Option<Arc<Task>>>, Receiver<Option<Arc<Task>>>),
+    pub idle: (Sender<Option<Task>>, Receiver<Option<Task>>),
     closed: AtomicBool,
 }
 
@@ -51,7 +51,7 @@ impl Pool {
     }
 
     pub fn put(&self, task: Task) {
-        self.idle.0.send(Some(Arc::new(task)));
+        self.idle.0.send(Some(task));
     }
 
     /// close just now
