@@ -132,6 +132,10 @@ path = "src/blocking.rs"
 name = "sync_vec"
 path = "src/sync_vec.rs"
 
+[[bin]]
+name = "pool"
+path = "src/pool.rs"
+
 [profile.release]
 lto = true
 opt-level = 3

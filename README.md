@@ -17,6 +17,7 @@ massive concurrent programs. It can be thought as the Rust version of the popula
 * ``` mco/std/defer ``` Defers evaluation of a block of code until the end of the scope.
 * ``` mco/std/map ```  Provides the same concurrency map as Golang, with ```SyncHashMap``` and ```SyncBtreeMap```.It is
   suitable for concurrent environments with too many reads and too few writes
+* ``` mco/std/vec ```  Provides the same concurrency vec
 * ``` mco/std/time ``` Improve the implementation of a high performance time
 * ``` mco/std/lazy ``` Thread/coroutine safe global variable,Lazy struct,OnceCell
 
