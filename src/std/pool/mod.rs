@@ -42,6 +42,14 @@ impl Pool {
         }
     }
 
+    pub fn new_limit(worker_num: i32, waiter_num: i32) -> Self {
+        Self {
+            worker_num: worker_num,
+            idle: chan!(waiter_num as usize),
+            closed: AtomicBool::new(false),
+        }
+    }
+
     pub fn put(&self, task: Task) {
         self.idle.0.send(Some(Arc::new(task)));
     }
