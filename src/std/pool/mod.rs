@@ -82,18 +82,15 @@ impl Pool {
                             break;
                         }
                         Some(task) => {
-                            match current.0.send(()) {
-                                Ok(_) => {
-                                    let rv = current.1.clone();
-                                    spawn(move || {
-                                        defer!(move ||{  rv.try_recv(); });
-                                        let r = task.execute();
-                                        if r.is_err() {
-                                            log::error!("task run fail:{}",r.err().unwrap());
-                                        }
-                                    });
-                                }
-                                Err(_) => {}
+                            if let Ok(_) = current.0.send(()) {
+                                let rv = current.1.clone();
+                                spawn(move || {
+                                    defer!(move ||{  rv.try_recv(); });
+                                    let r = task.execute();
+                                    if r.is_err() {
+                                        log::error!("task run fail:{}",r.err().unwrap());
+                                    }
+                                });
                             }
                         }
                     }
