@@ -1,6 +1,6 @@
 use std::cell::UnsafeCell;
 use std::fmt::{Debug, Formatter};
-use std::ops::{Deref, DerefMut};
+use std::ops::{Deref, DerefMut, Index, IndexMut};
 use std::slice::SliceIndex;
 use std::sync::Arc;
 use crate::std::sync::{Mutex, MutexGuard};
@@ -423,6 +423,13 @@ impl<V> Debug for SyncVecImpl<V> where V: Debug {
     }
 }
 
+impl<V> Index<usize> for SyncVecImpl<V> {
+    type Output = V;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        self.get(index).unwrap()
+    }
+}
 
 #[cfg(test)]
 mod test {
