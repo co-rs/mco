@@ -27,6 +27,7 @@ massive concurrent programs. It can be thought as the Rust version of the popula
 * [cdbc](https://github.com/co-rs/cdbc) Database Drivers include mysql, Postgres, AND SQLite
 * [fast_log](https://github.com/co-rs/fast_log) High-performance log impl
 * [mco-redis](https://github.com/co-rs/mco-redis) Redis client for mco
+* [mco-redis-rs](https://github.com/co-rs/mco-redis-rs) fork from ```redis-rs``` Replace only TcpStream with MCO ::TcpStream
 * [mco-rpc](https://github.com/co-rs/mco-rpc)  rpc server/client. support bincode/json rpc
 
 ## Features
