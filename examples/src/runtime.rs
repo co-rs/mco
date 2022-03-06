@@ -8,7 +8,7 @@ use mco::{co};
 
 fn main() {
     pub struct A {
-
+        f: fn(),
     }
 
     impl Future for A {
@@ -25,9 +25,12 @@ fn main() {
                     Poll::Pending => {}
                 }
             }
-            println!("hay1");
-            return Poll::Ready(());
+            return Poll::Ready((self.f)());
         }
     }
-    mco::get_runtime().spawn(A { });
+    mco::get_runtime().spawn(A {
+        f: || {
+            println!("hay1");
+        }
+    });
 }
