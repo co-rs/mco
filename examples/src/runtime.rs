@@ -1,15 +1,32 @@
+use std::future::Future;
+use std::pin::Pin;
+use std::task::{Context, Poll};
+use std::thread::sleep;
+use std::time::Duration;
 use mco::{co, yield_now};
 
 
 fn main() {
-    mco::get_runtime().spawn(async{
-       println!("hay");
-       tokio::task::yield_now().await;
-    });
-    mco::get_runtime().block_on(async {
+    pub struct A {}
+    impl Future for A {
+        type Output = ();
 
-    });
-    mco::get_runtime().block_on(async{
-
+        fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<Self::Output> {
+            //yield
+            let mut f = Box::pin(tokio::task::yield_now());
+            loop {
+                match Pin::new(&mut f).poll(cx) {
+                    Poll::Ready(v) => {
+                        break;
+                    }
+                    Poll::Pending => {}
+                }
+            }
+            println!("hay1");
+            return Poll::Ready(());
+        }
+    }
+    mco::get_runtime().spawn(async {
+        A {}.await;
     });
 }

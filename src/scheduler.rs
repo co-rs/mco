@@ -336,5 +336,4 @@ pub fn yield_now() {
     // if !is_coroutine() {
     //     return thread::yield_now();
     // }
-
 }
