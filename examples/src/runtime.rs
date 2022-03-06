@@ -26,7 +26,5 @@ fn main() {
             return Poll::Ready(());
         }
     }
-    mco::get_runtime().spawn(async {
-        A {}.await;
-    });
+    mco::get_runtime().spawn(A {});
 }
