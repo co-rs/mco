@@ -3,11 +3,14 @@ use std::pin::Pin;
 use std::task::{Context, Poll};
 use std::thread::sleep;
 use std::time::Duration;
-use mco::{co, yield_now};
+use mco::{co};
 
 
 fn main() {
-    pub struct A {}
+    pub struct A {
+
+    }
+
     impl Future for A {
         type Output = ();
 
@@ -26,5 +29,5 @@ fn main() {
             return Poll::Ready(());
         }
     }
-    mco::get_runtime().spawn(A {});
+    mco::get_runtime().spawn(A { });
 }
