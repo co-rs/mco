@@ -20,6 +20,9 @@ tungstenite = "0.16"
 rustls = "0.20"
 rustls-pemfile = "0.2.1"
 
+tokio = {version="1" , features = ["full"]}
+
+
 [[bin]]
 name = "channel"
 path = "src/channel.rs"
@@ -135,6 +138,10 @@ path = "src/sync_vec.rs"
 [[bin]]
 name = "pool"
 path = "src/pool.rs"
+
+[[bin]]
+name = "runtime"
+path = "src/runtime.rs"
 
 [profile.release]
 lto = true

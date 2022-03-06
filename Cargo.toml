@@ -25,9 +25,6 @@ exclude = [
     "docs/**/*",
 ]
 
-[badges]
-travis-ci = { repository = "Xudong-Huang/may" }
-appveyor = { repository = "Xudong-Huang/may", service = "github" }
 
 [dependencies]
 log = "0.4"
@@ -41,6 +38,9 @@ once_cell = "1.9.0"
 parking_lot = "0.11"
 time = { version = "0.3", features = ["formatting", "local-offset", "parsing", "serde"] }
 serde = "1.0"
+
+tokio = {version="1" , features = ["full"]}
+
 
 [target.'cfg(unix)'.dependencies]
 nix = "0.21"

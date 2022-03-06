@@ -289,3 +289,52 @@ impl Scheduler {
         self.event_loop.get_selector()
     }
 }
+
+
+static mut Runtime: *const tokio::runtime::Runtime = std::ptr::null();
+
+pub fn new_rt() -> tokio::runtime::Runtime {
+    let rt = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build().unwrap();
+    return rt;
+}
+
+#[inline(never)]
+fn init_runtime() {
+    // let workers = config().get_workers();
+    let b: Box<tokio::runtime::Runtime> = Box::new(new_rt());
+    unsafe {
+        Runtime = Box::into_raw(b);
+    }
+    // filter_cancel_panic();
+    // // io event loop thread
+    // for id in 0..workers {
+    //     thread::spawn(move || {
+    //         let s = unsafe { &*Runtime };
+    //         let rt = tokio::runtime::Builder::new_multi_thread()
+    //             .enable_all()
+    //             .build().unwrap();
+    //
+    //     });
+    // }
+}
+
+#[inline]
+pub fn get_runtime() -> &'static tokio::runtime::Runtime {
+    unsafe {
+        if likely(!Runtime.is_null()) {
+            return &*Runtime;
+        }
+    }
+    static ONCE0: Once = Once::new();
+    ONCE0.call_once(init_runtime);
+    unsafe { &*Runtime }
+}
+
+pub fn yield_now() {
+    // if !is_coroutine() {
+    //     return thread::yield_now();
+    // }
+
+}

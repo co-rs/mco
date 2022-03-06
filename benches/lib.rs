@@ -24,6 +24,17 @@ fn yield_bench(b: &mut Bencher) {
 }
 
 #[bench]
+fn yield_bench2(b: &mut Bencher) {
+    // don't print any panic info
+    // when cancel the generator
+    // panic::set_hook(Box::new(|_| {}));
+    let rt = mco::get_runtime();
+    b.iter(|| {
+        mco::yield_now();
+    });
+}
+
+#[bench]
 fn spawn_bench(b: &mut Bencher) {
     b.iter(|| {
         let total_work = 1000;

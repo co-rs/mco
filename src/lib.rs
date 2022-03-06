@@ -57,3 +57,5 @@ pub mod std;
 
 pub use crate::config::{config, Config};
 pub use crate::local::LocalKey;
+pub use crate::scheduler::get_runtime;
+pub use crate::scheduler::yield_now;
