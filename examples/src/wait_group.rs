@@ -1,5 +1,5 @@
-use std::time::Duration;
 use mco::std::sync::WaitGroup;
+use std::time::Duration;
 
 fn main() {
     let wg = WaitGroup::new();
@@ -22,13 +22,13 @@ fn main() {
         let wg = wg.clone();
 
         mco::co!(move || {
-        // Do some work.
+            // Do some work.
             println!("sleep 1s");
             mco::coroutine::sleep(Duration::from_secs(1));
 
-        // Drop the reference to the wait group.
-        drop(wg);
-    });
+            // Drop the reference to the wait group.
+            drop(wg);
+        });
     }
 
     // Block until all threads have finished their work.

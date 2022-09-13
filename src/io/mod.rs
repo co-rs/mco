@@ -49,8 +49,8 @@ impl IoContext {
     // f is a closure to set the actual inner io nonblocking mode
     #[inline]
     pub fn check_nonblocking<F>(&self, f: F) -> io::Result<bool>
-        where
-            F: FnOnce(bool) -> io::Result<()>,
+    where
+        F: FnOnce(bool) -> io::Result<()>,
     {
         // for coroutine context
         if self.nonblocking.load(Ordering::Relaxed) {
@@ -69,8 +69,8 @@ impl IoContext {
     // f is a closure to set the actual inner io nonblocking mode
     #[inline]
     pub fn check_context<F>(&self, f: F) -> io::Result<bool>
-        where
-            F: FnOnce(bool) -> io::Result<()>,
+    where
+        F: FnOnce(bool) -> io::Result<()>,
     {
         // thread context
         if !is_coroutine() {

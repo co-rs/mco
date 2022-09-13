@@ -3,18 +3,16 @@
 //   * no poisoning
 //   * init function can fail
 
+use crate::std::lazy::take_unchecked;
+use crate::std::sync::Blocker;
+use std::sync::Arc;
 use std::{
-    cell::{Cell, UnsafeCell},
+    cell::UnsafeCell,
     hint::unreachable_unchecked,
     marker::PhantomData,
     panic::{RefUnwindSafe, UnwindSafe},
     sync::atomic::{AtomicBool, AtomicUsize, Ordering},
 };
-use std::sync::Arc;
-use crate::coroutine::Coroutine;
-use crate::std::lazy::take_unchecked;
-use crate::std::sync::Blocker;
-
 
 #[derive(Debug)]
 pub(crate) struct OnceCell<T> {
@@ -88,8 +86,8 @@ impl<T> OnceCell<T> {
     /// successful write.
     #[cold]
     pub(crate) fn initialize<F, E>(&self, f: F) -> Result<(), E>
-        where
-            F: FnOnce() -> Result<T, E>,
+    where
+        F: FnOnce() -> Result<T, E>,
     {
         let mut f = Some(f);
         let mut res: Result<(), E> = Ok(());
@@ -213,7 +211,7 @@ fn wait(state_and_queue: &AtomicUsize, mut current_state: usize) {
         }
 
         while !node.signaled.load(Ordering::Acquire) {
-            node.p.park(None);
+            let _ = node.p.park(None);
         }
         break;
     }
@@ -222,22 +220,23 @@ fn wait(state_and_queue: &AtomicUsize, mut current_state: usize) {
 // Copy-pasted from std exactly.
 impl Drop for WaiterQueue<'_> {
     fn drop(&mut self) {
-        let state_and_queue =
-            self.state_and_queue.swap(self.set_state_on_drop_to, Ordering::AcqRel);
+        let state_and_queue = self
+            .state_and_queue
+            .swap(self.set_state_on_drop_to, Ordering::AcqRel);
 
         assert_eq!(state_and_queue & STATE_MASK, RUNNING);
 
         unsafe {
             let mut queue = (state_and_queue & !STATE_MASK) as *const Waiter;
             if !queue.is_null() {
-                (*queue).p.unpark();
+                let _ = (*queue).p.unpark();
             }
             while !queue.is_null() {
                 let next = (*queue).next;
                 (*queue).signaled.store(true, Ordering::Release);
                 queue = next;
                 if !next.is_null() {
-                    (*next).p.unpark();
+                    let _ = (*next).p.unpark();
                 }
             }
         }
@@ -247,8 +246,8 @@ impl Drop for WaiterQueue<'_> {
 // These test are snatched from std as well.
 #[cfg(test)]
 mod tests {
-    use std::panic;
     use super::OnceCell;
+    use std::panic;
 
     impl<T> OnceCell<T> {
         fn init(&self, f: impl FnOnce() -> T) {

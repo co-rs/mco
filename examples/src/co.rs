@@ -1,25 +1,37 @@
+use mco::coroutine::{sleep, spawn, yield_now, Builder, Spawn};
+use mco::{co, defer};
 use std::time::Duration;
-use mco::coroutine::{Builder, sleep, Spawn, spawn, yield_now};
-use mco::{defer, co};
 
 fn main() {
-    co!(||{
-       println!("coroutine");
+    co!(|| {
+        println!("coroutine");
     });
-    co!(2*4096,||{
-       println!("coroutine with stack size: {}",mco::coroutine::current().stack_size());
+    co!(2 * 4096, || {
+        println!(
+            "coroutine with stack size: {}",
+            mco::coroutine::current().stack_size()
+        );
     });
     (2 * 4096).spawn(|| {
-        println!("coroutine with stack size: {}", mco::coroutine::current().stack_size());
+        println!(
+            "coroutine with stack size: {}",
+            mco::coroutine::current().stack_size()
+        );
     });
-    co!("coroutine",||{
-       println!("coroutine with name: {}",mco::coroutine::current().name().unwrap_or_default());
+    co!("coroutine", || {
+        println!(
+            "coroutine with name: {}",
+            mco::coroutine::current().name().unwrap_or_default()
+        );
     });
     "coroutine".spawn(|| {
-        println!("coroutine with name: {}", mco::coroutine::current().name().unwrap_or_default());
+        println!(
+            "coroutine with name: {}",
+            mco::coroutine::current().name().unwrap_or_default()
+        );
     });
-    co!(Builder::new(),||{
-       println!("coroutine with Builder");
+    co!(Builder::new(), || {
+        println!("coroutine with Builder");
     });
     Builder::new().spawn(|| {
         println!("coroutine with Builder::spawn");
@@ -45,15 +57,17 @@ fn main() {
             i.join().unwrap();
         }
         println!("bye from parent");
-    }).join().unwrap();
+    })
+    .join()
+    .unwrap();
 
     sleep(Duration::from_secs(1));
     //cancel example
-    let g = co!(||{
-        defer!(||{ println!("cancel done!")});
-        for idx in 0..1000{
+    let g = co!(|| {
+        defer!(|| { println!("cancel done!") });
+        for idx in 0..1000 {
             sleep(Duration::from_secs(1));
-            println!("{}",idx);
+            println!("{}", idx);
         }
     });
     sleep(Duration::from_secs(2));

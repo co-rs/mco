@@ -21,7 +21,10 @@ const HECTONANOSEC_TO_UNIX_EPOCH: i64 = 11_644_473_600 * HECTONANOSECS_IN_SEC;
 
 fn time_to_file_time(sec: i64) -> FILETIME {
     let t = ((sec * HECTONANOSECS_IN_SEC) + HECTONANOSEC_TO_UNIX_EPOCH) as u64;
-    FILETIME { dwLowDateTime: t as DWORD, dwHighDateTime: (t >> 32) as DWORD }
+    FILETIME {
+        dwLowDateTime: t as DWORD,
+        dwHighDateTime: (t >> 32) as DWORD,
+    }
 }
 
 fn file_time_as_u64(ft: &FILETIME) -> u64 {
@@ -94,7 +97,11 @@ pub fn time_to_local_tm(sec: i64, tm: &mut Tm) {
         let mut utc = mem::zeroed();
         let mut local = mem::zeroed();
         call!(FileTimeToSystemTime(&ft, &mut utc));
-        call!(SystemTimeToTzSpecificLocalTime(0 as *const _, &mut utc, &mut local));
+        call!(SystemTimeToTzSpecificLocalTime(
+            0 as *const _,
+            &mut utc,
+            &mut local
+        ));
         system_time_to_tm(&local, tm);
 
         let local = system_time_to_file_time(&local);
@@ -106,7 +113,11 @@ pub fn time_to_local_tm(sec: i64, tm: &mut Tm) {
         // SystemTimeToTzSpecificLocalTime already applied the biases so
         // check if it non standard
         tm.tm_utcoff = (local_sec - sec) as i32;
-        tm.tm_isdst = if tm.tm_utcoff == -60 * (tz.Bias + tz.StandardBias) { 0 } else { 1 };
+        tm.tm_isdst = if tm.tm_utcoff == -60 * (tz.Bias + tz.StandardBias) {
+            0
+        } else {
+            1
+        };
     }
 }
 
@@ -124,7 +135,11 @@ pub fn local_tm_to_time(tm: &Tm) -> i64 {
         let mut ft = mem::zeroed();
         let mut utc = mem::zeroed();
         let mut sys_time = tm_to_system_time(tm);
-        call!(TzSpecificLocalTimeToSystemTime(0 as *mut _, &mut sys_time, &mut utc));
+        call!(TzSpecificLocalTimeToSystemTime(
+            0 as *mut _,
+            &mut sys_time,
+            &mut utc
+        ));
         call!(SystemTimeToFileTime(&utc, &mut ft));
         file_time_to_unix_seconds(&ft)
     }

@@ -25,8 +25,8 @@ fn coroutine_local() {
             assert_eq!(*f, 9);
         });
     })
-        .join()
-        .unwrap();
+    .join()
+    .unwrap();
 }
 
 #[test]

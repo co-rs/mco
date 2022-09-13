@@ -1,7 +1,7 @@
 //! `mco` Configuration interface
 //!
 
-use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 // default stack size, in usize
 // windows has a minimal size as 0x4a8!!!!

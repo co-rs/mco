@@ -77,7 +77,7 @@ impl Selector {
     /// terminate the select coroutine
     /// this would remove the selector from the associated cqueue
     pub fn remove(self) {
-        unsafe { self.co.cancel() };
+        self.co.cancel();
     }
 }
 
@@ -121,7 +121,7 @@ impl<'a> EventSource for EventSender<'a> {
             co: Some(co),
         });
         if let Some(w) = self.cqueue.to_wake.take() {
-            w.unpark();
+            let _ = w.unpark();
         }
     }
 
@@ -142,7 +142,7 @@ impl<'a> Drop for EventSender<'a> {
         });
         self.cqueue.cnt.fetch_sub(1, Ordering::Relaxed);
         if let Some(w) = self.cqueue.to_wake.take() {
-            w.unpark();
+            let _ = w.unpark();
         }
     }
 }
@@ -168,8 +168,8 @@ impl Cqueue {
     /// should use `cqueue_add` and `cqueue_add_oneshot` macros to
     /// create select coroutines correctly
     fn add_impl<'a, F>(&self, token: usize, f: F) -> Selector
-        where
-            F: FnOnce(EventSender) + Send + 'a,
+    where
+        F: FnOnce(EventSender) + Send + 'a,
     {
         let sender = EventSender {
             id: self.total.load(Ordering::Relaxed),
@@ -190,8 +190,8 @@ impl Cqueue {
     /// should use `cqueue_add` and `cqueue_add_oneshot` macros to
     /// create select coroutines correctly
     pub fn add<'a, F>(&self, token: usize, f: F) -> Selector
-        where
-            F: FnOnce(EventSender) + Send + 'a,
+    where
+        F: FnOnce(EventSender) + Send + 'a,
     {
         self.add_impl(token, f)
     }
@@ -261,7 +261,7 @@ impl Cqueue {
                 }
                 Some(mut ev) => {
                     if let Some(w) = self.to_wake.take() {
-                        w.unpark();
+                        let _ = w.unpark();
                     }
                     cur.park(timeout).ok();
                     run_ev!(ev);
@@ -288,7 +288,7 @@ impl Drop for Cqueue {
             .iter()
             .map(|j| j.as_ref())
             .fold((), |_, join| match join {
-                Some(j) if !j.is_done() => unsafe { j.coroutine().cancel() },
+                Some(j) if !j.is_done() => j.coroutine().cancel(),
                 _ => {}
             });
 
@@ -313,8 +313,8 @@ impl Drop for Cqueue {
 /// Scopes, in particular, support scoped select coroutine spawning.
 ///
 pub fn scope<'a, F, R>(f: F) -> R
-    where
-        F: FnOnce(&Cqueue) -> R + 'a,
+where
+    F: FnOnce(&Cqueue) -> R + 'a,
 {
     let cqueue = Cqueue {
         ev_queue: Queue::new(),

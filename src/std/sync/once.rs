@@ -1,7 +1,4 @@
 use std::sync::atomic::{AtomicU32, Ordering};
-use crate::defer;
-use crate::std::sync::Mutex;
-
 /// Once is an object that will perform exactly one action.
 ///
 /// A Once must not be copied after first use.
@@ -32,13 +29,19 @@ impl Once {
     ///
     /// If f panics, Do considers it to have returned; future calls of Do return
     /// without calling f.
-    pub fn r#do<F>(&self, f: F) where F: FnMut() {
+    pub fn r#do<F>(&self, f: F)
+    where
+        F: FnMut(),
+    {
         if self.done.load(Ordering::SeqCst) == 0 {
             self.do_slow(f);
         }
     }
 
-    fn do_slow<F>(&self, mut f: F) where F: FnMut() {
+    fn do_slow<F>(&self, mut f: F)
+    where
+        F: FnMut(),
+    {
         if self.done.load(Ordering::SeqCst) == 0 {
             self.done.store(1, Ordering::SeqCst);
             f();
@@ -48,12 +51,12 @@ impl Once {
 
 #[cfg(test)]
 mod test {
+    use crate::std::sync::channel::Sender;
+    use crate::std::sync::Once;
+    use crate::{chan, defer};
     use std::cell::UnsafeCell;
     use std::panic::catch_unwind;
     use std::sync::Arc;
-    use crate::{chan, defer};
-    use crate::std::sync::channel::Sender;
-    use crate::std::sync::Once;
 
     pub struct One {
         pub inner: UnsafeCell<i32>,
@@ -68,12 +71,9 @@ mod test {
             *(unsafe { &mut *self.inner.get() }) += 1;
         }
         pub fn value(&self) -> i32 {
-            unsafe {
-                *self.inner.get()
-            }
+            unsafe { *self.inner.get() }
         }
     }
-
 
     unsafe fn run(once: Arc<Once>, o: Arc<One>, s: Arc<Sender<bool>>) {
         once.r#do(|| {
@@ -87,7 +87,9 @@ mod test {
 
     #[test]
     fn test_once() {
-        let one = Arc::new(One { inner: UnsafeCell::new(0) });
+        let one = Arc::new(One {
+            inner: UnsafeCell::new(0),
+        });
         let once = Arc::new(Once::new());
         let (s, r) = chan!();
         let sender = Arc::new(s);
@@ -96,7 +98,11 @@ mod test {
             let oc = once.clone();
             let s = sender.clone();
             let o = one.clone();
-            co!(move ||{unsafe {run(oc,o,s);}});
+            co!(move || {
+                unsafe {
+                    run(oc, o, s);
+                }
+            });
         }
         for i in 0..n {
             r.recv();

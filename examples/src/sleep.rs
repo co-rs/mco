@@ -3,8 +3,8 @@ extern crate mco;
 
 use std::time::Duration;
 
-use mco::mco_gen::Gn;
 use mco::coroutine;
+use mco::mco_gen::Gn;
 
 fn main() {
     coroutine::scope(|scope| {

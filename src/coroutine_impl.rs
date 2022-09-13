@@ -5,6 +5,7 @@ use std::time::Duration;
 
 use crate::cancel::Cancel;
 use crate::config::config;
+use crate::err;
 use crate::join::{make_join_handle, Join, JoinHandle};
 use crate::local::get_co_local_data;
 use crate::local::CoroutineLocal;
@@ -12,7 +13,6 @@ use crate::park::Park;
 use crate::scheduler::get_scheduler;
 use crossbeam::atomic::AtomicCell;
 use mco_gen::{Generator, Gn};
-use crate::err;
 
 /// /////////////////////////////////////////////////////////////////////////////
 /// Coroutine framework types
@@ -149,7 +149,7 @@ impl Coroutine {
     /// And would drop all the resource tha the coroutine currently holding
     /// This may have unexpected side effects if you are not fully aware it
     pub fn cancel(&self) {
-        self.inner.cancel.cancel();
+        let _ = self.inner.cancel.cancel();
     }
 
     /// Gets the coroutine name.
@@ -250,9 +250,9 @@ impl Builder {
     /// The join handle can be used to block on
     /// termination of the child coroutine, including recovering its panics.
     fn spawn_impl<F, T>(self, f: F) -> (CoroutineImpl, JoinHandle<T>)
-        where
-            F: FnOnce() -> T + Send + 'static,
-            T: Send + 'static,
+    where
+        F: FnOnce() -> T + Send + 'static,
+        T: Send + 'static,
     {
         static DONE: Done = Done {};
 
@@ -348,9 +348,9 @@ impl Builder {
     /// [`go!`]: ../macro.go.html
     /// [`spawn`]: ./fn.spawn.html
     pub fn spawn<F, T>(self, f: F) -> JoinHandle<T>
-        where
-            F: FnOnce() -> T + Send + 'static,
-            T: Send + 'static,
+    where
+        F: FnOnce() -> T + Send + 'static,
+        T: Send + 'static,
     {
         return self.spawn_local(f);
     }
@@ -364,9 +364,9 @@ impl Builder {
     /// Normally this is safe but for some cases you should
     /// take care of the side effect
     pub fn spawn_local<F, T>(self, f: F) -> JoinHandle<T>
-        where
-            F: FnOnce() -> T + Send + 'static,
-            T: Send + 'static,
+    where
+        F: FnOnce() -> T + Send + 'static,
+        T: Send + 'static,
     {
         // we will still get optimizations in spawn_impl
         let (co, handle) = self.spawn_impl(f);
@@ -427,9 +427,9 @@ impl Builder {
 /// [`Builder::spawn`]: struct.Builder.html#method.spawn
 /// [`Builder`]: struct.Builder.html
 pub fn spawn<F, T>(f: F) -> JoinHandle<T>
-    where
-        F: FnOnce() -> T + Send + 'static,
-        T: Send + 'static,
+where
+    F: FnOnce() -> T + Send + 'static,
+    T: Send + 'static,
 {
     Builder::new().spawn(f)
 }
@@ -449,7 +449,9 @@ pub fn current() -> Coroutine {
 #[inline]
 pub fn try_current() -> Result<Coroutine, crate::std::errors::Error> {
     match get_co_local_data() {
-        None => Err(err!("no current coroutine, did you call `current()` in thread context?")),
+        None => Err(err!(
+            "no current coroutine, did you call `current()` in thread context?"
+        )),
         Some(local) => Ok(unsafe { local.as_ref() }.get_co().clone()),
     }
 }

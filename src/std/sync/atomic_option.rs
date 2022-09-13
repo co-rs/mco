@@ -1,10 +1,6 @@
+use crossbeam_utils::atomic::AtomicCell;
 use std::borrow::Borrow;
 use std::fmt::{Debug, Formatter};
-use std::ptr;
-use std::sync::atomic::{AtomicPtr, Ordering};
-use std::sync::Arc;
-use crossbeam_utils::atomic::AtomicCell;
-use mco_gen::Generator;
 
 pub struct AtomicOption<T> {
     inner: AtomicCell<Option<T>>,
@@ -13,16 +9,11 @@ pub struct AtomicOption<T> {
 impl<T: std::fmt::Debug> Debug for AtomicOption<T> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match self.get() {
-            None => {
-                f.debug_struct("AtomicOption")
-                    .field("inner", &Option::<T>::None)
-                    .finish()
-            }
-            Some(s) => {
-                f.debug_struct("AtomicOption")
-                    .field("inner", s)
-                    .finish()
-            }
+            None => f
+                .debug_struct("AtomicOption")
+                .field("inner", &Option::<T>::None)
+                .finish(),
+            Some(s) => f.debug_struct("AtomicOption").field("inner", s).finish(),
         }
     }
 }
@@ -61,27 +52,19 @@ impl<T> AtomicOption<T> {
 
     #[inline]
     pub fn is_none(&self) -> bool {
-        unsafe {
-            (&(*self.inner.borrow().as_ptr())).is_none()
-        }
+        unsafe { (&(*self.inner.borrow().as_ptr())).is_none() }
     }
 
     #[inline]
     pub fn is_some(&self) -> bool {
-        unsafe {
-            (&(*self.inner.borrow().as_ptr())).is_some()
-        }
+        unsafe { (&(*self.inner.borrow().as_ptr())).is_some() }
     }
 
     #[inline]
     pub fn get(&self) -> Option<&T> {
-        match unsafe { (&(*self.inner.borrow().as_ptr())) } {
-            None => {
-                None
-            }
-            Some(v) => {
-                Some(v)
-            }
+        match unsafe { &(*self.inner.borrow().as_ptr()) } {
+            None => None,
+            Some(v) => Some(v),
         }
     }
 }

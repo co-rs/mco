@@ -1,7 +1,7 @@
+use mco::co;
+use mco::std::sync::{SyncVec, WaitGroup};
 use std::ops::Deref;
 use std::sync::Arc;
-use mco::{co};
-use mco::std::sync::{SyncVec, WaitGroup};
 
 pub fn main() {
     let vec = Arc::new(SyncVec::new());

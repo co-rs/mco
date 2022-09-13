@@ -1,7 +1,7 @@
-use std::ops::Deref;
 use mco::co;
 use mco::std::lazy::sync::{Lazy, OnceCell};
 use mco::std::sync::WaitGroup;
+use std::ops::Deref;
 
 static GLOBAL: Lazy<i32> = Lazy::new(|| {
     println!("Init GLOBAL");
@@ -18,12 +18,12 @@ fn main() {
     let wg = WaitGroup::new();
     for i in 0..1000 {
         let wgc = wg.clone();
-        co!(move ||{
-            println!("{} {}",i, GLOBAL.deref());
+        co!(move || {
+            println!("{} {}", i, GLOBAL.deref());
             drop(wgc);
         });
     }
-    wg.wait();//wait done
+    wg.wait(); //wait done
     CELL.get_or_init(|| {
         println!("Init CELL");
         1

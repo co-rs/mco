@@ -52,7 +52,7 @@ struct Block<T> {
 
     /// Slots for values.
     // slots: [Slot<T>; BLOCK_CAP],
-    slots: Vec<Slot<T>>,//BLOCK_CAP
+    slots: Vec<Slot<T>>, //BLOCK_CAP
 }
 
 impl<T> Block<T> {

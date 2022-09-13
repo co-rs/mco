@@ -88,7 +88,7 @@ impl SyncFlag {
         self.to_wake.push(cur.clone());
         // dec the cnt, if it's positive, unpark one waiter
         if self.cnt.fetch_sub(1, Ordering::SeqCst) > 0 {
-            self.wakeup_all();
+            let _ = self.wakeup_all();
         }
 
         match cur.park(dur) {
@@ -134,7 +134,7 @@ impl SyncFlag {
         self.cnt.store(std::isize::MAX, Ordering::SeqCst);
 
         // try to wakeup all waiters
-        self.wakeup_all();
+        let _ = self.wakeup_all();
     }
 
     /// return the current SyncFlag value

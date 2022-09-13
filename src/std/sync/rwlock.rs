@@ -1,5 +1,6 @@
 //! compatible with std::sync::rwlock except for both thread and coroutine
 //! please ref the doc from std::sync::rwlock
+use crate::std::queue::mpsc_list::Queue as WaitList;
 use std::cell::UnsafeCell;
 use std::fmt;
 use std::ops::{Deref, DerefMut};
@@ -7,13 +8,12 @@ use std::panic::{RefUnwindSafe, UnwindSafe};
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 use std::sync::{LockResult, PoisonError, TryLockError, TryLockResult};
-use crate::std::queue::mpsc_list::Queue as WaitList;
 
-use crate::cancel::trigger_cancel_panic;
-use crate::park::ParkError;
 use super::blocking::SyncBlocker;
 use super::mutex::{self, Mutex};
 use super::poison;
+use crate::cancel::trigger_cancel_panic;
+use crate::park::ParkError;
 
 /// A reader-writer lock
 ///
@@ -83,7 +83,8 @@ impl<T: ?Sized> RwLock<T> {
         self.to_wake.push(cur.clone());
         // inc the cnt, if it's the first grab, unpark the first waiter
         if self.cnt.fetch_add(1, Ordering::SeqCst) == 0 {
-            self.to_wake
+            let _ = self
+                .to_wake
                 .pop()
                 .map(|w| self.unpark_one(&w))
                 .expect("got null blocker!");
@@ -130,7 +131,8 @@ impl<T: ?Sized> RwLock<T> {
 
     fn unlock(&self) {
         if self.cnt.fetch_sub(1, Ordering::SeqCst) > 1 {
-            self.to_wake
+            let _ = self
+                .to_wake
                 .pop()
                 .map(|w| self.unpark_one(&w))
                 .expect("got null blocker!");
@@ -217,8 +219,8 @@ impl<T: ?Sized> RwLock<T> {
     }
 
     pub fn into_inner(self) -> LockResult<T>
-        where
-            T: Sized,
+    where
+        T: Sized,
     {
         // We know statically that there are no outstanding references to
         // `self` so there's no need to lock the inner lock.
@@ -380,7 +382,7 @@ mod tests {
             let _lock = arc2.write().unwrap();
             panic!();
         })
-            .join();
+        .join();
         assert!(arc.read().is_err());
     }
 
@@ -393,7 +395,7 @@ mod tests {
             let _lock = arc2.write().unwrap();
             panic!();
         })
-            .join();
+        .join();
         assert!(arc.write().is_err());
         assert!(arc.is_poisoned());
     }
@@ -406,7 +408,7 @@ mod tests {
             let _lock = arc2.read().unwrap();
             panic!();
         })
-            .join();
+        .join();
         let lock = arc.read().unwrap();
         assert_eq!(*lock, 1);
     }
@@ -419,7 +421,7 @@ mod tests {
             let _lock = arc2.read().unwrap();
             panic!()
         })
-            .join();
+        .join();
         let lock = arc.write().unwrap();
         assert_eq!(*lock, 1);
     }
@@ -479,7 +481,7 @@ mod tests {
             let _u = Unwinder { i: arc2 };
             panic!();
         })
-            .join();
+        .join();
         let lock = arc.read().unwrap();
         assert_eq!(*lock, 2);
     }
@@ -546,7 +548,7 @@ mod tests {
             let _lock = m2.write().unwrap();
             panic!("test panic in inner thread to poison RwLock");
         })
-            .join();
+        .join();
 
         assert!(m.is_poisoned());
         match Arc::try_unwrap(m).unwrap().into_inner() {
@@ -570,7 +572,7 @@ mod tests {
             let _lock = m2.write().unwrap();
             panic!("test panic in inner thread to poison RwLock");
         })
-            .join();
+        .join();
 
         assert!(m.is_poisoned());
         match Arc::try_unwrap(m).unwrap().get_mut() {

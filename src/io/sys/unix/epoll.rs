@@ -7,8 +7,8 @@ use std::{cmp, io, isize, ptr};
 use super::{from_nix_error, timeout_handler, EventData, IoData, TimerList};
 use crate::coroutine_impl::run_coroutine;
 use crate::scheduler::get_scheduler;
-use crate::timeout_list::{now, ns_to_ms};
 use crate::std::queue::seg_queue::SegQueue as mpsc;
+use crate::timeout_list::{now, ns_to_ms};
 use libc::{eventfd, EFD_NONBLOCK};
 use nix::sys::epoll::*;
 use nix::unistd::{close, read, write};
@@ -94,12 +94,18 @@ impl Selector {
         let epfd = single_selector.epfd;
         // first register thread handle
         let scheduler = get_scheduler();
-        scheduler.workers.parked.fetch_or(mask as u64, Ordering::Relaxed);
+        scheduler
+            .workers
+            .parked
+            .fetch_or(mask as u64, Ordering::Relaxed);
 
         let n = epoll_wait(epfd, events, timeout_ms).map_err(from_nix_error)?;
 
         // clear the park stat after comeback
-        scheduler.workers.parked.fetch_and((mask - self.vec.len()) as u64, Ordering::Relaxed);
+        scheduler
+            .workers
+            .parked
+            .fetch_and((mask - self.vec.len()) as u64, Ordering::Relaxed);
 
         for event in events[..n].iter() {
             if event.data() == 0 {

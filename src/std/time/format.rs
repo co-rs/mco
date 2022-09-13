@@ -1,6 +1,6 @@
 use crate::std::lazy::sync::Lazy;
 
-pub static longDayNames: Lazy<Vec<&str>> = Lazy::new(|| {
+pub static LONG_DAY_NAMES: Lazy<Vec<&str>> = Lazy::new(|| {
     vec![
         "Sunday",
         "Monday",
@@ -12,36 +12,16 @@ pub static longDayNames: Lazy<Vec<&str>> = Lazy::new(|| {
     ]
 });
 
-pub static shortDayNames: Lazy<Vec<&str>> = Lazy::new(|| {
+pub static SHORT_DAY_NAMES: Lazy<Vec<&str>> =
+    Lazy::new(|| vec!["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]);
+
+pub static SHORT_MONTH_NAMES: Lazy<Vec<&str>> = Lazy::new(|| {
     vec![
-        "Sun",
-        "Mon",
-        "Tue",
-        "Wed",
-        "Thu",
-        "Fri",
-        "Sat",
+        "Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
     ]
 });
 
-pub static shortMonthNames: Lazy<Vec<&str>> = Lazy::new(|| {
-    vec![
-        "Jan",
-        "Feb",
-        "Mar",
-        "Apr",
-        "May",
-        "Jun",
-        "Jul",
-        "Aug",
-        "Sep",
-        "Oct",
-        "Nov",
-        "Dec",
-    ]
-});
-
-pub static longMonthNames: Lazy<Vec<&str>> = Lazy::new(|| {
+pub static LONG_MONTH_NAMES: Lazy<Vec<&str>> = Lazy::new(|| {
     vec![
         "January",
         "February",
@@ -54,6 +34,6 @@ pub static longMonthNames: Lazy<Vec<&str>> = Lazy::new(|| {
         "September",
         "October",
         "November",
-        "December", ]
+        "December",
+    ]
 });
-

@@ -70,7 +70,7 @@ impl Canceler for CancelCtx {
         }
         self.err.swap(err.clone().unwrap());
         if let Some(v) = self.done.get() {
-            self.send.send(());
+            let _=self.send.send(());
         } else {
             self.done.swap(CLOSE_RECV.clone());
         }

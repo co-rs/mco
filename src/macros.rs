@@ -7,7 +7,7 @@
 macro_rules! co {
     // for free spawn
     ($func:expr) => {{
-        unsafe { $crate::coroutine::spawn($func) }
+        $crate::coroutine::spawn($func)
     }};
 
     // for builder/scope spawn
@@ -107,7 +107,7 @@ macro_rules! cqueue_add {
 macro_rules! cqueue_add_oneshot {
     ($cqueue:ident, $token:expr, $name:pat = $top:expr => $bottom:expr) => {{
         $crate::co!($cqueue, $token, |es| {
-            if let $name = $top{
+            if let $name = $top {
                 $bottom
             }
             es.send(es.get_token());

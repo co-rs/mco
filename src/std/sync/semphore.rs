@@ -174,12 +174,11 @@ mod tests {
     #![feature(test)]
 
     use super::*;
-    use std::sync::Arc;
+    use crate::std::sync::channel::channel;
     use std::sync::mpsc::TryRecvError;
+    use std::sync::Arc;
     use std::thread;
     use std::time::Duration;
-    use crate::std::sync::channel::channel;
-
 
     #[test]
     fn sanity_1() {

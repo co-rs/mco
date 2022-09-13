@@ -47,7 +47,7 @@ impl CoroutineLocal {
 pub fn get_co_local_data() -> Option<NonNull<CoroutineLocal>> {
     let ptr = get_local_data();
     #[allow(clippy::cast_ptr_alignment)]
-        NonNull::new(ptr as *mut CoroutineLocal)
+    NonNull::new(ptr as *mut CoroutineLocal)
 }
 
 fn with<F: FnOnce(&LocalMap) -> R, R>(f: F) -> R {
@@ -131,8 +131,8 @@ impl<T: 'static> LocalKey<T> {
     /// * If the initialization expression is run and it panics
     /// * If the closure provided panics
     pub fn with<F, R>(&'static self, f: F) -> R
-        where
-            F: FnOnce(&T) -> R,
+    where
+        F: FnOnce(&T) -> R,
     {
         let key = (self.__key)();
         with(|data| {

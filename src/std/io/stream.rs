@@ -12,10 +12,9 @@ pub trait TryStream: Stream {
     fn try_next(&mut self) -> Option<Result<Self::Ok, Self::Error>>;
 }
 
-
 impl<S, T, E> TryStream for S
-    where
-        S: ?Sized + Stream<Item=Result<T, E>>,
+where
+    S: ?Sized + Stream<Item = Result<T, E>>,
 {
     type Ok = T;
     type Error = E;

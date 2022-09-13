@@ -6,7 +6,7 @@
 //! would not see that the same data any more
 
 use std::fmt;
-use std::sync::atomic::{AtomicBool, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::mpsc::{RecvError, RecvTimeoutError, SendError, TryRecvError};
 use std::sync::Arc;
 use std::time::Duration;
@@ -62,7 +62,6 @@ macro_rules! chan {
     };
 }
 
-
 /// /////////////////////////////////////////////////////////////////////////////
 /// MPMCBuffer
 /// /////////////////////////////////////////////////////////////////////////////
@@ -81,11 +80,6 @@ struct MPMCBuffer<T> {
 }
 
 impl<T> MPMCBuffer<T> {
-    /// default is an Unbounded buffer
-    pub fn new() -> MPMCBuffer<T> {
-        MPMCBuffer::new_buffer(usize::MAX)
-    }
-
     /// have buffer channel. If the buffered message exceeds the limit, the sender blocks until the message is consumed
     pub fn new_buffer(buffer: usize) -> MPMCBuffer<T> {
         MPMCBuffer {
@@ -437,12 +431,12 @@ impl<T> fmt::Debug for Receiver<T> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::coroutine::sleep;
+    use crate::std::sync::WaitGroup;
     use std::env;
     use std::sync::mpsc::{RecvTimeoutError, TryRecvError};
     use std::thread;
     use std::time::Duration;
-    use crate::coroutine::sleep;
-    use crate::std::sync::{WaitGroup};
 
     pub fn stress_factor() -> usize {
         match env::var("RUST_TEST_STRESS") {
@@ -458,12 +452,12 @@ mod tests {
         let wg_clone = wg.clone();
         let result = Arc::new(std::sync::Mutex::new(Duration::from_secs(0)));
         let result1 = result.clone();
-        co!(move ||{
+        co!(move || {
             tx.send(1);
             drop(wg_clone);
             let now = std::time::Instant::now();
             tx.send(2);
-            let mut l=result1.lock().unwrap();
+            let mut l = result1.lock().unwrap();
             *l = now.elapsed();
         });
         wg.wait();
@@ -712,7 +706,7 @@ mod tests {
             drop(tx);
             rx.recv().unwrap();
         })
-            .join();
+        .join();
         // What is our res?
         assert!(res.is_err());
     }
@@ -793,7 +787,7 @@ mod tests {
         let res = thread::spawn(move || {
             assert!(*rx.recv().unwrap() == 10);
         })
-            .join();
+        .join();
         assert!(res.is_err());
     }
 
@@ -818,7 +812,7 @@ mod tests {
             let _ = thread::spawn(move || {
                 tx.send(1).unwrap();
             })
-                .join();
+            .join();
         }
     }
 
@@ -830,7 +824,7 @@ mod tests {
                 let res = thread::spawn(move || {
                     rx.recv().unwrap();
                 })
-                    .join();
+                .join();
                 assert!(res.is_err());
             });
             let _t = thread::spawn(move || {

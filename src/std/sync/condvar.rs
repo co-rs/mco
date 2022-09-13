@@ -74,13 +74,13 @@ impl Condvar {
 
             // check the unpark status
             if cur.is_unparked() {
-                self.notify_one();
+                let _ = self.notify_one();
             } else {
                 // register
                 cur.set_release();
                 // re-check unpark status
                 if cur.is_unparked() && cur.take_release() {
-                    self.notify_one();
+                    let _ = self.notify_one();
                 }
             }
         }
@@ -199,12 +199,11 @@ mod tests {
 
     use crate::std::sync::channel::channel;
     use crate::std::sync::{Condvar, Mutex};
-    use std::sync::Arc;
     use std::sync::mpsc::TryRecvError;
+    use std::sync::Arc;
     use std::thread;
     use std::time::Duration;
     use std::u32;
-
 
     #[test]
     fn smoke() {

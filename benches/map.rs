@@ -4,9 +4,9 @@
 extern crate mco;
 extern crate test;
 
+use mco::std::sync::{Mutex, SyncHashMap};
 use std::collections::HashMap;
 use test::Bencher;
-use mco::std::sync::{Mutex, SyncHashMap};
 
 #[bench]
 fn bench_sync_hash_map_write(b: &mut Bencher) {

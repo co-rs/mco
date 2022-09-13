@@ -1,9 +1,9 @@
-use std::sync::mpsc::RecvError;
-use std::time::Duration;
-use mco::{err, select};
 use mco::coroutine::sleep;
 use mco::std::context::{CancelCtx, Canceler};
 use mco::std::errors::Error;
+use mco::{err, select};
+use std::sync::mpsc::RecvError;
+use std::time::Duration;
 
 //TODO Context is not complete yet。This API may changed
 fn main() {

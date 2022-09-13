@@ -1,19 +1,15 @@
-use std::borrow::{Borrow, BorrowMut};
+use crate::std::sync::{Mutex, MutexGuard};
+use serde::ser::SerializeMap;
+use serde::{Deserializer, Serialize, Serializer};
+use std::borrow::Borrow;
 use std::cell::UnsafeCell;
+use std::collections::{
+    hash_map::Iter as MapIter, hash_map::IterMut as MapIterMut, HashMap as Map,
+};
 use std::fmt::{Debug, Formatter};
 use std::hash::Hash;
 use std::ops::{Deref, DerefMut};
-use std::ptr;
-use std::sync::atomic::{AtomicPtr, Ordering};
-use std::sync::{Arc, LockResult};
-use std::time::Duration;
-use crate::std::sync::{Mutex, MutexGuard};
-use std::marker::PhantomData;
-
-use std::collections::{HashMap as Map, hash_map::IntoIter as IntoIter, hash_map::Iter as MapIter, hash_map::IterMut as MapIterMut, HashMap};
-use serde::ser::SerializeMap;
-use serde::{Deserializer, Serialize, Serializer};
-
+use std::sync::Arc;
 
 pub type SyncHashMap<K, V> = SyncMapImpl<K, V>;
 
@@ -34,18 +30,18 @@ pub type SyncHashMap<K, V> = SyncMapImpl<K, V>;
 /// contention compared to a Go map paired with a separate Mutex or RWMutex.
 ///
 /// The zero Map is empty and ready for use. A Map must not be copied after first use.
-pub struct SyncMapImpl<K:Eq+Hash+Clone, V> {
+pub struct SyncMapImpl<K: Eq + Hash + Clone, V> {
     read: UnsafeCell<Map<K, V>>,
     dirty: Mutex<Map<K, V>>,
 }
 
-impl <K:Eq+Hash+Clone, V>Drop for SyncMapImpl<K,V> {
+impl<K: Eq + Hash + Clone, V> Drop for SyncMapImpl<K, V> {
     fn drop(&mut self) {
         unsafe {
-            let k=(&mut *self.read.get()).keys().clone();
+            let k = (&mut *self.read.get()).keys().clone();
             for x in k {
-                let v=(&mut *self.read.get()).remove(x);
-                match v{
+                let v = (&mut *self.read.get()).remove(x);
+                match v {
                     None => {}
                     Some(v) => {
                         std::mem::forget(v);
@@ -57,13 +53,16 @@ impl <K:Eq+Hash+Clone, V>Drop for SyncMapImpl<K,V> {
 }
 
 /// this is safety, dirty mutex ensure
-unsafe impl<K:Eq+Hash+Clone, V> Send for SyncMapImpl<K, V> {}
+unsafe impl<K: Eq + Hash + Clone, V> Send for SyncMapImpl<K, V> {}
 
 /// this is safety, dirty mutex ensure
-unsafe impl<K:Eq+Hash+Clone, V> Sync for SyncMapImpl<K, V> {}
+unsafe impl<K: Eq + Hash + Clone, V> Sync for SyncMapImpl<K, V> {}
 
 //TODO maybe K will use transmute_copy replace Clone?
-impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
+impl<K, V> SyncMapImpl<K, V>
+where
+    K: std::cmp::Eq + Hash + Clone,
+{
     pub fn new_arc() -> Arc<Self> {
         Arc::new(Self::new())
     }
@@ -82,8 +81,10 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
         }
     }
 
-
-    pub fn insert(&self, k: K, v: V) -> Option<V> where K: Clone {
+    pub fn insert(&self, k: K, v: V) -> Option<V>
+    where
+        K: Clone,
+    {
         match self.dirty.lock() {
             Ok(mut m) => {
                 let op = m.insert(k.clone(), v);
@@ -95,26 +96,25 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
                         }
                         None
                     }
-                    Some(v) => {
-                        Some(v)
-                    }
+                    Some(v) => Some(v),
                 }
             }
-            Err(_) => {
-                Some(v)
-            }
+            Err(_) => Some(v),
         }
     }
 
-    pub fn remove(&self, k: &K) -> Option<V> where K: Clone {
+    pub fn remove(&self, k: &K) -> Option<V>
+    where
+        K: Clone,
+    {
         match self.dirty.lock() {
             Ok(mut m) => {
                 let op = m.remove(k);
                 match op {
                     Some(v) => {
                         unsafe {
-                            let r=(&mut *self.read.get()).remove(k);
-                            match r{
+                            let r = (&mut *self.read.get()).remove(k);
+                            match r {
                                 None => {}
                                 Some(r) => {
                                     std::mem::forget(r);
@@ -123,27 +123,19 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
                         }
                         Some(v)
                     }
-                    None => {
-                        None
-                    }
+                    None => None,
                 }
             }
-            Err(_) => {
-                None
-            }
+            Err(_) => None,
         }
     }
 
     pub fn len(&self) -> usize {
-        unsafe {
-            (&*self.read.get()).len()
-        }
+        unsafe { (&*self.read.get()).len() }
     }
 
     pub fn is_empty(&self) -> bool {
-        unsafe {
-            (&*self.read.get()).is_empty()
-        }
+        unsafe { (&*self.read.get()).is_empty() }
     }
 
     pub fn clear(&self) {
@@ -151,10 +143,10 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
             Ok(mut m) => {
                 m.clear();
                 unsafe {
-                    let k=(&mut *self.read.get()).keys().clone();
+                    let k = (&mut *self.read.get()).keys().clone();
                     for x in k {
-                        let v=(&mut *self.read.get()).remove(x);
-                        match v{
+                        let v = (&mut *self.read.get()).remove(x);
+                        match v {
                             None => {}
                             Some(v) => {
                                 std::mem::forget(v);
@@ -163,24 +155,24 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
                     }
                 }
             }
-            Err(_) => {
-            }
+            Err(_) => {}
         }
     }
 
     pub fn shrink_to_fit(&self) {
         match self.dirty.lock() {
             Ok(mut m) => {
-                unsafe {
-                    (&mut *self.read.get()).shrink_to_fit()
-                }
+                unsafe { (&mut *self.read.get()).shrink_to_fit() }
                 m.shrink_to_fit()
             }
             Err(_) => {}
         }
     }
 
-    pub fn from(map: Map<K, V>) -> Self where K: Clone + Eq + Hash {
+    pub fn from(map: Map<K, V>) -> Self
+    where
+        K: Clone + Eq + Hash,
+    {
         let s = Self::with_capacity(map.capacity());
         match s.dirty.lock() {
             Ok(mut m) => {
@@ -195,7 +187,6 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
         }
         s
     }
-
 
     /// Returns a reference to the value corresponding to the key.
     ///
@@ -217,58 +208,46 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
     /// assert_eq!(map.get(&2).is_none(), true);
     /// ```
     pub fn get<Q: ?Sized>(&self, k: &Q) -> Option<&V>
-        where
-            K: Borrow<Q>,
-            Q: Hash + Eq,
+    where
+        K: Borrow<Q>,
+        Q: Hash + Eq,
     {
         unsafe {
             let k = (&*self.read.get()).get(k);
             match k {
-                None => { None }
-                Some(s) => {
-                    Some(s)
-                }
+                None => None,
+                Some(s) => Some(s),
             }
         }
     }
 
     pub fn get_mut<Q: ?Sized>(&self, k: &Q) -> Option<SyncMapRefMut<'_, K, V>>
-        where
-            K: Borrow<Q>,
-            Q: Hash + Eq,
+    where
+        K: Borrow<Q>,
+        Q: Hash + Eq,
     {
         let g = self.dirty.lock();
         match g {
             Ok(m) => {
-                let mut r = SyncMapRefMut {
-                    g: m,
-                    value: None,
-                };
+                let mut r = SyncMapRefMut { g: m, value: None };
                 unsafe {
                     r.value = Some(change_lifetime_mut(r.g.get_mut(k)?));
                 }
                 Some(r)
             }
-            Err(_) => {
-                None
-            }
+            Err(_) => None,
         }
     }
 
     pub fn iter(&self) -> MapIter<'_, K, V> {
-        unsafe {
-             (&*self.read.get()).iter()
-        }
+        unsafe { (&*self.read.get()).iter() }
     }
 
     pub fn iter_mut(&self) -> IterMut<'_, K, V> {
         loop {
             match self.dirty.lock() {
                 Ok(m) => {
-                    let mut iter = IterMut {
-                        g: m,
-                        inner: None,
-                    };
+                    let mut iter = IterMut { g: m, inner: None };
                     unsafe {
                         iter.inner = Some(change_lifetime_mut(&mut iter.g).iter_mut());
                     }
@@ -282,9 +261,7 @@ impl<K, V> SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone {
     }
 
     pub fn into_iter(self) -> MapIter<'static, K, V> {
-        unsafe {
-            (&*self.read.get()).iter()
-        }
+        unsafe { (&*self.read.get()).iter() }
     }
 }
 
@@ -301,7 +278,6 @@ pub struct SyncMapRefMut<'a, K, V> {
     value: Option<&'a mut V>,
 }
 
-
 impl<'a, K, V> Deref for SyncMapRefMut<'_, K, V> {
     type Target = V;
 
@@ -316,21 +292,25 @@ impl<'a, K, V> DerefMut for SyncMapRefMut<'_, K, V> {
     }
 }
 
-impl<'a, K, V> Debug for SyncMapRefMut<'_, K, V> where V: Debug {
+impl<'a, K, V> Debug for SyncMapRefMut<'_, K, V>
+where
+    V: Debug,
+{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         self.value.fmt(f)
     }
 }
 
-
-impl<'a, K, V> PartialEq<Self> for SyncMapRefMut<'_, K, V> where V: Eq {
+impl<'a, K, V> PartialEq<Self> for SyncMapRefMut<'_, K, V>
+where
+    V: Eq,
+{
     fn eq(&self, other: &Self) -> bool {
         self.value.eq(&other.value)
     }
 }
 
 impl<'a, K, V> Eq for SyncMapRefMut<'_, K, V> where V: Eq {}
-
 
 pub struct Iter<'a, K, V> {
     inner: Option<MapIter<'a, K, *const V>>,
@@ -342,14 +322,12 @@ impl<'a, K, V> Iterator for Iter<'a, K, V> {
     fn next(&mut self) -> Option<Self::Item> {
         let next = self.inner.as_mut().unwrap().next();
         match next {
-            None => { None }
+            None => None,
             Some((k, v)) => {
                 if v.is_null() {
                     None
                 } else {
-                    unsafe {
-                        Some((k, &**v))
-                    }
+                    unsafe { Some((k, &**v)) }
                 }
             }
         }
@@ -383,7 +361,10 @@ impl<'a, K, V> Iterator for IterMut<'a, K, V> {
     }
 }
 
-impl<'a, K, V> IntoIterator for &'a SyncMapImpl<K, V> where K: Eq + Hash + Clone {
+impl<'a, K, V> IntoIterator for &'a SyncMapImpl<K, V>
+where
+    K: Eq + Hash + Clone,
+{
     type Item = (&'a K, &'a V);
     type IntoIter = MapIter<'a, K, V>;
 
@@ -392,8 +373,10 @@ impl<'a, K, V> IntoIterator for &'a SyncMapImpl<K, V> where K: Eq + Hash + Clone
     }
 }
 
-
-impl<'a, K, V> IntoIterator for &'a mut SyncMapImpl<K, V> where K: Eq + Hash + Clone {
+impl<'a, K, V> IntoIterator for &'a mut SyncMapImpl<K, V>
+where
+    K: Eq + Hash + Clone,
+{
     type Item = (&'a K, &'a mut V);
     type IntoIter = IterMut<'a, K, V>;
 
@@ -402,26 +385,35 @@ impl<'a, K, V> IntoIterator for &'a mut SyncMapImpl<K, V> where K: Eq + Hash + C
     }
 }
 
-impl<K, V> IntoIterator for SyncMapImpl<K, V> where
+impl<K, V> IntoIterator for SyncMapImpl<K, V>
+where
     K: Eq + Hash + Clone,
-    K: 'static, V: 'static {
+    K: 'static,
+    V: 'static,
+{
     type Item = (&'static K, &'static V);
     type IntoIter = MapIter<'static, K, V>;
 
-    fn into_iter(mut self) -> Self::IntoIter {
+    fn into_iter(self) -> Self::IntoIter {
         self.into_iter()
     }
 }
 
-
-impl<K:Eq+Hash+Clone, V> From<Map<K, V>> for SyncMapImpl<K, V> {
+impl<K: Eq + Hash + Clone, V> From<Map<K, V>> for SyncMapImpl<K, V> {
     fn from(arg: Map<K, V>) -> Self {
         Self::from(arg)
     }
 }
 
-impl<K, V> serde::Serialize for SyncMapImpl<K, V> where K: Eq + Hash + Clone + Serialize, V: Serialize {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+impl<K, V> serde::Serialize for SyncMapImpl<K, V>
+where
+    K: Eq + Hash + Clone + Serialize,
+    V: Serialize,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
         let mut m = serializer.serialize_map(Some(self.len()))?;
         for (k, v) in self.iter() {
             m.serialize_key(k)?;
@@ -431,14 +423,25 @@ impl<K, V> serde::Serialize for SyncMapImpl<K, V> where K: Eq + Hash + Clone + S
     }
 }
 
-impl<'de, K, V> serde::Deserialize<'de> for SyncMapImpl<K, V> where K: Eq + Hash + Clone + serde::Deserialize<'de>, V: serde::Deserialize<'de> {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: Deserializer<'de> {
+impl<'de, K, V> serde::Deserialize<'de> for SyncMapImpl<K, V>
+where
+    K: Eq + Hash + Clone + serde::Deserialize<'de>,
+    V: serde::Deserialize<'de>,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         let m = Map::deserialize(deserializer)?;
         Ok(Self::from(m))
     }
 }
 
-impl<K, V> Debug for SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone + Debug, V: Debug {
+impl<K, V> Debug for SyncMapImpl<K, V>
+where
+    K: std::cmp::Eq + Hash + Clone + Debug,
+    V: Debug,
+{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut m = f.debug_map();
         for (k, v) in self.iter() {
@@ -451,15 +454,15 @@ impl<K, V> Debug for SyncMapImpl<K, V> where K: std::cmp::Eq + Hash + Clone + De
 
 #[cfg(test)]
 mod test {
-    use std::collections::HashMap;
-    use std::ops::Deref;
-    use std::sync::Arc;
-    use std::sync::atomic::{Ordering};
-    use std::time::Duration;
     use crate::coroutine::sleep;
     use crate::sleep;
     use crate::std::map::SyncHashMap;
-    use crate::std::sync::{WaitGroup};
+    use crate::std::sync::WaitGroup;
+    use std::collections::HashMap;
+    use std::ops::Deref;
+    use std::sync::atomic::Ordering;
+    use std::sync::Arc;
+    use std::time::Duration;
 
     #[test]
     pub fn test_debug() {
@@ -503,15 +506,15 @@ mod test {
             let wg2 = wg.clone();
             let m1 = m.clone();
             let m2 = m.clone();
-            co!(move ||{
-                 m1.remove(&1);
-                 let insert = m1.insert(1, 2);
-                 drop(wg1);
+            co!(move || {
+                m1.remove(&1);
+                let insert = m1.insert(1, 2);
+                drop(wg1);
             });
-            co!(move ||{
-                 m2.remove(&1);
-                 let insert = m2.insert(1, 2);
-                 drop(wg2);
+            co!(move || {
+                m2.remove(&1);
+                let insert = m2.insert(1, 2);
+                drop(wg2);
             });
         }
         wg.wait();
@@ -526,19 +529,19 @@ mod test {
             let wg2 = wg.clone();
             let m1 = m.clone();
             let m2 = m.clone();
-            co!(move ||{
-                 for i in 0..10000{
-                     m1.remove(&i);
-                     let insert = m1.insert(i, i);
-                 }
-                 drop(wg1);
+            co!(move || {
+                for i in 0..10000 {
+                    m1.remove(&i);
+                    let insert = m1.insert(i, i);
+                }
+                drop(wg1);
             });
-            co!(move ||{
-                 for i in 0..10000{
-                     m2.remove(&i);
-                     let insert = m2.insert(i, i);
-                 }
-                 drop(wg2);
+            co!(move || {
+                for i in 0..10000 {
+                    m2.remove(&i);
+                    let insert = m2.insert(i, i);
+                }
+                drop(wg2);
             });
         }
         wg.wait();
@@ -621,7 +624,6 @@ mod test {
         }
     }
 
-
     #[test]
     pub fn test_smoke2() {
         let wait1 = WaitGroup::new();
@@ -632,18 +634,20 @@ mod test {
 
             let wg2 = wait1.clone();
             let m2 = m1.clone();
-            co!(move ||{
+            co!(move || {
                 let insert = m.insert(i, i);
                 let g = m.get(&i).unwrap();
                 assert_eq!(i, *g.deref());
                 drop(wg);
-                println!("done{}",i);
+                println!("done{}", i);
             });
-            co!(move ||{
-                 let g = m2.remove(&i);
-                  if g.is_some(){
-                  println!("done remove {}",i);
-                  drop(wg2);} });
+            co!(move || {
+                let g = m2.remove(&i);
+                if g.is_some() {
+                    println!("done remove {}", i);
+                    drop(wg2);
+                }
+            });
         }
         wait1.wait();
     }
@@ -656,18 +660,18 @@ mod test {
             i = 1;
             let wg = wait1.clone();
             let m = m1.clone();
-            co!(move ||{
+            co!(move || {
                 let insert = m.insert(i, i);
                 let g = m.get(&i).unwrap();
                 assert_eq!(i, *g.deref());
                 drop(wg);
-                println!("done{}",i);
+                println!("done{}", i);
             });
             let wg2 = wait1.clone();
             let m2 = m1.clone();
-            co!(move ||{
-                 let g = m2.remove(&i);
-                 drop(wg2);
+            co!(move || {
+                let g = m2.remove(&i);
+                drop(wg2);
             });
         }
         wait1.wait();

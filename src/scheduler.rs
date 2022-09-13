@@ -251,9 +251,9 @@ impl Scheduler {
     #[inline]
     pub fn schedule(&self, co: CoroutineImpl) {
         #[cfg(nightly)]
-            let id = WORKER_ID.load(Ordering::Relaxed);
+        let id = WORKER_ID.load(Ordering::Relaxed);
         #[cfg(not(nightly))]
-            let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
+        let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
 
         if id == !1 {
             self.schedule_global(co);

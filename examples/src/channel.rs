@@ -1,12 +1,17 @@
-use std::time::Duration;
 use mco::coroutine::sleep;
 use mco::{chan, co};
+use std::time::Duration;
 
 fn main() {
     //unbounded
     let (s, r) = chan!();
     s.send(1);
-    println!("remain msg:{},sender num:{},receiver num:{}", r.remain(), r.sender_num(), r.receiver_num());
+    println!(
+        "remain msg:{},sender num:{},receiver num:{}",
+        r.remain(),
+        r.sender_num(),
+        r.receiver_num()
+    );
     let rv = r.recv().unwrap();
     println!("recv = {},remain:{}", rv, r.remain());
 
@@ -14,13 +19,13 @@ fn main() {
 
     //bounded length, If the sender sends more messages than the limit, it waits until the message is consumed
     let (s, r) = chan!(1);
-    co!(move ||{
-       let send_result = s.send(1);
-       println!("send 1 is_ok:{}", send_result.is_ok());
-       //will blocking until the excess messages are consumed or the channel is closed
-       println!("s.send(2) blocking 2s...");
-       let send_result = s.send(2);
-       println!("send 2 is_ok: {:?}", send_result);
+    co!(move || {
+        let send_result = s.send(1);
+        println!("send 1 is_ok:{}", send_result.is_ok());
+        //will blocking until the excess messages are consumed or the channel is closed
+        println!("s.send(2) blocking 2s...");
+        let send_result = s.send(2);
+        println!("send 2 is_ok: {:?}", send_result);
     });
 
     sleep(Duration::from_secs(2));

@@ -322,8 +322,6 @@
 //! Most of this crate's functionality is available in `std` in nightly Rust.
 //! See the [tracking issue](https://github.com/rust-lang/rust/issues/74465).
 
-#![cfg_attr(not(feature = "std"), no_std)]
-
 #[cfg(feature = "alloc")]
 extern crate alloc;
 
@@ -337,7 +335,6 @@ pub mod unsync {
         fmt, hint, mem,
         ops::{Deref, DerefMut},
     };
-
 
     use std::panic::{RefUnwindSafe, UnwindSafe};
 
@@ -413,14 +410,18 @@ pub mod unsync {
 
     impl<T> From<T> for OnceCell<T> {
         fn from(value: T) -> Self {
-            OnceCell { inner: UnsafeCell::new(Some(value)) }
+            OnceCell {
+                inner: UnsafeCell::new(Some(value)),
+            }
         }
     }
 
     impl<T> OnceCell<T> {
         /// Creates a new empty cell.
         pub const fn new() -> OnceCell<T> {
-            OnceCell { inner: UnsafeCell::new(None) }
+            OnceCell {
+                inner: UnsafeCell::new(None),
+            }
         }
 
         /// Gets a reference to the underlying value.
@@ -527,8 +528,8 @@ pub mod unsync {
         /// assert_eq!(value, &92);
         /// ```
         pub fn get_or_init<F>(&self, f: F) -> &T
-            where
-                F: FnOnce() -> T,
+        where
+            F: FnOnce() -> T,
         {
             enum Void {}
             match self.get_or_try_init(|| Ok::<T, Void>(f())) {
@@ -563,8 +564,8 @@ pub mod unsync {
         /// assert_eq!(cell.get(), Some(&92))
         /// ```
         pub fn get_or_try_init<F, E>(&self, f: F) -> Result<&T, E>
-            where
-                F: FnOnce() -> Result<T, E>,
+        where
+            F: FnOnce() -> Result<T, E>,
         {
             if let Some(val) = self.get() {
                 return Ok(val);
@@ -659,12 +660,14 @@ pub mod unsync {
         init: Cell<Option<F>>,
     }
 
-
     impl<T, F: RefUnwindSafe> RefUnwindSafe for Lazy<T, F> where OnceCell<T>: RefUnwindSafe {}
 
     impl<T: fmt::Debug, F> fmt::Debug for Lazy<T, F> {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            f.debug_struct("Lazy").field("cell", &self.cell).field("init", &"..").finish()
+            f.debug_struct("Lazy")
+                .field("cell", &self.cell)
+                .field("init", &"..")
+                .finish()
         }
     }
 
@@ -684,7 +687,10 @@ pub mod unsync {
         /// # }
         /// ```
         pub const fn new(init: F) -> Lazy<T, F> {
-            Lazy { cell: OnceCell::new(), init: Cell::new(Some(init)) }
+            Lazy {
+                cell: OnceCell::new(),
+                init: Cell::new(Some(init)),
+            }
         }
 
         /// Consumes this `Lazy` returning the stored value.
@@ -694,7 +700,8 @@ pub mod unsync {
             let cell = this.cell;
             let init = this.init;
             cell.into_inner().ok_or_else(|| {
-                init.take().unwrap_or_else(|| panic!("Lazy instance has previously been poisoned"))
+                init.take()
+                    .unwrap_or_else(|| panic!("Lazy instance has previously been poisoned"))
             })
         }
     }
@@ -960,8 +967,8 @@ pub mod sync {
         /// assert_eq!(value, &92);
         /// ```
         pub fn get_or_init<F>(&self, f: F) -> &T
-            where
-                F: FnOnce() -> T,
+        where
+            F: FnOnce() -> T,
         {
             enum Void {}
             match self.get_or_try_init(|| Ok::<T, Void>(f())) {
@@ -997,8 +1004,8 @@ pub mod sync {
         /// assert_eq!(cell.get(), Some(&92))
         /// ```
         pub fn get_or_try_init<F, E>(&self, f: F) -> Result<&T, E>
-            where
-                F: FnOnce() -> Result<T, E>,
+        where
+            F: FnOnce() -> Result<T, E>,
         {
             // Fast path check
             if let Some(value) = self.get() {
@@ -1104,7 +1111,10 @@ pub mod sync {
 
     impl<T: fmt::Debug, F> fmt::Debug for Lazy<T, F> {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-            f.debug_struct("Lazy").field("cell", &self.cell).field("init", &"..").finish()
+            f.debug_struct("Lazy")
+                .field("cell", &self.cell)
+                .field("init", &"..")
+                .finish()
         }
     }
 
@@ -1115,14 +1125,16 @@ pub mod sync {
     unsafe impl<T, F: Send> Sync for Lazy<T, F> where OnceCell<T>: Sync {}
     // auto-derived `Send` impl is OK.
 
-
     impl<T, F: RefUnwindSafe> RefUnwindSafe for Lazy<T, F> where OnceCell<T>: RefUnwindSafe {}
 
     impl<T, F> Lazy<T, F> {
         /// Creates a new lazy value with the given initializing
         /// function.
         pub const fn new(f: F) -> Lazy<T, F> {
-            Lazy { cell: OnceCell::new(), init: Cell::new(Some(f)) }
+            Lazy {
+                cell: OnceCell::new(),
+                init: Cell::new(Some(f)),
+            }
         }
 
         /// Consumes this `Lazy` returning the stored value.
@@ -1132,7 +1144,8 @@ pub mod sync {
             let cell = this.cell;
             let init = this.init;
             cell.into_inner().ok_or_else(|| {
-                init.take().unwrap_or_else(|| panic!("Lazy instance has previously been poisoned"))
+                init.take()
+                    .unwrap_or_else(|| panic!("Lazy instance has previously been poisoned"))
             })
         }
     }
@@ -1197,10 +1210,6 @@ pub mod sync {
     /// ```
     fn _dummy() {}
 }
-
-#[cfg(feature = "race")]
-pub mod race;
-
 
 unsafe fn take_unchecked<T>(val: &mut Option<T>) -> T {
     match val.take() {

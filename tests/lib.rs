@@ -6,8 +6,8 @@ extern crate mco_gen;
 extern crate mco;
 
 use crate::coroutine::yield_now;
-use mco_gen::Gn;
 use mco::coroutine;
+use mco_gen::Gn;
 
 #[test]
 fn panic_coroutine() {
@@ -147,8 +147,8 @@ fn spawn_inside() {
         yield_now();
         println!("bye from parent: {:?}", me);
     })
-        .join()
-        .unwrap();
+    .join()
+    .unwrap();
 
     thread::sleep(Duration::from_millis(200));
 }
@@ -322,16 +322,16 @@ fn co_with_macro() {
     spawn_with!(8192, move || {
         tx1.send(coroutine::current().stack_size()).unwrap();
     })
-        .join()
-        .unwrap();
+    .join()
+    .unwrap();
 
     spawn_with!("test_task", 10240, move || {
         let task = coroutine::current();
         let msg = (task.name().map(ToOwned::to_owned), task.stack_size());
         tx2.send(msg).unwrap();
     })
-        .join()
-        .unwrap();
+    .join()
+    .unwrap();
 
     {
         let x = rx1.recv().unwrap();

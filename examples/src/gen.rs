@@ -2,8 +2,8 @@
 extern crate mco;
 
 use crate::coroutine::yield_now;
-use mco::mco_gen::Gn;
 use mco::coroutine;
+use mco::mco_gen::Gn;
 
 fn main() {
     coroutine::scope(|scope| {

@@ -28,7 +28,10 @@ impl CancelIoData {
         let handle = ev.handle;
         let overlapped = ev.get_overlapped();
         if handle.is_null() {
-            return Err(io::Error::new(ErrorKind::NotFound, "ev_data.handle is null"));
+            return Err(io::Error::new(
+                ErrorKind::NotFound,
+                "ev_data.handle is null",
+            ));
         }
         //safety
         let ret = unsafe { CancelIoEx(handle, overlapped) };
@@ -65,20 +68,18 @@ impl CancelIo for CancelIoImpl {
     fn cancel(&self) -> Result<(), std::io::Error> {
         match self.0.lock() {
             Ok(mut v) => {
-                v.take().map(|d| {
-                    match d.cancel() {
-                        Ok(_) => {
-                            return Ok(());
-                        }
-                        Err(e) => {
-                            return Err("failed to get CancelIo lock".to_string());
-                        }
+                v.take().map(|d| match d.cancel() {
+                    Ok(_) => {
+                        return Ok(());
+                    }
+                    Err(e) => {
+                        return Err("failed to get CancelIo lock".to_string());
                     }
                 });
                 return Ok(());
             }
             Err(e) => {
-                return Err(std::io::Error::new(ErrorKind::Other,e.to_string()));
+                return Err(std::io::Error::new(ErrorKind::Other, e.to_string()));
             }
         }
     }

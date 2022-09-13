@@ -1,6 +1,6 @@
-use std::time::Duration;
 use mco::std::time::time::Time;
 use mco::std::time::{time, UtcOffset};
+use std::time::Duration;
 
 fn main() {
     let mut now = Time::now();
@@ -30,14 +30,14 @@ fn main() {
     assert_eq!(true, Time::now().after(&now));
 
     //parse from str
-    let parsed = Time::parse(time::RFC3339Nano, &now.to_string()).unwrap();
+    let parsed = Time::parse(time::RFC3339_NANO, &now.to_string()).unwrap();
     assert_eq!(now, parsed);
 
     //format time to str
     let formatted = now.format(time::RFC3339);
     println!("formatted: {}", formatted);
 
-    let formatted = now.format(time::RFC3339Nano);
+    let formatted = now.format(time::RFC3339_NANO);
     println!("formatted: {}", formatted);
 
     let formatted = now.format("[year]-[month] [ordinal] [weekday] [week_number]-[day] [hour]:[minute] [period]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]");

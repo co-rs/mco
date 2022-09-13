@@ -1,15 +1,15 @@
-use std::sync::Arc;
-use std::time::Duration;
 use mco::co;
 use mco::coroutine::sleep;
 use mco::std::errors::Error;
 use mco::std::pool::{Pool, Task};
+use std::sync::Arc;
+use std::time::Duration;
 
 fn main() {
     let pool = Arc::new(Pool::new(10));
     let copy = pool.clone();
-    co!(move ||{
-         copy.run();
+    co!(move || {
+        copy.run();
     });
     for n in 0..100 {
         pool.put(Task::new(move || -> Result<(), Error> {

@@ -19,9 +19,9 @@ impl EventLoop {
     pub fn run(&self, id: usize) -> io::Result<()> {
         use std::mem::MaybeUninit;
         #[cfg(nightly)]
-            WORKER_ID.store(id, Ordering::Relaxed);
+        WORKER_ID.store(id, Ordering::Relaxed);
         #[cfg(not(nightly))]
-            WORKER_ID.with(|worker_id| worker_id.store(id, Ordering::Relaxed));
+        WORKER_ID.with(|worker_id| worker_id.store(id, Ordering::Relaxed));
 
         let events_buf: MaybeUninit<[SysEvent; 1024]> = MaybeUninit::uninit();
         let mut events_buf = unsafe { events_buf.assume_init() };

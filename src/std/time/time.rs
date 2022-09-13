@@ -1,35 +1,32 @@
-use std::alloc::Layout;
-use std::fmt::{Debug, Display, Formatter};
-use std::ops::{Add, Deref, DerefMut, Sub};
-use std::str::FromStr;
-use std::time::SystemTime;
-use serde::de::Error;
-use time::{format_description, OffsetDateTime};
-use time::error::InvalidFormatDescription;
-use time::format_description::FormatItem;
-use crate::std::time::format::{longDayNames, longMonthNames};
 use crate::std::errors::Result;
 use crate::std::lazy::sync::Lazy;
+use crate::std::time::format::{LONG_DAY_NAMES, LONG_MONTH_NAMES};
 use crate::std::time::sys::Timespec;
+use serde::de::Error;
+use std::fmt::{Debug, Display, Formatter};
+use std::ops::{Add, Deref, Sub};
+use std::str::FromStr;
+use time::{format_description, OffsetDateTime};
 
 pub use time::UtcOffset;
 
 /// "Mon, 02 Jan 2006 15:04:05 GMT"
-pub const TimeFormat: &'static str = "[weekday repr:short], [day] [month repr:short] [year] [hour]:[minute]:[second] GMT";
+pub const TIME_FORMAT: &'static str =
+    "[weekday repr:short], [day] [month repr:short] [year] [hour]:[minute]:[second] GMT";
 /// "2006-01-02T15:04:05"
-pub const RFC3339Second: &'static str = "[year]-[month]-[day]T[hour]:[minute]:[second]";
+pub const RFC3339_SECOND: &'static str = "[year]-[month]-[day]T[hour]:[minute]:[second]";
 /// "2006-01-02T15:04:05Z07:00"
-pub const RFC3339: &'static str = "[year]-[month]-[day]T[hour]:[minute]:[second][offset_hour sign:mandatory]:[offset_minute]";
+pub const RFC3339: &'static str =
+    "[year]-[month]-[day]T[hour]:[minute]:[second][offset_hour sign:mandatory]:[offset_minute]";
 ///"2006-01-02T15:04:05.999999999Z07:00"
-pub const RFC3339Nano: &'static str = "[year]-[month]-[day]T[hour]:[minute]:[second].[subsecond][offset_hour sign:mandatory]:[offset_minute]";
+pub const RFC3339_NANO: &'static str = "[year]-[month]-[day]T[hour]:[minute]:[second].[subsecond][offset_hour sign:mandatory]:[offset_minute]";
 ///"Mon, 02 Jan 2006 15:04:05 MST"
-pub const RFC1123: &'static str = "[weekday repr:short], [day] [month repr:short] [year] [hour]:[minute]:[second] MST";
-
+pub const RFC1123: &'static str =
+    "[weekday repr:short], [day] [month repr:short] [year] [hour]:[minute]:[second] MST";
 
 /// Obtain the offset of Utc time and Local time in seconds, using Lazy only once to improve performance
-pub static GLOBAL_OFFSET: Lazy<UtcOffset> = Lazy::new(|| {
-    UtcOffset::from_whole_seconds(Timespec::now().local().tm_utcoff).unwrap()
-});
+pub static GLOBAL_OFFSET: Lazy<UtcOffset> =
+    Lazy::new(|| UtcOffset::from_whole_seconds(Timespec::now().local().tm_utcoff).unwrap());
 
 /// a time wrapper just like golang
 #[derive(Eq, PartialEq, Ord, PartialOrd, Clone)]
@@ -41,21 +38,21 @@ impl Time {
     /// convert self to utc time
     pub fn utc(&self) -> Self {
         Self {
-            inner: self.inner.to_offset(UtcOffset::UTC)
+            inner: self.inner.to_offset(UtcOffset::UTC),
         }
     }
 
     /// convert self to utc time
     pub fn local(&self) -> Self {
         Self {
-            inner: self.inner.to_offset(GLOBAL_OFFSET.deref().clone())
+            inner: self.inner.to_offset(GLOBAL_OFFSET.deref().clone()),
         }
     }
 
     /// return new offset
     pub fn to_offset(self, offset: UtcOffset) -> Time {
         Self {
-            inner: self.inner.to_offset(offset)
+            inner: self.inner.to_offset(offset),
         }
     }
 
@@ -109,7 +106,6 @@ impl Time {
         u.inner.sub(self.inner).is_positive()
     }
 
-
     /// equal reports whether t and u represent the same time instanself.
     /// Two times can be equal even if they are in different locations.
     /// For example, 6:00 +0200 and 4:00 UTC are equal.
@@ -118,7 +114,6 @@ impl Time {
     pub fn equal(&self, u: &Time) -> bool {
         self.inner.eq(&u.inner)
     }
-
 
     /// is_zero reports whether t represents the zero time instant,
     /// January 1, year 1, 00:00:00 UTC.
@@ -214,9 +209,7 @@ impl Time {
     pub fn format(&self, layout: &str) -> String {
         let f = {
             match format_description::parse(layout) {
-                Ok(v) => {
-                    v
-                }
+                Ok(v) => v,
                 Err(_) => {
                     vec![]
                 }
@@ -246,19 +239,17 @@ impl Time {
     ///
     /// for example:
     /// ```rust
-    ///     use mco::std::time::{RFC3339Nano,Time};
+    ///     use mco::std::time::{RFC3339_NANO,Time};
     ///
     ///     let parsed = Time::parse("[year]-[month] [ordinal] [weekday] [week_number]-[day] [hour]:[minute] [period]:[second].[subsecond] [offset_hour sign:mandatory]:[offset_minute]:[offset_second]","2022-02 033 Wednesday 05-02 01:49 AM:22.1210536 +08:00:00").unwrap();
     ///
-    ///     let parsed = Time::parse(RFC3339Nano, "2022-02-03T01:51:00.9335458+08:00").unwrap();
+    ///     let parsed = Time::parse(RFC3339_NANO, "2022-02-03T01:51:00.9335458+08:00").unwrap();
     /// ```
     pub fn parse(layout: &str, value: &str) -> Result<Self> {
         match format_description::parse(layout) {
-            Ok(v) => {
-                Ok(Self {
-                    inner: time::OffsetDateTime::parse(value, &v)?
-                })
-            }
+            Ok(v) => Ok(Self {
+                inner: time::OffsetDateTime::parse(value, &v)?,
+            }),
             Err(e) => {
                 return Err(e.into());
             }
@@ -269,53 +260,53 @@ impl Time {
     pub fn now() -> Time {
         let mut now = time::OffsetDateTime::now_utc();
         now = now.to_offset(GLOBAL_OFFSET.clone());
-        return Time {
-            inner: now
-        };
+        return Time { inner: now };
     }
 
     /// current utc time
     pub fn now_utc() -> Time {
         let now = time::OffsetDateTime::now_utc();
-        return Time {
-            inner: now
-        };
+        return Time { inner: now };
     }
 }
 
 impl Debug for Time {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         f.debug_tuple("Time")
-            .field(&self.format(RFC3339Nano))
+            .field(&self.format(RFC3339_NANO))
             .finish()
     }
 }
 
 impl Display for Time {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        std::fmt::Display::fmt(&self.format(RFC3339Nano), f)
+        std::fmt::Display::fmt(&self.format(RFC3339_NANO), f)
     }
 }
 
 impl Default for Time {
     fn default() -> Self {
-        Self::parse(RFC3339Nano, "0001-01-01T00:00:00.000000+00:00").unwrap()
+        Self::parse(RFC3339_NANO, "0001-01-01T00:00:00.000000+00:00").unwrap()
     }
 }
 
 impl serde::Serialize for Time {
-    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error> where S: serde::Serializer {
-        serializer.serialize_str(&self.format(RFC3339Nano))
+    fn serialize<S>(&self, serializer: S) -> std::result::Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        serializer.serialize_str(&self.format(RFC3339_NANO))
     }
 }
 
 impl<'de> serde::Deserialize<'de> for Time {
-    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error> where D: serde::Deserializer<'de> {
-        match Time::parse(RFC3339Nano, &String::deserialize(deserializer)?) {
-            Ok(v) => { Ok(v) }
-            Err(e) => {
-                Err(D::Error::custom(e.to_string()))
-            }
+    fn deserialize<D>(deserializer: D) -> std::result::Result<Self, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        match Time::parse(RFC3339_NANO, &String::deserialize(deserializer)?) {
+            Ok(v) => Ok(v),
+            Err(e) => Err(D::Error::custom(e.to_string())),
         }
     }
 }
@@ -324,10 +315,9 @@ impl FromStr for Time {
     type Err = crate::std::errors::Error;
 
     fn from_str(s: &str) -> std::result::Result<Self, Self::Err> {
-        Time::parse(RFC3339Nano, s)
+        Time::parse(RFC3339_NANO, s)
     }
 }
-
 
 // A month specifies a month of the year (January = 1, ...).
 #[derive(Eq, PartialEq, Debug, PartialOrd)]
@@ -349,22 +339,21 @@ pub enum Month {
 impl From<time::Month> for Month {
     fn from(arg: time::Month) -> Self {
         match arg {
-            time::Month::January => { Month::January }
-            time::Month::February => { Month::February }
-            time::Month::March => { Month::March }
-            time::Month::April => { Month::April }
-            time::Month::May => { Month::May }
-            time::Month::June => { Month::June }
-            time::Month::July => { Month::July }
-            time::Month::August => { Month::August }
-            time::Month::September => { Month::September }
-            time::Month::October => { Month::October }
-            time::Month::November => { Month::November }
-            time::Month::December => { Month::December }
+            time::Month::January => Month::January,
+            time::Month::February => Month::February,
+            time::Month::March => Month::March,
+            time::Month::April => Month::April,
+            time::Month::May => Month::May,
+            time::Month::June => Month::June,
+            time::Month::July => Month::July,
+            time::Month::August => Month::August,
+            time::Month::September => Month::September,
+            time::Month::October => Month::October,
+            time::Month::November => Month::November,
+            time::Month::December => Month::December,
         }
     }
 }
-
 
 impl From<i64> for Month {
     fn from(arg: i64) -> Self {
@@ -414,18 +403,18 @@ impl From<i64> for Month {
 impl From<Month> for i64 {
     fn from(arg: Month) -> Self {
         match arg {
-            Month::January => { 1 }
-            Month::February => { 2 }
-            Month::March => { 3 }
-            Month::April => { 4 }
-            Month::May => { 5 }
-            Month::June => { 6 }
-            Month::July => { 7 }
-            Month::August => { 8 }
-            Month::September => { 9 }
-            Month::October => { 10 }
-            Month::November => { 11 }
-            Month::December => { 23 }
+            Month::January => 1,
+            Month::February => 2,
+            Month::March => 3,
+            Month::April => 4,
+            Month::May => 5,
+            Month::June => 6,
+            Month::July => 7,
+            Month::August => 8,
+            Month::September => 9,
+            Month::October => 10,
+            Month::November => 11,
+            Month::December => 23,
         }
     }
 }
@@ -433,18 +422,18 @@ impl From<Month> for i64 {
 impl From<&Month> for i64 {
     fn from(arg: &Month) -> Self {
         match arg {
-            Month::January => { 1 }
-            Month::February => { 2 }
-            Month::March => { 3 }
-            Month::April => { 4 }
-            Month::May => { 5 }
-            Month::June => { 6 }
-            Month::July => { 7 }
-            Month::August => { 8 }
-            Month::September => { 9 }
-            Month::October => { 10 }
-            Month::November => { 11 }
-            Month::December => { 23 }
+            Month::January => 1,
+            Month::February => 2,
+            Month::March => 3,
+            Month::April => 4,
+            Month::May => 5,
+            Month::June => 6,
+            Month::July => 7,
+            Month::August => 8,
+            Month::September => 9,
+            Month::October => 10,
+            Month::November => 11,
+            Month::December => 23,
         }
     }
 }
@@ -456,14 +445,16 @@ impl Month {
     // string returns the English name of the month ("January", "February", ...).
     pub fn string(&self) -> String {
         if Month::January <= *self && *self <= Month::December {
-            return longMonthNames[(self.i64() - 1) as usize].to_string();
+            return LONG_MONTH_NAMES[(self.i64() - 1) as usize].to_string();
         }
         let mut buf = Vec::with_capacity(20);
         for _ in 0..20 {
             buf.push(0);
         }
         let n = fmt_int(&mut buf, self.i64() as u64) as usize;
-        return "%!month(".to_string() + &String::from_utf8(buf[n..].to_vec()).unwrap_or_default() + ")";
+        return "%!month(".to_string()
+            + &String::from_utf8(buf[n..].to_vec()).unwrap_or_default()
+            + ")";
     }
 }
 
@@ -475,8 +466,7 @@ fn fmt_int(buf: &mut Vec<u8>, mut v: u64) -> i64 {
         w -= 1;
         buf[w] = '0' as u8;
     } else {
-        while v > 0
-        {
+        while v > 0 {
             w -= 1;
             buf[w] = (v % 10) as u8 + '0' as u8;
             v /= 10
@@ -499,13 +489,13 @@ pub enum Weekday {
 impl From<time::Weekday> for Weekday {
     fn from(arg: time::Weekday) -> Self {
         match arg {
-            time::Weekday::Monday => { Weekday::Monday }
-            time::Weekday::Tuesday => { Weekday::Tuesday }
-            time::Weekday::Wednesday => { Weekday::Wednesday }
-            time::Weekday::Thursday => { Weekday::Thursday }
-            time::Weekday::Friday => { Weekday::Friday }
-            time::Weekday::Saturday => { Weekday::Saturday }
-            time::Weekday::Sunday => { Weekday::Sunday }
+            time::Weekday::Monday => Weekday::Monday,
+            time::Weekday::Tuesday => Weekday::Tuesday,
+            time::Weekday::Wednesday => Weekday::Wednesday,
+            time::Weekday::Thursday => Weekday::Thursday,
+            time::Weekday::Friday => Weekday::Friday,
+            time::Weekday::Saturday => Weekday::Saturday,
+            time::Weekday::Sunday => Weekday::Sunday,
         }
     }
 }
@@ -513,34 +503,36 @@ impl From<time::Weekday> for Weekday {
 impl Weekday {
     pub fn i64(&self) -> i64 {
         match self {
-            Weekday::Sunday => { 0 }
-            Weekday::Monday => { 1 }
-            Weekday::Tuesday => { 2 }
-            Weekday::Wednesday => { 3 }
-            Weekday::Thursday => { 4 }
-            Weekday::Friday => { 5 }
-            Weekday::Saturday => { 6 }
+            Weekday::Sunday => 0,
+            Weekday::Monday => 1,
+            Weekday::Tuesday => 2,
+            Weekday::Wednesday => 3,
+            Weekday::Thursday => 4,
+            Weekday::Friday => 5,
+            Weekday::Saturday => 6,
         }
     }
     pub fn string(&self) -> String {
         if Weekday::Sunday <= *self && *self <= Weekday::Saturday {
-            return longDayNames[self.i64() as usize].to_string();
+            return LONG_DAY_NAMES[self.i64() as usize].to_string();
         }
         let mut buf = Vec::with_capacity(20);
         for _ in 0..20 {
             buf.push(0u8);
         }
         let n = fmt_int(&mut buf, self.i64() as u64);
-        return format!("%!weekday({})", String::from_utf8(buf[n as usize..].to_vec()).unwrap_or_default());
+        return format!(
+            "%!weekday({})",
+            String::from_utf8(buf[n as usize..].to_vec()).unwrap_or_default()
+        );
     }
 }
 
-
 #[cfg(test)]
 mod test {
-    use std::time::Duration;
     use crate::coroutine::sleep;
-    use crate::std::time::time::{Month, RFC3339, RFC3339Nano, Time, TimeFormat};
+    use crate::std::time::time::{Month, Time, RFC3339, RFC3339_NANO, TIME_FORMAT};
+    use std::time::Duration;
 
     #[test]
     fn test_mon() {
@@ -549,21 +541,23 @@ mod test {
         assert_eq!("May", m.string());
     }
 
-
     #[test]
     fn test_parse() {
         let now = Time::now();
-        println!("{}", now.format(TimeFormat));
+        println!("{}", now.format(TIME_FORMAT));
         println!("{}", now.format(RFC3339));
-        println!("{}", now.format(RFC3339Nano));
-        assert_eq!(now, Time::parse(RFC3339Nano, &now.format(RFC3339Nano)).unwrap())
+        println!("{}", now.format(RFC3339_NANO));
+        assert_eq!(
+            now,
+            Time::parse(RFC3339_NANO, &now.format(RFC3339_NANO)).unwrap()
+        )
     }
 
     #[test]
     fn test_eq() {
         let now = Time::now();
         sleep(Duration::from_secs(1));
-        println!("{}", now.format(RFC3339Nano));
+        println!("{}", now.format(RFC3339_NANO));
         assert_eq!(true, now.before(&Time::now()));
     }
 
@@ -577,7 +571,7 @@ mod test {
         sleep(Duration::from_secs(1));
         assert_eq!(true, Time::now().after(&now));
         //parse from str
-        let parsed = Time::parse(RFC3339Nano, &now.to_string()).unwrap();
+        let parsed = Time::parse(RFC3339_NANO, &now.to_string()).unwrap();
         assert_eq!(now, parsed);
         let formatted = now.utc();
         println!("to utc: {}", formatted);

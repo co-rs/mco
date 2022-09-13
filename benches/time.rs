@@ -5,9 +5,9 @@ mod bench {
     #![feature(test)]
     extern crate test;
 
-    use test::Bencher;
     use mco::std::sync::WaitGroup;
     use mco::std::time::time::Time;
+    use test::Bencher;
 
     //test bench::single_thread_test ... bench:          44 ns/iter (+/- 1)
     #[bench]

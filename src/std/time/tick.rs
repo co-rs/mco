@@ -1,12 +1,11 @@
-use std::ops::Deref;
-use std::sync::{Arc, LockResult};
-use std::sync::mpsc::RecvError;
-use std::time::Duration;
 use crate::coroutine::sleep;
-use crate::std::sync::channel::{Receiver, Sender};
+use crate::std::errors::Result;
+use crate::std::sync::channel::Receiver;
 use crate::std::sync::Mutex;
 use crate::std::time::time::Time;
-use crate::std::errors::Result;
+use std::ops::Deref;
+use std::sync::Arc;
+use std::time::Duration;
 
 /// A Ticker holds a channel that delivers ``ticks'' of a clock
 /// at intervals.
@@ -35,7 +34,6 @@ pub struct Ticker {
 }
 
 impl Ticker {
-
     pub fn new_arc(d: Duration) -> Arc<Self> {
         Arc::new(Self::new(d))
     }
@@ -43,22 +41,19 @@ impl Ticker {
     pub fn new(d: Duration) -> Self {
         let d = Arc::new(Mutex::new(d));
         let (s, r) = chan!();
-        let ticker = Self {
-            d: d,
-            recv: r,
-        };
+        let ticker = Self { d: d, recv: r };
         let d = ticker.d.clone();
-        let tick = move || {
-            loop {
-                match d.lock() {
-                    Ok(d) => {
-                        if d.is_zero() {
-                            break;
-                        }
-                        sleep(d.deref().clone());
-                        s.send(Time::now());
+        let tick = move || loop {
+            match d.lock() {
+                Ok(d) => {
+                    if d.is_zero() {
+                        break;
                     }
-                    Err(_) => { break; }
+                    sleep(d.deref().clone());
+                    let _ = s.send(Time::now());
+                }
+                Err(_) => {
+                    break;
                 }
             }
         };
@@ -75,9 +70,7 @@ impl Ticker {
                 *d = Duration::from_secs(0);
                 Ok(())
             }
-            Err(e) => {
-                Err(err!("lock fail: {}",e))
-            }
+            Err(e) => Err(err!("lock fail: {}", e)),
         }
     }
 
@@ -89,9 +82,7 @@ impl Ticker {
                 *dur = d;
                 Ok(())
             }
-            Err(e) => {
-                Err(err!("lock fail: {}",e))
-            }
+            Err(e) => Err(err!("lock fail: {}", e)),
         }
     }
 }
@@ -101,12 +92,8 @@ impl Iterator for Ticker {
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.recv.recv() {
-            Ok(v) => {
-                Some(v)
-            }
-            Err(_) => {
-                None
-            }
+            Ok(v) => Some(v),
+            Err(_) => None,
         }
     }
 }
@@ -116,31 +103,27 @@ impl Iterator for &Ticker {
 
     fn next(&mut self) -> Option<Self::Item> {
         match self.recv.recv() {
-            Ok(v) => {
-                Some(v)
-            }
-            Err(_) => {
-                None
-            }
+            Ok(v) => Some(v),
+            Err(_) => None,
         }
     }
 }
 
 #[cfg(test)]
 mod test {
-    use std::sync::Arc;
-    use std::time::Duration;
     use crate::sleep::sleep;
     use crate::std::time::tick::Ticker;
+    use std::sync::Arc;
+    use std::time::Duration;
 
     //test --package mco --lib std::time::tick::test::test_tick -- --exact --nocapture
     #[test]
     fn test_tick() {
         let mut t = Arc::new(Ticker::new(Duration::from_secs(1)));
         let tclone = t.clone();
-        co!(move ||{
-             for x in tclone.as_ref() {
-               println!("tick {}", x);
+        co!(move || {
+            for x in tclone.as_ref() {
+                println!("tick {}", x);
             }
         });
         sleep(Duration::from_secs(3));

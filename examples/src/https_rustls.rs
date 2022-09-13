@@ -3,15 +3,15 @@ extern crate httparse;
 #[macro_use]
 extern crate mco;
 
-use std::convert::TryInto;
 use bytes::BufMut;
 use httparse::Status;
 use mco::net::TcpListener;
+use rustls::server::Acceptor;
+use rustls::{Certificate, OwnedTrustAnchor, PrivateKey, RootCertStore};
+use std::convert::TryInto;
 use std::fs::File;
 use std::io::{BufReader, Read, Write};
 use std::sync::Arc;
-use rustls::{Certificate, OwnedTrustAnchor, PrivateKey, RootCertStore};
-use rustls::server::Acceptor;
 
 fn req_done(buf: &[u8], path: &mut String) -> Option<usize> {
     let mut headers = [httparse::EMPTY_HEADER; 16];
@@ -28,16 +28,16 @@ fn main() {
     let f_cert = File::open("examples/rustls/cert.pem").unwrap();
 
     let mut reader = BufReader::new(f_cert);
-    let cert= rustls_pemfile::certs(&mut reader).unwrap();
+    let cert = rustls_pemfile::certs(&mut reader).unwrap();
     let cert = cert[0].clone();
 
     let f_cert = File::open("examples/rustls/key.rsa").unwrap();
     let mut reader = BufReader::new(f_cert);
-    let pris=rustls_pemfile::pkcs8_private_keys(&mut reader).unwrap();
+    let pris = rustls_pemfile::pkcs8_private_keys(&mut reader).unwrap();
     let pri = pris[0].clone();
 
-    let private_key = PrivateKey(pri);//private.pem
-    let cert = Certificate(cert);//cert
+    let private_key = PrivateKey(pri); //private.pem
+    let cert = Certificate(cert); //cert
 
     let config = rustls::ServerConfig::builder()
         .with_safe_default_cipher_suites()
@@ -45,7 +45,8 @@ fn main() {
         .with_safe_default_protocol_versions()
         .unwrap()
         .with_no_client_auth()
-        .with_single_cert(vec![cert], private_key).unwrap();
+        .with_single_cert(vec![cert], private_key)
+        .unwrap();
     let cfg = Arc::new(config);
 
     let listener = TcpListener::bind("0.0.0.0:8080").unwrap();
@@ -53,7 +54,7 @@ fn main() {
     while let Ok((mut stream, _)) = listener.accept() {
         let mut conn = rustls::ServerConnection::new(cfg.clone()).unwrap();
         let mut stream = rustls::StreamOwned::new(conn, stream);
-        co!(2*4096,move || {
+        co!(2 * 4096, move || {
             let mut buf = Vec::new();
             let mut path = String::new();
 
@@ -91,7 +92,7 @@ fn main() {
                         Err(err) => {
                             println!("err = {:?}", err);
                             break;
-                        },
+                        }
                     }
                 }
             }

@@ -6,12 +6,12 @@ use std::sync::{Arc, RwLock};
 use std::thread;
 use std::time::{Duration, Instant};
 
-use crossbeam::atomic::AtomicCell;
-use crate::std::queue::seg_queue::SegQueue as mpsc;
-use once_cell::sync::Lazy;
-use parking_lot::Mutex;
 use crate::std::queue::mpsc_list_v1::Entry;
 use crate::std::queue::mpsc_list_v1::Queue as TimeoutQueue;
+use crate::std::queue::seg_queue::SegQueue as mpsc;
+use crossbeam::atomic::AtomicCell;
+use once_cell::sync::Lazy;
+use parking_lot::Mutex;
 
 const NANOS_PER_MILLI: u64 = 1_000_000;
 const NANOS_PER_SEC: u64 = 1_000_000_000;
@@ -37,7 +37,7 @@ pub fn ns_to_ms(ns: u64) -> u64 {
     (ns + NANOS_PER_MILLI - 1) / NANOS_PER_MILLI
 }
 
-pub static START_TIME: Lazy<Instant> = Lazy::new(|| { Instant::now() });
+pub static START_TIME: Lazy<Instant> = Lazy::new(|| Instant::now());
 
 // get the current wall clock in ns
 #[inline]
@@ -85,8 +85,8 @@ impl<T> IntervalEntry<T> {
     // trigger the timeout event with the supplying function
     // return next expire time
     pub fn pop_timeout<F>(&self, now: u64, f: &F) -> Option<u64>
-        where
-            F: Fn(T),
+    where
+        F: Fn(T),
     {
         let p = |v: &TimeoutData<T>| v.time <= now;
         while let Some(timeout) = self.list.inner.pop_if(&p) {
@@ -144,7 +144,7 @@ impl<T> TimeOutList<T> {
     pub fn add_timer(&self, dur: Duration, data: T) -> (TimeoutHandle<T>, bool) {
         let interval = dur_to_ns(dur);
         let time = now() + interval; // TODO: deal with overflow?
-        //println!("add timer = {:?}", time);
+                                     //println!("add timer = {:?}", time);
 
         let timeout = TimeoutData { time, data };
 

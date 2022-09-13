@@ -4,13 +4,11 @@ use std::sync::Arc;
 use std::time::Duration;
 use std::{io, ptr};
 
+use super::{timeout_handler, EventData, IoData, TimerList};
 use crate::coroutine_impl::run_coroutine;
 use crate::scheduler::get_scheduler;
-use crate::timeout_list::{now, ns_to_dur};
 use crate::std::queue::seg_queue::SegQueue as mpsc;
-use smallvec::SmallVec;
-
-use super::{timeout_handler, EventData, IoData, TimerList};
+use crate::timeout_list::{now, ns_to_dur};
 
 pub type SysEvent = libc::kevent;
 
@@ -113,7 +111,10 @@ impl Selector {
         let single_selector = unsafe { self.vec.get_unchecked(id) };
         // first register thread handle
         let scheduler = get_scheduler();
-        scheduler.workers.parked.fetch_or(mask as u64, Ordering::Relaxed);
+        scheduler
+            .workers
+            .parked
+            .fetch_or(mask as u64, Ordering::Relaxed);
 
         // Wait for epoll events for at most timeout_ms milliseconds
         let kqfd = single_selector.kqfd;
@@ -129,7 +130,10 @@ impl Selector {
         };
 
         // clear the park stat after comeback
-        scheduler.workers.parked.fetch_and((mask - self.vec.len()) as u64, Ordering::Relaxed);
+        scheduler
+            .workers
+            .parked
+            .fetch_and((mask - self.vec.len()) as u64, Ordering::Relaxed);
 
         if n < 0 {
             return Err(io::Error::last_os_error());
@@ -197,7 +201,7 @@ impl Selector {
             udata: ptr::null_mut(),
         };
 
-        let ret = unsafe { libc::kevent(kqfd, &kev, 1, ptr::null_mut(), 0, ptr::null()) };
+        let _ = unsafe { libc::kevent(kqfd, &kev, 1, ptr::null_mut(), 0, ptr::null()) };
 
         //info!("wakeup id={:?}, ret={:?}", id, ret);
     }

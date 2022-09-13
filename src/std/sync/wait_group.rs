@@ -1,9 +1,9 @@
 // Necessary for using `Mutex<usize>` for conditional variables
 #![allow(clippy::mutex_atomic)]
 
+use crate::std::sync::{Condvar, Mutex};
 use std::fmt;
 use std::sync::Arc;
-use crate::std::sync::{Condvar, Mutex};
 
 /// Enables threads to synchronize the beginning or end of some computation.
 ///
@@ -134,7 +134,7 @@ impl Drop for WaitGroup {
         *count -= 1;
 
         if *count == 0 {
-            self.inner.cvar.notify_all();
+            let _ = self.inner.cvar.notify_all();
         }
     }
 }

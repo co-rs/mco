@@ -1,8 +1,8 @@
-use std::time::Duration;
-use mco::coroutine::sleep;
 use mco::co;
+use mco::coroutine::sleep;
 use mco::std::sync::channel::channel;
 use mco::std::sync::WaitGroup;
+use std::time::Duration;
 
 #[test]
 fn channel_recv() {
@@ -12,7 +12,7 @@ fn channel_recv() {
         let r1 = r.clone();
         let s1 = s.clone();
         let w = wait_group.clone();
-        co!(move ||{
+        co!(move || {
             s1.send(1);
             r1.recv().unwrap();
             drop(w);
@@ -22,8 +22,8 @@ fn channel_recv() {
         let w = wait_group.clone();
         let r1 = r.clone();
         let s1 = s.clone();
-        co!(move ||{
-            if idx==499{
+        co!(move || {
+            if idx == 499 {
                 println!("sleep 5s");
                 sleep(Duration::from_secs(5));
             }

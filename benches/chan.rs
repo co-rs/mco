@@ -5,13 +5,13 @@ mod bench {
     #![cfg(nightly)]
     extern crate test;
 
-    use std::sync::Arc;
-    use std::sync::mpsc::channel;
     use self::test::Bencher;
+    use std::sync::mpsc::channel;
+    use std::sync::Arc;
 
-    use std::thread;
     use mco::chan;
     use mco::std::queue::mpmc_bounded::Queue;
+    use std::thread;
 
     #[bench]
     fn bounded_mpmc(b: &mut Bencher) {
@@ -67,7 +67,6 @@ mod bench {
         });
     }
 
-
     // #[bench]
     // the channel bench result show that it's 10 fold slow than our queue
     // not to mention the multi core contention
@@ -89,7 +88,6 @@ mod bench {
             }
         });
     }
-
 
     // improve performance  from 39,294 ns/iter to 12,207 ns/iter (my computer)
     //test bench_channel  ... bench:      12,207 ns/iter (+/- 118)

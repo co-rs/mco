@@ -1,11 +1,8 @@
-use std::cell::RefCell;
-use std::mem::take;
-use std::sync::Arc;
-use std::sync::atomic::{AtomicBool, AtomicI32, Ordering};
-use std::sync::mpsc::{RecvError, SendError};
 use crate::coroutine::spawn;
 use crate::std::errors::Error;
 use crate::std::sync::{Receiver, Sender};
+use std::sync::atomic::{AtomicBool, Ordering};
+use std::sync::Arc;
 
 pub struct Task {
     pub f: Box<dyn Fn() -> Result<(), Error>>,
@@ -16,10 +13,11 @@ unsafe impl Send for Task {}
 unsafe impl Sync for Task {}
 
 impl Task {
-    pub fn new<F>(f: F) -> Task where F: Fn() -> Result<(), Error> + Send + 'static {
-        return Task {
-            f: Box::new(f),
-        };
+    pub fn new<F>(f: F) -> Task
+    where
+        F: Fn() -> Result<(), Error> + Send + 'static,
+    {
+        return Task { f: Box::new(f) };
     }
     pub fn execute(&self) -> Result<(), Error> {
         (self.f)()
@@ -51,20 +49,20 @@ impl Pool {
     }
 
     pub fn put(&self, task: Task) {
-        self.idle.0.send(Some(task));
+        let _ = self.idle.0.send(Some(task));
     }
 
     /// close just now
     pub fn close(&self) {
         while self.idle.1.remain() > 0 {
-            self.idle.1.try_recv();
+            let _ = self.idle.1.try_recv();
         }
-        self.idle.0.send(None);
+        let _ = self.idle.0.send(None);
     }
 
     /// close when all task finish
     pub fn close_finish(&self) {
-        self.idle.0.send(None);
+        let _ = self.idle.0.send(None);
     }
 
     pub fn is_close(&self) -> bool {
@@ -72,29 +70,29 @@ impl Pool {
     }
 
     pub fn run(&self) {
-        let mut current = Arc::new(chan!(self.worker_num as usize));
+        let current = Arc::new(chan!(self.worker_num as usize));
         loop {
             match self.idle.1.recv() {
-                Ok(mut task) => {
-                    match task {
-                        None => {
-                            log::info!("pool exited");
-                            break;
-                        }
-                        Some(task) => {
-                            if let Ok(_) = current.0.send(()) {
-                                let rv = current.1.clone();
-                                spawn(move || {
-                                    defer!(move ||{  rv.try_recv(); });
-                                    let r = task.execute();
-                                    if r.is_err() {
-                                        log::error!("task run fail:{}",r.err().unwrap());
-                                    }
+                Ok(task) => match task {
+                    None => {
+                        log::info!("pool exited");
+                        break;
+                    }
+                    Some(task) => {
+                        if let Ok(_) = current.0.send(()) {
+                            let rv = current.1.clone();
+                            spawn(move || {
+                                defer!(move || {
+                                    let _ = rv.try_recv();
                                 });
-                            }
+                                let r = task.execute();
+                                if r.is_err() {
+                                    log::error!("task run fail:{}", r.err().unwrap());
+                                }
+                            });
                         }
                     }
-                }
+                },
                 Err(_) => {
                     log::info!("pool exited");
                     break;

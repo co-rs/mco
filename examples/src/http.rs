@@ -3,10 +3,10 @@ extern crate httparse;
 #[macro_use]
 extern crate mco;
 
-use std::io::{Read, Write};
 use bytes::BufMut;
 use httparse::Status;
 use mco::net::TcpListener;
+use std::io::{Read, Write};
 
 // This example is for demonstration only and is suitable for production environment please move on
 // example see https://github.com/co-rs/mco-http/tree/main/examples
@@ -52,7 +52,7 @@ fn main() {
                         Err(err) => {
                             println!("err = {:?}", err);
                             break;
-                        },
+                        }
                     }
                 }
             }

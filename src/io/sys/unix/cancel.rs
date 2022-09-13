@@ -1,4 +1,3 @@
-use std::sync::atomic::Ordering;
 use std::sync::Arc;
 
 use super::EventData;
@@ -23,7 +22,7 @@ impl CancelIo for CancelIoImpl {
         self.0.take();
     }
 
-    fn cancel(&self) -> Result<(),std::io::Error> {
+    fn cancel(&self) -> Result<(), std::io::Error> {
         if let Some(e) = self.0.take() {
             if let Some(co) = e.co.take() {
                 get_scheduler().schedule(co);

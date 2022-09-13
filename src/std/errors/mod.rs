@@ -1,7 +1,7 @@
+use crate::std::io::{EOF, ERR_UNEXPECTED_EOF};
 use std::fmt::{self, Debug, Display, Formatter};
 use std::io::ErrorKind::UnexpectedEof;
 use std::sync::mpsc::RecvError;
-use crate::std::io::io;
 
 pub type Result<T> = std::result::Result<T, Error>;
 
@@ -15,9 +15,12 @@ impl Error {
         self.inner.clone()
     }
 
-    pub fn warp<E>(e: E, info: &str) -> Self where E: std::fmt::Display {
+    pub fn warp<E>(e: E, info: &str) -> Self
+    where
+        E: std::fmt::Display,
+    {
         Self {
-            inner: format!("{}{}", info, e)
+            inner: format!("{}{}", info, e),
         }
     }
 
@@ -25,7 +28,6 @@ impl Error {
         self.inner.clone()
     }
 }
-
 
 /// mco::std::errors::Error
 #[macro_export]
@@ -40,9 +42,7 @@ macro_rules! err {
 ///new error
 #[inline]
 pub fn new(text: String) -> Error {
-    Error {
-        inner: text
-    }
+    Error { inner: text }
 }
 
 pub trait FromError<T>: Sized {
@@ -61,15 +61,14 @@ impl Debug for Error {
     }
 }
 
-
 impl From<std::io::Error> for Error {
     #[inline]
     fn from(err: std::io::Error) -> Self {
         if err.kind().eq(&UnexpectedEof) {
-            return io::EOF.clone();
+            return EOF.clone();
         }
         if err.kind().eq(&std::io::ErrorKind::UnexpectedEof) {
-            return io::ErrUnexpectedEOF.clone();
+            return ERR_UNEXPECTED_EOF.clone();
         }
         new(err.to_string())
     }
@@ -119,13 +118,13 @@ impl From<time::error::Parse> for Error {
     }
 }
 
-impl From<std::sync::mpsc::RecvError> for Error{
+impl From<std::sync::mpsc::RecvError> for Error {
     fn from(e: RecvError) -> Self {
-       return new(e.to_string());
+        return new(e.to_string());
     }
 }
 
-impl <T>From<std::sync::mpsc::SendError<T>> for Error{
+impl<T> From<std::sync::mpsc::SendError<T>> for Error {
     fn from(e: std::sync::mpsc::SendError<T>) -> Self {
         return new(e.to_string());
     }

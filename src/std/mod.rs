@@ -9,10 +9,9 @@ pub mod defer;
 pub mod time;
 #[macro_use]
 pub mod map;
-pub mod strings;
-pub mod lazy;
-pub mod context;
-pub mod wrapper;
 pub mod blocking;
-pub mod vec;
+pub mod lazy;
 pub mod pool;
+pub mod strings;
+pub mod vec;
+pub mod wrapper;

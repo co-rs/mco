@@ -49,8 +49,8 @@ fn cqueue_in_coroutine() {
             }
         });
     })
-        .join()
-        .unwrap();
+    .join()
+    .unwrap();
     println!("cqueue finished");
 }
 
@@ -156,7 +156,7 @@ fn cqueue_select() {
         tx1.send(42).unwrap();
     });
 
-    let id= select!(
+    let id = select!(
         _ = coroutine::sleep(Duration::from_millis(1000)) => {},
         _ = rx1.recv() => println!("rx1 received"),
         a = rx2.recv() => println!("rx2 received, a={:?}", a)

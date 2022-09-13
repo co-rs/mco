@@ -1,9 +1,6 @@
-use std::cell::RefCell;
-use std::panic::set_hook;
-use crate::std::errors::Error;
-use crate::std::sync::channel;
 use crate::std::errors::Result;
-
+use crate::std::sync::channel;
+use std::panic::set_hook;
 
 /// will spawn a thread to doing and return value by channel
 /// for example:
@@ -17,14 +14,13 @@ use crate::std::errors::Result;
 #[macro_export]
 macro_rules! spawn_blocking {
     ($task:expr) => {
-        if true{
+        if true {
             $crate::std::blocking::spawn_blocking($task)
-        }else{
+        } else {
             Ok($task())
         }
     };
 }
-
 
 /// will spawn a thread to doing and return value by channel
 /// for example:
@@ -36,23 +32,28 @@ macro_rules! spawn_blocking {
 ///     assert_eq!(v.unwrap(), 1);
 /// ```
 pub fn spawn_blocking<F, T>(f: F) -> Result<T>
-    where
-        F: FnOnce() -> T,
-        F: Send + 'static,
-        T: Send + 'static,
+where
+    F: FnOnce() -> T,
+    F: Send + 'static,
+    T: Send + 'static,
 {
     let (s, r) = channel::<Result<T>>();
     std::thread::Builder::new().spawn(move || {
         let send_e = s.clone();
-        set_hook(Box::new(move |panic_info|{
-            let e= err!("{}",panic_info.payload().downcast_ref::<&str>().unwrap_or(&"spawn_blocking panic!"));
-            send_e.send(Err(e));
+        set_hook(Box::new(move |panic_info| {
+            let e = err!(
+                "{}",
+                panic_info
+                    .payload()
+                    .downcast_ref::<&str>()
+                    .unwrap_or(&"spawn_blocking panic!")
+            );
+            let _ = send_e.send(Err(e));
         }));
-        s.send(Ok(f()));
+        let _ = s.send(Ok(f()));
     })?;
     return r.recv()?;
 }
-
 
 #[cfg(test)]
 mod test {

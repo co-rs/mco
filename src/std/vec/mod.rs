@@ -1,17 +1,14 @@
+use crate::std::sync::{Mutex, MutexGuard};
 use std::cell::UnsafeCell;
 use std::fmt::{Debug, Formatter};
-use std::ops::{Deref, DerefMut, Index, IndexMut};
-use std::slice::SliceIndex;
+use std::ops::{Deref, DerefMut, Index};
 use std::sync::Arc;
-use crate::std::sync::{Mutex, MutexGuard};
 
-use std::slice::{Iter as SliceIter, IterMut as SliceIterMut};
-use serde::{Deserializer, Serialize, Serializer};
 use serde::ser::SerializeSeq;
-
+use serde::{Deserializer, Serialize, Serializer};
+use std::slice::{Iter as SliceIter, IterMut as SliceIterMut};
 
 pub type SyncVec<V> = SyncVecImpl<V>;
-
 
 pub struct SyncVecImpl<V> {
     read: UnsafeCell<Vec<V>>,
@@ -26,9 +23,7 @@ impl<V> Drop for SyncVecImpl<V> {
                     None => {
                         break;
                     }
-                    Some(v) => {
-                        std::mem::forget(v)
-                    }
+                    Some(v) => std::mem::forget(v),
                 }
             }
         }
@@ -71,9 +66,7 @@ impl<V> SyncVecImpl<V> {
                 }
                 None
             }
-            Err(_) => {
-                Some(v)
-            }
+            Err(_) => Some(v),
         }
     }
 
@@ -88,73 +81,56 @@ impl<V> SyncVecImpl<V> {
                 }
                 None
             }
-            Err(_) => {
-                Some(v)
-            }
+            Err(_) => Some(v),
         }
     }
 
     pub fn pop(&self) -> Option<V> {
         match self.dirty.lock() {
-            Ok(mut m) => {
-                match m.pop() {
-                    None => {
-                        return None;
-                    }
-                    Some(s) => {
-                        unsafe {
-                            let r = (&mut *self.read.get()).pop();
-                            match r {
-                                None => {}
-                                Some(r) => {
-                                    std::mem::forget(r);
-                                }
+            Ok(mut m) => match m.pop() {
+                None => {
+                    return None;
+                }
+                Some(s) => {
+                    unsafe {
+                        let r = (&mut *self.read.get()).pop();
+                        match r {
+                            None => {}
+                            Some(r) => {
+                                std::mem::forget(r);
                             }
                         }
-                        return Some(s);
                     }
+                    return Some(s);
                 }
-            }
-            Err(_) => {
-                None
-            }
+            },
+            Err(_) => None,
         }
     }
 
     pub fn remove(&self, index: usize) -> Option<V> {
         match self.get(index) {
-            None => {
-                None
-            }
-            Some(_) => {
-                match self.dirty.lock() {
-                    Ok(mut m) => {
-                        let v = m.remove(index);
-                        unsafe {
-                            let r = (&mut *self.read.get()).remove(index);
-                            std::mem::forget(r);
-                        }
-                        Some(v)
+            None => None,
+            Some(_) => match self.dirty.lock() {
+                Ok(mut m) => {
+                    let v = m.remove(index);
+                    unsafe {
+                        let r = (&mut *self.read.get()).remove(index);
+                        std::mem::forget(r);
                     }
-                    Err(_) => {
-                        None
-                    }
+                    Some(v)
                 }
-            }
+                Err(_) => None,
+            },
         }
     }
 
-
     pub fn len(&self) -> usize {
-        unsafe {
-            (&*self.read.get()).len()
-        }
+        unsafe { (&*self.read.get()).len() }
     }
 
     pub fn is_empty(&self) -> bool {
-        unsafe {
-            (&*self.read.get()).is_empty()
-        }
+        unsafe { (&*self.read.get()).is_empty() }
     }
 
     pub fn clear(&self) {
@@ -167,9 +143,7 @@ impl<V> SyncVecImpl<V> {
                             None => {
                                 break;
                             }
-                            Some(v) => {
-                                std::mem::forget(v)
-                            }
+                            Some(v) => std::mem::forget(v),
                         }
                     }
                 }
@@ -181,9 +155,7 @@ impl<V> SyncVecImpl<V> {
     pub fn shrink_to_fit(&self) {
         match self.dirty.lock() {
             Ok(mut m) => {
-                unsafe {
-                    (&mut *self.read.get()).shrink_to_fit()
-                }
+                unsafe { (&mut *self.read.get()).shrink_to_fit() }
                 m.shrink_to_fit()
             }
             Err(_) => {}
@@ -206,61 +178,46 @@ impl<V> SyncVecImpl<V> {
         s
     }
 
-    pub fn get(&self, index: usize) -> Option<&V>
-    {
+    pub fn get(&self, index: usize) -> Option<&V> {
         unsafe {
             let k = (&*self.read.get()).get(index);
             match k {
-                None => { None }
-                Some(s) => {
-                    Some(s)
-                }
+                None => None,
+                Some(s) => Some(s),
             }
         }
     }
 
-    pub unsafe fn get_uncheck(&self, index: usize) -> Option<&V>
-    {
+    pub unsafe fn get_uncheck(&self, index: usize) -> Option<&V> {
         unsafe {
             let k = (&*self.read.get()).get_unchecked(index);
             Some(k)
         }
     }
 
-    pub fn get_mut(&self, index: usize) -> Option<VecRefMut<'_, V>>
-    {
+    pub fn get_mut(&self, index: usize) -> Option<VecRefMut<'_, V>> {
         let g = self.dirty.lock();
         match g {
             Ok(m) => {
-                let mut r = VecRefMut {
-                    g: m,
-                    value: None,
-                };
+                let mut r = VecRefMut { g: m, value: None };
                 unsafe {
                     r.value = Some(change_lifetime_mut(r.g.get_mut(index)?));
                 }
                 Some(r)
             }
-            Err(_) => {
-                None
-            }
+            Err(_) => None,
         }
     }
 
     pub fn iter(&self) -> SliceIter<'_, V> {
-        unsafe {
-            (&*self.read.get()).iter()
-        }
+        unsafe { (&*self.read.get()).iter() }
     }
 
     pub fn iter_mut(&self) -> IterMut<'_, V> {
         loop {
             match self.dirty.lock() {
                 Ok(m) => {
-                    let mut iter = IterMut {
-                        g: m,
-                        inner: None,
-                    };
+                    let mut iter = IterMut { g: m, inner: None };
                     unsafe {
                         iter.inner = Some(change_lifetime_mut(&mut iter.g).iter_mut());
                     }
@@ -274,12 +231,9 @@ impl<V> SyncVecImpl<V> {
     }
 
     pub fn into_iter(self) -> SliceIter<'static, V> {
-        unsafe {
-            (&*self.read.get()).iter()
-        }
+        unsafe { (&*self.read.get()).iter() }
     }
 }
-
 
 pub unsafe fn change_lifetime_const<'a, 'b, T>(x: &'a T) -> &'b T {
     &*(x as *const T)
@@ -308,12 +262,14 @@ impl<'a, V> DerefMut for VecRefMut<'_, V> {
     }
 }
 
-impl<'a, V> Debug for VecRefMut<'_, V> where V: Debug {
+impl<'a, V> Debug for VecRefMut<'_, V>
+where
+    V: Debug,
+{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         self.value.fmt(f)
     }
 }
-
 
 pub struct Iter<'a, V> {
     inner: Option<SliceIter<'a, *const V>>,
@@ -325,20 +281,17 @@ impl<'a, V> Iterator for Iter<'a, V> {
     fn next(&mut self) -> Option<Self::Item> {
         let next = self.inner.as_mut().unwrap().next();
         match next {
-            None => { None }
+            None => None,
             Some(v) => {
                 if v.is_null() {
                     None
                 } else {
-                    unsafe {
-                        Some(&**v)
-                    }
+                    unsafe { Some(&**v) }
                 }
             }
         }
     }
 }
-
 
 pub struct IterMut<'a, V> {
     g: MutexGuard<'a, Vec<V>>,
@@ -367,7 +320,6 @@ impl<'a, V> Iterator for IterMut<'a, V> {
     }
 }
 
-
 impl<'a, V> IntoIterator for &'a SyncVecImpl<V> {
     type Item = &'a V;
     type IntoIter = SliceIter<'a, V>;
@@ -376,7 +328,6 @@ impl<'a, V> IntoIterator for &'a SyncVecImpl<V> {
         self.iter()
     }
 }
-
 
 impl<'a, V> IntoIterator for &'a mut SyncVecImpl<V> {
     type Item = &'a mut V;
@@ -387,33 +338,51 @@ impl<'a, V> IntoIterator for &'a mut SyncVecImpl<V> {
     }
 }
 
-impl<V> IntoIterator for SyncVecImpl<V> where V: 'static {
+impl<V> IntoIterator for SyncVecImpl<V>
+where
+    V: 'static,
+{
     type Item = &'static V;
     type IntoIter = SliceIter<'static, V>;
 
-    fn into_iter(mut self) -> Self::IntoIter {
+    fn into_iter(self) -> Self::IntoIter {
         self.into_iter()
     }
 }
 
-impl<V> serde::Serialize for SyncVecImpl<V> where V: Serialize {
-    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error> where S: Serializer {
+impl<V> serde::Serialize for SyncVecImpl<V>
+where
+    V: Serialize,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
         let mut m = serializer.serialize_seq(Some(self.len()))?;
         for v in self.iter() {
-            m.serialize_element(v);
+            m.serialize_element(v)?;
         }
         m.end()
     }
 }
 
-impl<'de, V> serde::Deserialize<'de> for SyncVecImpl<V> where V: serde::Deserialize<'de> {
-    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error> where D: Deserializer<'de> {
+impl<'de, V> serde::Deserialize<'de> for SyncVecImpl<V>
+where
+    V: serde::Deserialize<'de>,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
         let m = Vec::deserialize(deserializer)?;
         Ok(Self::from(m))
     }
 }
 
-impl<V> Debug for SyncVecImpl<V> where V: Debug {
+impl<V> Debug for SyncVecImpl<V>
+where
+    V: Debug,
+{
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut m = f.debug_list();
         for v in self.iter() {
@@ -433,14 +402,14 @@ impl<V> Index<usize> for SyncVecImpl<V> {
 
 #[cfg(test)]
 mod test {
-    use std::ops::Deref;
-    use std::sync::Arc;
-    use std::sync::atomic::{Ordering};
-    use std::time::Duration;
     use crate::coroutine::sleep;
     use crate::sleep;
+    use crate::std::sync::WaitGroup;
     use crate::std::vec::SyncVec;
-    use crate::std::sync::{WaitGroup};
+    use std::ops::Deref;
+    use std::sync::atomic::Ordering;
+    use std::sync::Arc;
+    use std::time::Duration;
 
     #[test]
     pub fn test_debug() {
@@ -484,15 +453,15 @@ mod test {
             let wg2 = wg.clone();
             let m1 = m.clone();
             let m2 = m.clone();
-            co!(move ||{
-                 m1.pop();
-                 let insert = m1.push( 2);
-                 drop(wg1);
+            co!(move || {
+                m1.pop();
+                let insert = m1.push(2);
+                drop(wg1);
             });
-            co!(move ||{
-                 m2.pop();
-                 let insert = m2.push( 2);
-                 drop(wg2);
+            co!(move || {
+                m2.pop();
+                let insert = m2.push(2);
+                drop(wg2);
             });
         }
         wg.wait();
@@ -507,19 +476,19 @@ mod test {
             let wg2 = wg.clone();
             let m1 = m.clone();
             let m2 = m.clone();
-            co!(move ||{
-                 for i in 0..10000{
-                     m1.pop();
-                     let insert = m1.push( i);
-                 }
-                 drop(wg1);
+            co!(move || {
+                for i in 0..10000 {
+                    m1.pop();
+                    let insert = m1.push(i);
+                }
+                drop(wg1);
             });
-            co!(move ||{
-                 for i in 0..10000{
-                     m2.pop();
-                     let insert = m2.push( i);
-                 }
-                 drop(wg2);
+            co!(move || {
+                for i in 0..10000 {
+                    m2.pop();
+                    let insert = m2.push(i);
+                }
+                drop(wg2);
             });
         }
         wg.wait();

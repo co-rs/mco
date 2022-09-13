@@ -41,7 +41,7 @@ impl Join {
     pub fn trigger(&self) {
         self.state.store(false, Ordering::Release);
         if let Some(w) = self.to_wake.take() {
-            w.unpark();
+            let _ = w.unpark();
         }
     }
 
@@ -55,7 +55,7 @@ impl Join {
                 // successfully register the blocker
             } else if let Some(w) = self.to_wake.take() {
                 // it's already triggered
-                w.unpark();
+                let _ = w.unpark();
             }
 
             cur.park(None).ok();

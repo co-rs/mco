@@ -104,7 +104,7 @@ impl EventSource for UnixStreamConnect {
         cancel.set_io(io_data);
         // re-check the cancel status
         if cancel.is_canceled() {
-            unsafe { cancel.cancel() };
+            let _ = cancel.cancel();
         }
     }
 }

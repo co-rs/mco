@@ -1,35 +1,35 @@
-use std::io::{Read, Write};
 use crate::std::errors::{Error, Result};
 use crate::std::lazy::sync::Lazy;
+use std::io::{Read, Write};
 
-
-// ErrShortWrite means that a write accepted fewer bytes than requested
+// ERR_SHORT_WRITE means that a write accepted fewer bytes than requested
 // but failed to return an explicit error.
-pub static ErrShortWrite: Lazy<Error> = Lazy::new(|| err!("short write"));
+pub static ERR_SHORT_WRITE: Lazy<Error> = Lazy::new(|| err!("short write"));
 
-// errInvalidWrite means that a write returned an impossible count.
-pub static errInvalidWrite: Lazy<Error> = Lazy::new(|| err!("invalid write result"));
+// ERR_INVALID_WRITE means that a write returned an impossible count.
+pub static ERR_INVALID_WRITE: Lazy<Error> = Lazy::new(|| err!("invalid write result"));
 
-// ErrShortBuffer means that a read required a longer buffer than was provided.
-pub static ErrShortBuffer: Lazy<Error> = Lazy::new(|| err!("short buffer"));
+// ERR_SHORT_BUFFER means that a read required a longer buffer than was provided.
+pub static ERR_SHORT_BUFFER: Lazy<Error> = Lazy::new(|| err!("short buffer"));
 
 // EOF is the error returned by Read when no more input is available.
 // (Read must return EOF itself, not an error wrapping EOF,
 // because callers will test for EOF using ==.)
 // Functions should return EOF only to signal a graceful end of input.
 // If the EOF occurs unexpectedly in a structured data stream,
-// the appropriate error is either ErrUnexpectedEOF or some other error
+// the appropriate error is either ERR_UNEXPECTED_EOF or some other error
 // giving more detail.
 pub static EOF: Lazy<Error> = Lazy::new(|| err!("EOF"));
 
-// ErrUnexpectedEOF means that EOF was encountered in the
+// ERR_UNEXPECTED_EOF means that EOF was encountered in the
 // middle of reading a fixed-size block or data structure.
-pub static ErrUnexpectedEOF: Lazy<Error> = Lazy::new(|| err!("unexpected EOF"));
+pub static ERR_UNEXPECTED_EOF: Lazy<Error> = Lazy::new(|| err!("unexpected EOF"));
 
-// ErrNoProgress is returned by some clients of an Reader when
+// ERR_NO_PROGRESS is returned by some clients of an Reader when
 // many calls to Read have failed to return any data or error,
 // usually the sign of a broken Reader implementation.
-pub static ErrNoProgress: Lazy<Error> = Lazy::new(|| err!("multiple Read calls return no data or error"));
+pub static ERR_NO_PROGRESS: Lazy<Error> =
+    Lazy::new(|| err!("multiple Read calls return no data or error"));
 
 // Closer is the interface that wraps the basic Close method.
 //
@@ -42,16 +42,6 @@ pub trait Closer {
 pub trait ReadCloser: Read + Closer {}
 
 pub trait WriteCloser: Write + Closer {}
-
-struct NopCloser<R> where R: Read {
-    pub reader: R,
-}
-
-impl<R: std::io::Read> Closer for NopCloser<R> {
-    fn close(&mut self) -> crate::std::errors::Result<()> {
-        Ok(())
-    }
-}
 
 /// ReadAll reads from r until an error or EOF and returns the data it read.
 /// A successful call returns err == nil, not err == EOF. Because ReadAll is

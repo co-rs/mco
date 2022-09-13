@@ -1,7 +1,7 @@
+use parking_lot::{Condvar, Mutex};
 use std::sync::atomic::{AtomicBool, Ordering};
 use std::sync::Arc;
 use std::time::Duration;
-use parking_lot::{Condvar, Mutex};
 
 use crate::coroutine_impl::is_coroutine;
 use crate::park::{Park, ParkError};

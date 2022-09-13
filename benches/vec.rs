@@ -4,8 +4,8 @@
 extern crate mco;
 extern crate test;
 
-use test::Bencher;
 use mco::std::sync::{Mutex, SyncVec};
+use test::Bencher;
 
 #[bench]
 fn bench_sync_vec_push(b: &mut Bencher) {
@@ -55,9 +55,5 @@ fn bench_sync_vec_iter(b: &mut Bencher) {
     for i in 0..1000000 {
         m.push(i);
     }
-    b.iter(|| {
-        for x in &m {
-
-        }
-    });
+    b.iter(|| for x in &m {});
 }

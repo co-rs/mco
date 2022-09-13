@@ -25,9 +25,13 @@ pub struct Timespec {
 impl Timespec {
     /// Constructs a timespec representing the current time in UTC.
     pub fn now() -> Timespec {
-        let st =
-            SystemTime::now().duration_since(UNIX_EPOCH).expect("system time before Unix epoch");
-        Timespec { sec: st.as_secs() as i64, nsec: st.subsec_nanos() as i32 }
+        let st = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .expect("system time before Unix epoch");
+        Timespec {
+            sec: st.as_secs() as i64,
+            nsec: st.subsec_nanos() as i32,
+        }
     }
 
     /// Converts this timespec into the system's local time.
@@ -104,6 +108,9 @@ impl Tm {
             0 => inner::utc_tm_to_time(self),
             _ => inner::local_tm_to_time(self),
         };
-        Timespec { sec: sec, nsec: self.tm_nsec }
+        Timespec {
+            sec: sec,
+            nsec: self.tm_nsec,
+        }
     }
 }

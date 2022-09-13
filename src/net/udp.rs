@@ -84,22 +84,22 @@ impl UdpSocket {
         }
 
         #[cfg(unix)]
-            {
-                self.io.reset();
-                // this is an earlier return try for nonblocking read
-                match self.sys.send_to(buf, &addr) {
-                    Ok(n) => return Ok(n),
-                    Err(e) => {
-                        // raw_os_error is faster than kind
-                        let raw_err = e.raw_os_error();
-                        if raw_err == Some(libc::EAGAIN) || raw_err == Some(libc::EWOULDBLOCK) {
-                            // do nothing here
-                        } else {
-                            return Err(e);
-                        }
+        {
+            self.io.reset();
+            // this is an earlier return try for nonblocking read
+            match self.sys.send_to(buf, &addr) {
+                Ok(n) => return Ok(n),
+                Err(e) => {
+                    // raw_os_error is faster than kind
+                    let raw_err = e.raw_os_error();
+                    if raw_err == Some(libc::EAGAIN) || raw_err == Some(libc::EWOULDBLOCK) {
+                        // do nothing here
+                    } else {
+                        return Err(e);
                     }
                 }
             }
+        }
 
         let mut writer = net_impl::UdpSendTo::new(self, buf, addr)?;
         yield_with(&writer);
@@ -117,22 +117,22 @@ impl UdpSocket {
         }
 
         #[cfg(unix)]
-            {
-                self.io.reset();
-                // this is an earlier return try for nonblocking read
-                match self.sys.recv_from(buf) {
-                    Ok(n) => return Ok(n),
-                    Err(e) => {
-                        // raw_os_error is faster than kind
-                        let raw_err = e.raw_os_error();
-                        if raw_err == Some(libc::EAGAIN) || raw_err == Some(libc::EWOULDBLOCK) {
-                            // do nothing here
-                        } else {
-                            return Err(e);
-                        }
+        {
+            self.io.reset();
+            // this is an earlier return try for nonblocking read
+            match self.sys.recv_from(buf) {
+                Ok(n) => return Ok(n),
+                Err(e) => {
+                    // raw_os_error is faster than kind
+                    let raw_err = e.raw_os_error();
+                    if raw_err == Some(libc::EAGAIN) || raw_err == Some(libc::EWOULDBLOCK) {
+                        // do nothing here
+                    } else {
+                        return Err(e);
                     }
                 }
             }
+        }
 
         let mut reader = net_impl::UdpRecvFrom::new(self, buf);
         yield_with(&reader);
@@ -150,22 +150,22 @@ impl UdpSocket {
         }
 
         #[cfg(unix)]
-            {
-                self.io.reset();
-                // this is an earlier return try for nonblocking write
-                match self.sys.send(buf) {
-                    Ok(n) => return Ok(n),
-                    Err(e) => {
-                        // raw_os_error is faster than kind
-                        let raw_err = e.raw_os_error();
-                        if raw_err == Some(libc::EAGAIN) || raw_err == Some(libc::EWOULDBLOCK) {
-                            // do nothing here
-                        } else {
-                            return Err(e);
-                        }
+        {
+            self.io.reset();
+            // this is an earlier return try for nonblocking write
+            match self.sys.send(buf) {
+                Ok(n) => return Ok(n),
+                Err(e) => {
+                    // raw_os_error is faster than kind
+                    let raw_err = e.raw_os_error();
+                    if raw_err == Some(libc::EAGAIN) || raw_err == Some(libc::EWOULDBLOCK) {
+                        // do nothing here
+                    } else {
+                        return Err(e);
                     }
                 }
             }
+        }
 
         let mut writer = net_impl::SocketWrite::new(self, buf, self.write_timeout.get());
         yield_with(&writer);
@@ -183,22 +183,22 @@ impl UdpSocket {
         }
 
         #[cfg(unix)]
-            {
-                self.io.reset();
-                // this is an earlier return try for nonblocking read
-                match self.sys.recv(buf) {
-                    Ok(n) => return Ok(n),
-                    Err(e) => {
-                        // raw_os_error is faster than kind
-                        let raw_err = e.raw_os_error();
-                        if raw_err == Some(libc::EAGAIN) || raw_err == Some(libc::EWOULDBLOCK) {
-                            // do nothing here
-                        } else {
-                            return Err(e);
-                        }
+        {
+            self.io.reset();
+            // this is an earlier return try for nonblocking read
+            match self.sys.recv(buf) {
+                Ok(n) => return Ok(n),
+                Err(e) => {
+                    // raw_os_error is faster than kind
+                    let raw_err = e.raw_os_error();
+                    if raw_err == Some(libc::EAGAIN) || raw_err == Some(libc::EWOULDBLOCK) {
+                        // do nothing here
+                    } else {
+                        return Err(e);
                     }
                 }
             }
+        }
 
         let mut reader = net_impl::SocketRead::new(self, buf, self.read_timeout.get());
         yield_with(&reader);

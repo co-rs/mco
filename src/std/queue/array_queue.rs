@@ -5,7 +5,7 @@
 use core::cell::UnsafeCell;
 use core::fmt;
 use core::marker::PhantomData;
-use core::mem::{self, MaybeUninit};
+use core::mem::MaybeUninit;
 use core::sync::atomic::{self, AtomicUsize, Ordering};
 
 use crossbeam_utils::{Backoff, CachePadded};
@@ -116,12 +116,10 @@ impl<T> ArrayQueue<T> {
                 v.set_len(cap);
             }
             for i in 0..cap {
-                unsafe {
-                    v[i] = Slot {
-                        stamp: AtomicUsize::new(i),
-                        value: UnsafeCell::new(MaybeUninit::uninit()),
-                    };
-                }
+                v[i] = Slot {
+                    stamp: AtomicUsize::new(i),
+                    value: UnsafeCell::new(MaybeUninit::uninit()),
+                };
             }
             v
         };
@@ -472,7 +470,6 @@ impl<T> Iterator for IntoIter<T> {
         }
     }
 }
-
 
 #[cfg(test)]
 mod test {

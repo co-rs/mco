@@ -25,7 +25,6 @@ impl<T> From<PoisonError<T>> for ParkError {
     }
 }
 
-
 pub struct DropGuard<'a>(&'a Park);
 
 pub struct Park {
@@ -268,7 +267,7 @@ impl EventSource for Park {
         cancel.set_co(self.wait_co.clone());
         // re-check the cancel status
         if cancel.is_canceled() {
-            unsafe { cancel.cancel() };
+            let _ = cancel.cancel();
         }
     }
 
