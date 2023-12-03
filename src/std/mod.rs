@@ -7,8 +7,6 @@ pub mod io;
 #[macro_use]
 pub mod defer;
 pub mod time;
-#[macro_use]
-pub mod map;
 pub mod blocking;
 pub mod lazy;
 pub mod pool;

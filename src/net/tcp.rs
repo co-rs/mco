@@ -14,7 +14,9 @@ use crate::yield_now::yield_with;
 
 #[derive(Debug)]
 pub struct TcpStream {
+    #[cfg(unix)]
     io: io_impl::IoData,
+
     sys: net::TcpStream,
     ctx: io_impl::IoContext,
     read_timeout: AtomicDuration,
@@ -28,8 +30,9 @@ impl TcpStream {
         // to avoid unnecessary context switch
         s.set_nonblocking(true)?;
 
-        io_impl::add_socket(&s).map(|io| TcpStream {
-            io,
+        io_impl::add_socket(&s).map(|_io| TcpStream {
+            #[cfg(unix)]
+            _io,
             sys: s,
             ctx: io_impl::IoContext::new(),
             read_timeout: AtomicDuration::new(None),
@@ -108,6 +111,7 @@ impl TcpStream {
         // it always failed with "The parameter is incorrect"
         io_impl::add_socket(&s).ok();
         Ok(TcpStream {
+            #[cfg(unix)]
             io: io_impl::IoData::new(0),
             sys: s,
             ctx: io_impl::IoContext::new(),
@@ -162,9 +166,10 @@ impl TcpStream {
     }
 
     // convert std::net::TcpStream to Self without add_socket
-    pub(crate) fn from_stream(s: net::TcpStream, io: io_impl::IoData) -> Self {
+    pub(crate) fn from_stream(s: net::TcpStream, _io: io_impl::IoData) -> Self {
         TcpStream {
-            io,
+            #[cfg(unix)]
+            _io,
             sys: s,
             ctx: io_impl::IoContext::new(),
             read_timeout: AtomicDuration::new(None),
@@ -313,6 +318,7 @@ impl io_impl::AsIoData for TcpStream {
 
 #[derive(Debug)]
 pub struct TcpListener {
+    #[cfg(unix)]
     io: io_impl::IoData,
     ctx: io_impl::IoContext,
     sys: net::TcpListener,
@@ -325,8 +331,9 @@ impl TcpListener {
         // to avoid unnecessary context switch
         s.set_nonblocking(true)?;
 
-        io_impl::add_socket(&s).map(|io| TcpListener {
-            io,
+        io_impl::add_socket(&s).map(|_io| TcpListener {
+            #[cfg(unix)]
+            _io,
             ctx: io_impl::IoContext::new(),
             sys: s,
         })
@@ -419,6 +426,7 @@ impl TcpListener {
         s.set_nonblocking(true)?;
         io_impl::add_socket(&s).ok();
         Ok(TcpListener {
+            #[cfg(unix)]
             io: io_impl::IoData::new(0),
             sys: s,
             ctx: io_impl::IoContext::new(),

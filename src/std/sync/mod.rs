@@ -9,10 +9,11 @@ mod rwlock;
 mod semphore;
 mod sync_array_queue;
 mod sync_flag;
-mod sync_map;
 mod sync_queue;
 mod sync_vec;
 mod wait_group;
+mod sync_hash_map;
+mod sync_btree_map;
 
 pub(crate) mod atomic_dur;
 #[cfg(not(unix))]
@@ -21,16 +22,17 @@ pub(crate) mod delay_drop;
 pub mod channel;
 
 pub use self::atomic_option::*;
-pub use self::blocking::{Blocker, FastBlocker};
+pub use self::blocking::*;
 pub use self::channel::*;
-pub use self::condvar::{Condvar, WaitTimeoutResult};
-pub use self::mutex::{Mutex, MutexGuard};
+pub use self::condvar::*;
+pub use self::mutex::*;
 pub use self::once::*;
-pub use self::rwlock::{RwLock, RwLockReadGuard, RwLockWriteGuard};
-pub use self::semphore::Semphore;
+pub use self::rwlock::*;
+pub use self::semphore::*;
 pub use self::sync_array_queue::*;
-pub use self::sync_flag::SyncFlag;
-pub use self::sync_map::*;
+pub use self::sync_flag::*;
+pub use self::sync_hash_map::*;
+pub use self::sync_btree_map::*;
 pub use self::sync_queue::*;
 pub use self::sync_vec::*;
 pub use self::wait_group::*;
