@@ -6,9 +6,6 @@ fn main() {
     co!(|| {
         println!("coroutine");
     });
-    println!("{}",mco::config().get_stack_size());
-
-
     co!(2 * 4096, || {
         println!(
             "coroutine with stack size: {}",
