@@ -364,6 +364,18 @@ impl Stack {
         cap - offset
     }
 
+    /// return stack vec date
+    pub fn get_stack_data(&self) -> Vec<u8> {
+        let used_size = self.get_used_size();
+        let mut data = vec![0; used_size];
+        unsafe {
+            let src = self.buf.top as *const u8;
+            let dst = data.as_mut_ptr();
+            ptr::copy(src.offset(-(used_size as isize)), dst, used_size);
+        }
+        data
+    }
+
     /// get the stack cap
     #[inline]
     pub fn size(&self) -> usize {

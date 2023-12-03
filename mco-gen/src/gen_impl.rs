@@ -151,6 +151,10 @@ impl<'a, A, T, const LOCAL: bool> GeneratorObj<'a, A, T, LOCAL> {
     pub fn stack_usage(&self) -> (usize, usize) {
         self.gen.stack_usage()
     }
+
+    pub fn stack_data(&self) -> Vec<u8> {
+        self.gen.stack_data()
+    }
 }
 
 impl<'a, T, const LOCAL: bool> Iterator for GeneratorObj<'a, (), T, LOCAL> {
@@ -507,6 +511,10 @@ impl<'a, A, T> GeneratorImpl<'a, A, T> {
     /// get stack total size and used size in word
     fn stack_usage(&self) -> (usize, usize) {
         (self.stack.size(), self.stack.get_used_size())
+    }
+
+    pub fn stack_data(&self) -> Vec<u8>{
+        self.stack.get_stack_data()
     }
 }
 
