@@ -12,4 +12,3 @@ pub mod lazy;
 pub mod pool;
 pub mod strings;
 pub mod vec;
-pub mod wrapper;
