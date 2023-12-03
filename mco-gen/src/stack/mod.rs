@@ -406,7 +406,7 @@ impl Stack {
     }
 
     // dealloc the statck
-    fn drop_stack(&self) {
+    pub fn drop_stack(&self) {
         if self.buf.len() == 0 {
             return;
         }
