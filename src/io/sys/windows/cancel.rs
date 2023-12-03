@@ -1,11 +1,7 @@
 use std::io;
 use std::io::ErrorKind;
-use std::panic::catch_unwind;
-use std::sync::LockResult;
-
 use crate::cancel::CancelIo;
 use crate::std::sync::Mutex;
-// use scheduler::get_scheduler;
 use super::EventData;
 
 pub struct CancelIoData {
@@ -72,8 +68,8 @@ impl CancelIo for CancelIoImpl {
                     Ok(_) => {
                         return Ok(());
                     }
-                    Err(e) => {
-                        return Err("failed to get CancelIo lock".to_string());
+                    Err(_e) => {
+                        return Err("failed to get CancelIo lock");
                     }
                 });
                 return Ok(());

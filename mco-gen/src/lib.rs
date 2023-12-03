@@ -8,6 +8,7 @@
 #![cfg_attr(test, deny(warnings))]
 #![deny(missing_docs)]
 #![allow(deprecated)]
+#![allow(unused_imports)]
 
 #[macro_use]
 extern crate log;

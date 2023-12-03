@@ -98,7 +98,7 @@ impl EventSource for TcpStreamConnect {
         cancel.set_io(CancelIoData::new(&self.io_data));
         // re-check the cancel status
         if cancel.is_canceled() {
-            unsafe { cancel.cancel() };
+            _ = unsafe { cancel.cancel() };
         }
     }
 }
