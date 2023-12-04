@@ -383,7 +383,7 @@ impl Stack {
             // 计算栈的大小
             let size = data.len();
             // 确保数据不会超过栈的大小
-            assert!(size <= used_size, "Data is larger than stack size");
+            assert!(size <= used_size, "write_stack_data data is larger than stack size");
             // 获取栈顶部的指针
             let src = self.buf.top as *mut u8;
             // 将数据复制到栈中
