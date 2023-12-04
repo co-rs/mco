@@ -517,10 +517,12 @@ impl<'a, A, T> GeneratorImpl<'a, A, T> {
         (self.stack.size(), self.stack.get_used_size())
     }
 
+    /// get stack data vec
     pub fn stack_data(&self) -> Vec<u8>{
         self.stack.get_stack_data()
     }
 
+    /// write stack data
     pub fn write_stack_data(&mut self, data:Vec<u8>){
         self.stack.write_stack_data(data);
     }
