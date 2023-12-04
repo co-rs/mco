@@ -155,6 +155,10 @@ impl<'a, A, T, const LOCAL: bool> GeneratorObj<'a, A, T, LOCAL> {
     pub fn stack_data(&self) -> Vec<u8> {
         self.gen.stack_data()
     }
+
+    pub fn write_stack_data(&mut self, data:Vec<u8>){
+        self.gen.write_stack_data(data);
+    }
 }
 
 impl<'a, T, const LOCAL: bool> Iterator for GeneratorObj<'a, (), T, LOCAL> {
@@ -515,6 +519,10 @@ impl<'a, A, T> GeneratorImpl<'a, A, T> {
 
     pub fn stack_data(&self) -> Vec<u8>{
         self.stack.get_stack_data()
+    }
+
+    pub fn write_stack_data(&mut self, data:Vec<u8>){
+        self.stack.write_stack_data(data);
     }
 }
 
