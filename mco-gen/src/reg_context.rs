@@ -54,6 +54,16 @@ impl RegContext {
         // debug!("register raw swap");
         // in_context.stack_restore();
         // out_context.stack_restore();
+        // if let Some(v)= &in_context.stack {
+        //    unsafe {
+        //        println!("in_context {}", v.as_ref().unwrap().size());
+        //    }
+        // }
+        // if let Some(v)= &out_context.stack {
+        //     unsafe {
+        //         println!("out_context {}", v.as_ref().unwrap().size());
+        //     }
+        // }
         unsafe { swap_registers(&mut out_context.regs, &in_context.regs) }
         //in_context.stack_reduce();
     }
