@@ -452,7 +452,7 @@ where
 mod test {
     use crate::coroutine::sleep;
     use crate::sleep;
-    use crate::std::map::SyncHashMap;
+    use crate::std::sync::SyncHashMap;
     use crate::std::sync::WaitGroup;
     use std::collections::HashMap;
     use std::ops::Deref;

@@ -441,7 +441,7 @@ where
 
 #[cfg(test)]
 mod test {
-    use crate::std::map::SyncBtreeMap;
+    use crate::std::sync::SyncBtreeMap;
     use crate::std::sync::WaitGroup;
     use std::collections::BTreeMap;
     use std::ops::Deref;
