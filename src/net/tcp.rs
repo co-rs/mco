@@ -32,7 +32,7 @@ impl TcpStream {
 
         io_impl::add_socket(&s).map(|_io| TcpStream {
             #[cfg(unix)]
-            _io,
+            io: _io,
             sys: s,
             ctx: io_impl::IoContext::new(),
             read_timeout: AtomicDuration::new(None),
@@ -169,7 +169,7 @@ impl TcpStream {
     pub(crate) fn from_stream(s: net::TcpStream, _io: io_impl::IoData) -> Self {
         TcpStream {
             #[cfg(unix)]
-            _io,
+            io: _io,
             sys: s,
             ctx: io_impl::IoContext::new(),
             read_timeout: AtomicDuration::new(None),
@@ -333,7 +333,7 @@ impl TcpListener {
 
         io_impl::add_socket(&s).map(|_io| TcpListener {
             #[cfg(unix)]
-            _io,
+            io: _io,
             ctx: io_impl::IoContext::new(),
             sys: s,
         })

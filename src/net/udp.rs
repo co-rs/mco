@@ -26,7 +26,7 @@ impl UdpSocket {
 
         io_impl::add_socket(&s).map(|_io| UdpSocket {
             #[cfg(unix)]
-            _io,
+            io: _io,
             sys: s,
             ctx: io_impl::IoContext::new(),
             read_timeout: AtomicDuration::new(None),
