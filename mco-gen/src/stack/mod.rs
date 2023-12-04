@@ -309,7 +309,7 @@ unsafe impl Send for SysStack {}
 /// this struct will not dealloc the memroy
 /// instead StackBox<> would track it's usage and dealloc it
 pub struct Stack {
-    buf: SysStack,
+    pub buf: SysStack,
 }
 
 impl Stack {
@@ -326,7 +326,7 @@ impl Stack {
 
         let buf = SysStack::allocate(bytes, true).expect("failed to alloc sys stack");
 
-        let stk = Stack { buf };
+        let stk = Stack {  buf: buf };
 
         // if size is not even we do the full foot print test
         let count = if track {
@@ -366,7 +366,7 @@ impl Stack {
 
     /// return stack vec date
     pub fn get_stack_data(&self) -> Vec<u8> {
-        let used_size = self.get_used_size();
+        let used_size = self.size();
         let mut data = vec![0; used_size];
         unsafe {
             let src = self.buf.top as *const u8;
@@ -375,6 +375,22 @@ impl Stack {
         }
         data
     }
+
+    /// write_stack_data
+    pub fn write_stack_data(&mut self, data: Vec<u8>) {
+        unsafe {
+            let used_size = self.size();
+            // 计算栈的大小
+            let size = data.len();
+            // 确保数据不会超过栈的大小
+            assert!(size <= used_size, "Data is larger than stack size");
+            // 获取栈顶部的指针
+            let src = self.buf.top as *mut u8;
+            // 将数据复制到栈中
+            ptr::copy(data.as_ptr(), src.offset(-(size as isize)), size);
+        }
+    }
+
 
     /// get the stack cap
     #[inline]
