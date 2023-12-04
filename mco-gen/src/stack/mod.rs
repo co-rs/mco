@@ -326,7 +326,7 @@ impl Stack {
 
         let buf = SysStack::allocate(bytes, true).expect("failed to alloc sys stack");
 
-        let stk = Stack {  buf: buf };
+        let stk = Stack { buf: buf };
 
         // if size is not even we do the full foot print test
         let count = if track {
@@ -368,9 +368,9 @@ impl Stack {
     pub fn get_stack_data(&self) -> Vec<u8> {
         let used_size = self.size();
         let mut data = vec![0; used_size];
+        let src = self.buf.top as *const u8;
+        let dst = data.as_mut_ptr();
         unsafe {
-            let src = self.buf.top as *const u8;
-            let dst = data.as_mut_ptr();
             ptr::copy(src.offset(-(used_size as isize)), dst, used_size);
         }
         data
@@ -378,11 +378,11 @@ impl Stack {
 
     /// write_stack_data
     pub fn write_stack_data(&mut self, data: Vec<u8>) {
+        let used_size = self.size();
+        let size = data.len();
+        assert!(size <= used_size, "write_stack_data data is larger than stack size");
+        let src = self.buf.top as *mut u8;
         unsafe {
-            let used_size = self.size();
-            let size = data.len();
-            assert!(size <= used_size, "write_stack_data data is larger than stack size");
-            let src = self.buf.top as *mut u8;
             ptr::copy(data.as_ptr(), src.offset(-(size as isize)), size);
         }
     }
