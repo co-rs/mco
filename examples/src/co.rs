@@ -1,11 +1,10 @@
-use mco::coroutine::{sleep, spawn, yield_now, Builder, Spawn};
-use mco::{co, defer};
-use std::time::Duration;
+use mco::{co};
 
 fn main() {
     co!(|| {
         println!("coroutine");
     });
+    // use mco::coroutine::{ spawn, yield_now, Builder, Spawn};
     // co!(2 * 4096, || {
     //     println!(
     //         "coroutine with stack size: {}",
@@ -61,15 +60,15 @@ fn main() {
     // .join()
     // .unwrap();
     //
-    // sleep(Duration::from_secs(1));
+    // mco::coroutine::sleep(use std::time::Duration::from_secs(1));
     // //cancel example
     // let g = co!(|| {
-    //     defer!(|| { println!("cancel done!") });
+    //     mco::defer!(|| { println!("cancel done!") });
     //     for idx in 0..1000 {
-    //         sleep(Duration::from_secs(1));
+    //         mco::coroutine::sleep(use std::time::Duration::from_secs(1));
     //         println!("{}", idx);
     //     }
     // });
-    // sleep(Duration::from_secs(2));
+    //std::thread::sleep(use std::time::Duration::from_secs(2));
     // g.coroutine().cancel();
 }
