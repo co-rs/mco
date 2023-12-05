@@ -1,6 +1,5 @@
 [workspace]
 members = [
-    "mco-gen",
     "examples"
 ]
 
@@ -16,7 +15,7 @@ description = "Rust Coroutine Library like go"
 readme = "README.md"
 keywords = ["coroutine", "async", "multi-thread"]
 categories = ["concurrency"]
-build = "build.rs"
+
 exclude = [
     ".gitignore",
     ".travis.yml",
@@ -34,7 +33,7 @@ log = "0.4"
 socket2 = { version = "0.5.5", features = ["all"] }
 num_cpus = "1.13"
 smallvec = "1.9"
-mco-gen = { version = "0.1", path = "mco-gen" }
+generator = "0.7"
 crossbeam = "0.8"
 crossbeam-utils = { version = "0.8", features = ["std"] }
 once_cell = "1.18"
