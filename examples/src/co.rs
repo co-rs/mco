@@ -1,8 +1,9 @@
 use mco::{co};
 
 fn main() {
+    println!("coroutine {:?}", std::thread::current().id());
     co!(|| {
-        println!("coroutine");
+        println!("coroutine {:?}", std::thread::current().id());
     });
     // use mco::coroutine::{ spawn, yield_now, Builder, Spawn};
     // co!(2 * 4096, || {

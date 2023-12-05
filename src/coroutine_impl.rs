@@ -352,7 +352,10 @@ impl Builder {
         F: FnOnce() -> T + Send + 'static,
         T: Send + 'static,
     {
-        return self.spawn_local(f);
+        let (co, handle) = self.spawn_impl(f);
+        let s = get_scheduler();
+        s.schedule_global(co);
+        handle
     }
 
     /// first run the coroutine in current thread, you should allways use
