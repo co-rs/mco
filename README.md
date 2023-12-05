@@ -111,7 +111,7 @@ should follow when writing programs that use coroutines:
 > ```rust
 > set_tls();
 > // Or another coroutine API that would cause scheduling:
-> coroutine::yield_now(); 
+> yield_now(); 
 > use_tls();
 > ```
 > but it's **safe** if your code is not sensitive about the previous state of TLS. Or there is no coroutines scheduling between **set** TLS and **use** TLS.
@@ -126,7 +126,7 @@ should follow when writing programs that use coroutines:
 ## How to tune a stack size
 
 ```rust
-mco::config().set_stack_size(8*1024);//default is 4k=4*1024,Multiple of 4kb is recommended
+mco::config().set_stack_size(6*1024*1024);
 ```
 
 * We are in urgent need of financial support and cooperation, welcome to contact us
