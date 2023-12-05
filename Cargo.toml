@@ -31,13 +31,13 @@ appveyor = { repository = "Xudong-Huang/may", service = "github" }
 
 [dependencies]
 log = "0.4"
-socket2 = { version = "0.4", features = ["all"] }
-num_cpus = "1.1"
-smallvec = "1.2"
+socket2 = { version = "0.5.5", features = ["all"] }
+num_cpus = "1.13"
+smallvec = "1.9"
 mco-gen = { version = "0.1", path = "mco-gen" }
 crossbeam = "0.8"
 crossbeam-utils = { version = "0.8", features = ["std"] }
-once_cell = "1.9.0"
+once_cell = "1.18"
 parking_lot = "0.11"
 time = { version = "0.3", features = ["formatting", "local-offset", "parsing", "serde"] }
 serde = "1.0"
