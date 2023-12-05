@@ -10,5 +10,4 @@ pub mod time;
 pub mod blocking;
 pub mod lazy;
 pub mod pool;
-pub mod strings;
 pub mod vec;
