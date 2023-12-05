@@ -1,5 +1,4 @@
 //! # generator stack
-//! TODO maybe use region-rs replace this?
 //!
 //!
 
