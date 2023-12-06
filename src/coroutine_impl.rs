@@ -257,8 +257,7 @@ impl Builder {
         static DONE: Done = Done {};
 
         let sched = get_scheduler();
-        let Builder { name, stack_size } = self;
-        let stack_size = stack_size.unwrap_or_else(|| config().get_stack_size());
+        let stack_size = self.stack_size.unwrap_or_else(|| config().get_stack_size());
         let _co = if stack_size == config().get_stack_size() {
             let co = sched.pool.get();
             co.prefetch();
@@ -299,7 +298,7 @@ impl Builder {
             Gn::new_opt(stack_size, closure)
         };
 
-        let handle = Coroutine::new(name, stack_size);
+        let handle = Coroutine::new(self.name, stack_size);
         // create the local storage
         let local = CoroutineLocal::new(handle.clone(), join.clone());
         // attache the local storage to the coroutine
