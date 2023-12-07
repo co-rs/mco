@@ -11,8 +11,8 @@ use std::io::{Read, Write};
 // This example is for demonstration only and is suitable for production environment please move on
 // example see https://github.com/co-rs/mco-http/tree/main/examples
 fn main() {
-    println!("bind http://127.0.0.1:8080");
-    let listener = TcpListener::bind("0.0.0.0:8080").unwrap();
+    println!("bind http://127.0.0.1:3000");
+    let listener = TcpListener::bind("0.0.0.0:3000").unwrap();
     while let Ok((mut stream, _)) = listener.accept() {
         co!(move || {
             let mut buf = Vec::new();

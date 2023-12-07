@@ -8,7 +8,7 @@ use tungstenite::accept;
 
 fn main() {
     let handler = co!(move || {
-        let listener = TcpListener::bind(("0.0.0.0", 8080)).unwrap();
+        let listener = TcpListener::bind(("0.0.0.0", 3000)).unwrap();
         for stream in listener.incoming() {
             co!(move || -> () {
                 let mut websocket = accept(stream.unwrap()).unwrap();
@@ -25,6 +25,6 @@ fn main() {
         }
     });
 
-    println!("Websocket server running on ws://0.0.0.0:8080");
+    println!("Websocket server running on ws://0.0.0.0:3000");
     handler.join().unwrap();
 }
