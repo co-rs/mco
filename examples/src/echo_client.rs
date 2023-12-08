@@ -32,7 +32,7 @@ Options:
   -l <length>       packet length in bytes [default: 100].
   -c <connections>  concurent connections  [default: 100].
   -d <time>         time to run in seconds [default: 10].
-  -a <address>      target address (e.g. 127.0.0.1:8080).
+  -a <address>      target address (e.g. 127.0.0.1:3000).
 ";
 
 #[derive(Debug, Deserialize)]

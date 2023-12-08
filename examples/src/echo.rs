@@ -24,7 +24,7 @@ Options:
   -h --help         Show this screen.
   -v --version      Show version.
   -t <threads>      number of threads to use [default: 1].
-  -p <address>      port of the server [default: 8080].
+  -p <address>      port of the server [default: 3000].
 ";
 
 #[derive(Debug, Deserialize)]
@@ -58,7 +58,7 @@ fn handle_client(mut stream: TcpStream) {
     }
 }
 
-/// simple test: echo hello | nc 127.0.0.1 8080
+/// simple test: echo hello | nc 127.0.0.1 3000
 fn main() {
     let args: Args = Docopt::new(USAGE)
         .and_then(|d| d.deserialize())
@@ -75,7 +75,7 @@ fn main() {
     mco::coroutine::scope(|s| {
         for i in 0..threads {
             co!(s, move || {
-                // let listener = TcpListener::bind("127.0.0.1:8080").unwrap();
+                // let listener = TcpListener::bind("127.0.0.1:3000").unwrap();
                 let listener = TcpListener::bind(("0.0.0.0", port)).unwrap();
 
                 println!(

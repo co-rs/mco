@@ -49,8 +49,8 @@ fn main() {
         .unwrap();
     let cfg = Arc::new(config);
 
-    let listener = TcpListener::bind("0.0.0.0:8080").unwrap();
-    println!("server bind on https://127.0.0.1:8080");
+    let listener = TcpListener::bind("0.0.0.0:3000").unwrap();
+    println!("server bind on https://127.0.0.1:3000");
     while let Ok((mut stream, _)) = listener.accept() {
         let mut conn = rustls::ServerConnection::new(cfg.clone()).unwrap();
         let mut stream = rustls::StreamOwned::new(conn, stream);

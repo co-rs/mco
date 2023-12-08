@@ -33,7 +33,7 @@ fn main() {
     let acceptor = TlsAcceptor::new(identity).unwrap();
     let acceptor = Arc::new(acceptor);
 
-    let listener = TcpListener::bind("0.0.0.0:8080").unwrap();
+    let listener = TcpListener::bind("0.0.0.0:3000").unwrap();
     while let Ok((stream, _)) = listener.accept() {
         let acceptor = acceptor.clone();
         let mut stream = acceptor.accept(stream).unwrap();
