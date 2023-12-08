@@ -5,6 +5,12 @@
 mco is a high-performance library for programming stackful coroutines with which you can easily develop and maintain
 massive concurrent programs. It can be thought as the Rust version of the popular [Goroutine][go].
 
+# way mco?
+* Elegant coding,No need for async await
+* Simple concurrency(CSP model), learning Golang
+* Default MAX 6MB Stack Size use Virtual Memory(Virtual memory is loaded on demand, with minimal actual usage)
+* many std like API
+
 > Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Many improvements(Inspired by [Golang](https://golang.google.cn/),  [parking_lot](https://github.com/Amanieu/parking_lot)  and [crossbeam](https://github.com/crossbeam-rs/crossbeam)) and more...
 
 
@@ -117,6 +123,7 @@ should follow when writing programs that use coroutines:
 > but it's **safe** if your code is not sensitive about the previous state of TLS. Or there is no coroutines scheduling between **set** TLS and **use** TLS.
 
 * Don't run CPU bound tasks for long time, but it's ok if you don't care about fairness;
+* In most modern operating systems, when starting a process, the standard Thread stack size is usually 8 MB, and mco provides a maximum stack space of 6MB. Typically, operating systems load memory pages on demand, such as starting about 1 million processes on my Mac/Unix system, which requires 46GB of memory space. This means that a protocol requires a minimum of 50KB of stack space to be consumed until a maximum of 6MB of stack space is reached
 * Don't exceed the coroutine stack. There is a guard page for each coroutine stack. When stack overflow occurs, it will
   trigger segment fault error.
 

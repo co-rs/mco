@@ -1,12 +1,11 @@
 use std::thread;
 use std::time::{Duration, Instant};
-
-extern crate mco_gen;
 #[macro_use]
 extern crate mco;
 
 use crate::coroutine::yield_now;
 use mco::coroutine;
+use mco::mco_gen as mco_gen;
 use mco_gen::Gn;
 
 #[test]

@@ -12,19 +12,9 @@ use std::fs::File;
 use std::io::{Read, Write};
 use std::sync::Arc;
 
-fn req_done(buf: &[u8], path: &mut String) -> Option<usize> {
-    let mut headers = [httparse::EMPTY_HEADER; 16];
-    let mut req = httparse::Request::new(&mut headers);
 
-    if let Ok(Status::Complete(i)) = req.parse(buf) {
-        path.clear();
-        path.push_str(req.path.unwrap_or("/"));
-        return Some(i);
-    }
-
-    None
-}
-
+// This example is for demonstration only and is suitable for production environment please move on
+// example see https://github.com/co-rs/mco-http/tree/main/examples
 fn main() {
     let mut file = File::open("examples/native-tls/mycert.pfx").unwrap();
     let mut identity = vec![];
@@ -82,4 +72,18 @@ fn main() {
             }
         });
     }
+}
+
+
+fn req_done(buf: &[u8], path: &mut String) -> Option<usize> {
+    let mut headers = [httparse::EMPTY_HEADER; 16];
+    let mut req = httparse::Request::new(&mut headers);
+
+    if let Ok(Status::Complete(i)) = req.parse(buf) {
+        path.clear();
+        path.push_str(req.path.unwrap_or("/"));
+        return Some(i);
+    }
+
+    None
 }
