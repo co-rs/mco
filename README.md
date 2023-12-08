@@ -7,6 +7,12 @@ massive concurrent programs. It can be thought as the Rust version of the popula
 
 > Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Many improvements(Inspired by [Golang](https://golang.google.cn/),  [parking_lot](https://github.com/Amanieu/parking_lot)  and [crossbeam](https://github.com/crossbeam-rs/crossbeam)) and more...
 
+# way mco?
+* Elegant coding,No need for async await
+* Simple concurrency(CSP model), learning Golang
+* Default MAX 6MB Stack Size use Virtual Memory(Virtual memory is loaded on demand, with minimal actual usage)
+* many std like API
+
 
 # mco crates
 
