@@ -13,17 +13,8 @@ use std::fs::File;
 use std::io::{BufReader, Read, Write};
 use std::sync::Arc;
 
-fn req_done(buf: &[u8], path: &mut String) -> Option<usize> {
-    let mut headers = [httparse::EMPTY_HEADER; 16];
-    let mut req = httparse::Request::new(&mut headers);
-    if let Ok(Status::Complete(i)) = req.parse(buf) {
-        path.clear();
-        path.push_str(req.path.unwrap_or("/"));
-        return Some(i);
-    }
-    None
-}
-
+// This example is for demonstration only and is suitable for production environment please move on
+// example see https://github.com/co-rs/mco-http/tree/main/examples
 fn main() {
     let f_cert = File::open("examples/rustls/cert.pem").unwrap();
 
@@ -98,4 +89,15 @@ fn main() {
             }
         });
     }
+}
+
+fn req_done(buf: &[u8], path: &mut String) -> Option<usize> {
+    let mut headers = [httparse::EMPTY_HEADER; 16];
+    let mut req = httparse::Request::new(&mut headers);
+    if let Ok(Status::Complete(i)) = req.parse(buf) {
+        path.clear();
+        path.push_str(req.path.unwrap_or("/"));
+        return Some(i);
+    }
+    None
 }
