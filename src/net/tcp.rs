@@ -24,7 +24,7 @@ pub struct TcpStream {
 }
 
 impl TcpStream {
-    fn new(s: net::TcpStream) -> io::Result<TcpStream> {
+    pub fn new(s: net::TcpStream) -> io::Result<TcpStream> {
         // only set non blocking in coroutine context
         // we would first call nonblocking io in the coroutine
         // to avoid unnecessary context switch

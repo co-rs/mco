@@ -18,7 +18,7 @@ pub struct UdpSocket {
 }
 
 impl UdpSocket {
-    fn new(s: net::UdpSocket) -> io::Result<UdpSocket> {
+    pub fn new(s: net::UdpSocket) -> io::Result<UdpSocket> {
         // only set non blocking in coroutine context
         // we would first call nonblocking io in the coroutine
         // to avoid unnecessary context switch
