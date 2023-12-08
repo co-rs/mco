@@ -6,38 +6,36 @@ extern crate mco;
 use bytes::BufMut;
 use httparse::Status;
 use mco::net::TcpListener;
-use rustls::server::Acceptor;
-use rustls::{Certificate, OwnedTrustAnchor, PrivateKey, RootCertStore};
-use std::convert::TryInto;
 use std::fs::File;
-use std::io::{BufReader, Read, Write};
+use std::io::{BufReader, Cursor, Read, Write};
 use std::sync::Arc;
 
 // This example is for demonstration only and is suitable for production environment please move on
 // example see https://github.com/co-rs/mco-http/tree/main/examples
 fn main() {
-    let f_cert = File::open("examples/rustls/cert.pem").unwrap();
+    let config = {
+        let mut f_cert = File::open("examples/rustls/sample.pem").unwrap();
+        let mut f_key = File::open("examples/rustls/sample.rsa").unwrap();
 
-    let mut reader = BufReader::new(f_cert);
-    let cert = rustls_pemfile::certs(&mut reader).unwrap();
-    let cert = cert[0].clone();
+        let mut certs =vec![];
+        _ = f_cert.read_to_end(&mut certs);
 
-    let f_cert = File::open("examples/rustls/key.rsa").unwrap();
-    let mut reader = BufReader::new(f_cert);
-    let pris = rustls_pemfile::pkcs8_private_keys(&mut reader).unwrap();
-    let pri = pris[0].clone();
+        let mut key =vec![];
+        _ = f_key.read_to_end(&mut key);
 
-    let private_key = PrivateKey(pri); //private.pem
-    let cert = Certificate(cert); //cert
+        let flattened_data: Vec<u8> = vec![certs].into_iter().flatten().collect();
+        let mut reader = BufReader::new(Cursor::new(flattened_data));
+        let certs = rustls_pemfile::certs(&mut reader).map(|result| result.unwrap())
+            .collect();
+        let private_key=rustls_pemfile::private_key(&mut BufReader::new(Cursor::new(key.clone()))).expect("rustls_pemfile::private_key() read fail");
+        if private_key.is_none() {
+            panic!("load keys is empty")
+        }
+        rustls::ServerConfig::builder()
+            .with_no_client_auth()
+            .with_single_cert(certs, private_key.unwrap()).unwrap()
+    };
 
-    let config = rustls::ServerConfig::builder()
-        .with_safe_default_cipher_suites()
-        .with_safe_default_kx_groups()
-        .with_safe_default_protocol_versions()
-        .unwrap()
-        .with_no_client_auth()
-        .with_single_cert(vec![cert], private_key)
-        .unwrap();
     let cfg = Arc::new(config);
 
     let listener = TcpListener::bind("0.0.0.0:3000").unwrap();
