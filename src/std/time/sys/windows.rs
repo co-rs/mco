@@ -11,10 +11,11 @@
 use super::Tm;
 use std::io;
 use std::mem;
-
-use winapi::shared::minwindef::*;
-use winapi::um::minwinbase::SYSTEMTIME;
-use winapi::um::timezoneapi::*;
+use windows_sys::Win32::Foundation::{FILETIME, SYSTEMTIME};
+use windows_sys::Win32::System::Time::{GetTimeZoneInformation, SystemTimeToFileTime};
+use windows_sys::Win32::System::Time::FileTimeToSystemTime;
+use windows_sys::Win32::System::Time::SystemTimeToTzSpecificLocalTime;
+use windows_sys::Win32::System::Time::TzSpecificLocalTimeToSystemTime;
 
 const HECTONANOSECS_IN_SEC: i64 = 10_000_000;
 const HECTONANOSEC_TO_UNIX_EPOCH: i64 = 11_644_473_600 * HECTONANOSECS_IN_SEC;
@@ -22,8 +23,8 @@ const HECTONANOSEC_TO_UNIX_EPOCH: i64 = 11_644_473_600 * HECTONANOSECS_IN_SEC;
 fn time_to_file_time(sec: i64) -> FILETIME {
     let t = ((sec * HECTONANOSECS_IN_SEC) + HECTONANOSEC_TO_UNIX_EPOCH) as u64;
     FILETIME {
-        dwLowDateTime: t as DWORD,
-        dwHighDateTime: (t >> 32) as DWORD,
+        dwLowDateTime: t as u32,
+        dwHighDateTime: (t >> 32) as u32,
     }
 }
 
@@ -46,13 +47,13 @@ fn system_time_to_file_time(sys: &SYSTEMTIME) -> FILETIME {
 
 fn tm_to_system_time(tm: &Tm) -> SYSTEMTIME {
     let mut sys: SYSTEMTIME = unsafe { mem::zeroed() };
-    sys.wSecond = tm.tm_sec as WORD;
-    sys.wMinute = tm.tm_min as WORD;
-    sys.wHour = tm.tm_hour as WORD;
-    sys.wDay = tm.tm_mday as WORD;
-    sys.wDayOfWeek = tm.tm_wday as WORD;
-    sys.wMonth = (tm.tm_mon + 1) as WORD;
-    sys.wYear = (tm.tm_year + 1900) as WORD;
+    sys.wSecond = tm.tm_sec as u16;
+    sys.wMinute = tm.tm_min as u16;
+    sys.wHour = tm.tm_hour as u16;
+    sys.wDay = tm.tm_mday as u16;
+    sys.wDayOfWeek = tm.tm_wday as u16;
+    sys.wMonth = (tm.tm_mon + 1) as u16;
+    sys.wYear = (tm.tm_year + 1900) as u16;
     sys
 }
 

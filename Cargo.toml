@@ -24,10 +24,6 @@ exclude = [
     "docs/**/*",
 ]
 
-[badges]
-travis-ci = { repository = "Xudong-Huang/may" }
-appveyor = { repository = "Xudong-Huang/may", service = "github" }
-
 [dependencies]
 log = "0.4"
 socket2 = { version = "0.5.5", features = ["all"] }
@@ -48,7 +44,6 @@ tempdir = "0.3.7"
 
 
 [target.'cfg(windows)'.dependencies]
-winapi = { version = "0.3", features = ["timezoneapi"] }
 miow = "0.6"
 [target.'cfg(windows)'.dependencies.windows-sys]
 version = "0.48"
