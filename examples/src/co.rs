@@ -2,11 +2,11 @@ use std::time::Duration;
 use mco::{co};
 
 fn main() {
-    println!("coroutine {:?}", std::thread::current().id());
+    println!("thread {:?}", std::thread::current().id());
     co!(|| {
-        println!("coroutine {:?}", std::thread::current().id());
+        println!("coroutine run on thread {:?}", std::thread::current().id());
     });
-    std::thread::sleep(Duration::from_secs(1));
+    std::thread::sleep(Duration::from_secs(2));
     // use mco::coroutine::{ spawn, yield_now, Builder, Spawn};
     // co!(2 * 4096, || {
     //     println!(

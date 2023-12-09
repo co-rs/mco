@@ -11,7 +11,7 @@ use crate::net::TcpStream;
 use crate::scheduler::get_scheduler;
 use crate::std::sync::delay_drop::DelayDrop;
 use miow::net::TcpStreamExt;
-use winapi::shared::ntdef::*;
+use windows_sys::Win32::Foundation::HANDLE;
 
 pub struct TcpStreamConnect {
     io_data: EventData,

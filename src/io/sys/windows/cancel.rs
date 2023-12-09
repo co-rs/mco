@@ -1,12 +1,16 @@
 use std::io;
 use std::io::ErrorKind;
+
 use crate::cancel::CancelIo;
 use crate::std::sync::Mutex;
+// use scheduler::get_scheduler;
 use super::EventData;
 
 pub struct CancelIoData {
     ev_data: *mut EventData,
 }
+
+unsafe impl Send for CancelIoData {}
 
 impl CancelIoData {
     pub fn new(ev_data: &EventData) -> Self {
@@ -15,22 +19,13 @@ impl CancelIoData {
         }
     }
 
-    pub fn cancel(&self) -> io::Result<()> {
-        use winapi::um::ioapiset::CancelIoEx;
-        if self.ev_data.is_null() {
-            return Err(io::Error::new(ErrorKind::NotFound, "ev_data is null"));
-        }
-        let ev = unsafe { &mut *self.ev_data };
+    fn cancel(&self) -> Result<(), io::Error> {
+        use windows_sys::Win32::System::IO::CancelIoEx;
+
+        let ev = unsafe{&mut *self.ev_data};
         let handle = ev.handle;
         let overlapped = ev.get_overlapped();
-        if handle.is_null() {
-            return Err(io::Error::new(
-                ErrorKind::NotFound,
-                "ev_data.handle is null",
-            ));
-        }
-        //safety
-        let ret = unsafe { CancelIoEx(handle, overlapped) };
+        let ret = unsafe{CancelIoEx(handle, overlapped)};
         if ret == 0 {
             let err = io::Error::last_os_error();
             error!("cancel err={:?}", err);
@@ -61,7 +56,7 @@ impl CancelIo for CancelIoImpl {
         *self.0.lock().expect("failed to get CancelIo lock") = None;
     }
 
-    fn cancel(&self) -> Result<(), std::io::Error> {
+    fn cancel(&self)  -> Result<(), std::io::Error> {
         match self.0.lock() {
             Ok(mut v) => {
                 v.take().map(|d| match d.cancel() {

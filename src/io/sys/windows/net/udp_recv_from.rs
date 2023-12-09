@@ -10,7 +10,8 @@ use crate::net::UdpSocket;
 use crate::scheduler::get_scheduler;
 use crate::std::sync::delay_drop::DelayDrop;
 use miow::net::{SocketAddrBuf, UdpSocketExt};
-use winapi::shared::ntdef::*;
+use windows_sys::Win32::Foundation::HANDLE;
+
 
 pub struct UdpRecvFrom<'a> {
     io_data: EventData,

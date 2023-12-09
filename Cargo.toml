@@ -5,7 +5,7 @@ members = [
 
 [package]
 name = "mco"
-version = "0.1.46"
+version = "0.1.47"
 edition = "2018"
 authors = ["zhuxiujia@qq.com", "Xudong Huang <huangxu008@hotmail.com>"]
 license = "MIT/Apache-2.0"
@@ -42,13 +42,28 @@ time = { version = "0.3", features = ["formatting", "local-offset", "parsing", "
 serde = "1.0"
 
 [target.'cfg(unix)'.dependencies]
-nix = "0.21"
+nix = { version = "0.27", features = ["event"] }
 libc = "0.2"
 tempdir = "0.3.7"
 
+
 [target.'cfg(windows)'.dependencies]
-miow = "0.3"
-winapi = { version = "0.3", features = ["std", "minwinbase", "minwindef", "timezoneapi"] }
+winapi = { version = "0.3", features = ["timezoneapi"] }
+miow = "0.6"
+[target.'cfg(windows)'.dependencies.windows-sys]
+version = "0.48"
+features = [
+    "Win32_Foundation",
+    "Win32_Networking_WinSock",
+    "Win32_NetworkManagement_IpHelper",
+    "Win32_Security",
+    "Win32_Storage_FileSystem",
+    "Win32_System_IO",
+    "Win32_System_Pipes",
+    "Win32_System_Threading",
+    "Win32_System_WindowsProgramming",
+    "Win32_System_Time",
+]
 
 [target."cfg(all(target_arch = \"wasm32\", not(any(target_os = \"emscripten\", target_os = \"wasi\"))))".dependencies.js-sys]
 version = "0.3"

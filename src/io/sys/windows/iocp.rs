@@ -9,11 +9,8 @@ use crate::scheduler::get_scheduler;
 use crate::timeout_list::{now, ns_to_dur, TimeOutList, TimeoutHandle};
 use crate::yield_now::set_co_para;
 use miow::iocp::{CompletionPort, CompletionStatus};
-use winapi::shared::ntdef::*;
-use winapi::shared::ntstatus::STATUS_CANCELLED;
-use winapi::shared::winerror::*;
-use winapi::um::ioapiset::{CancelIoEx, GetOverlappedResult};
-use winapi::um::minwinbase::OVERLAPPED;
+use windows_sys::Win32::Foundation::*;
+use windows_sys::Win32::System::IO::{CancelIoEx, GetOverlappedResult, OVERLAPPED};
 
 // the timeout data
 pub struct TimerData {

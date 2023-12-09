@@ -10,7 +10,8 @@ use crate::net::{TcpListener, TcpStream};
 use crate::scheduler::get_scheduler;
 use crate::std::sync::delay_drop::DelayDrop;
 use miow::net::{AcceptAddrsBuf, TcpListenerExt};
-use winapi::shared::ntdef::*;
+
+use windows_sys::Win32::Foundation::HANDLE;
 
 pub struct TcpListenerAccept<'a> {
     io_data: EventData,
