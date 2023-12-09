@@ -8,7 +8,7 @@ use crate::io::cancel::CancelIoData;
 use crate::scheduler::get_scheduler;
 use crate::std::sync::delay_drop::DelayDrop;
 use miow::pipe::NamedPipe;
-use winapi::shared::winerror::*;
+use windows_sys::Win32::Foundation::ERROR_BROKEN_PIPE;
 
 pub struct PipeRead<'a> {
     io_data: EventData,
