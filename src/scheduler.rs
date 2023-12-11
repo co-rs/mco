@@ -112,7 +112,7 @@ fn init_scheduler() {
                 // run_coroutine(c);
                 for (t, b) in s.sleeps.iter() {
                     if b.load(Ordering::Relaxed) {
-                        let id = s.worker_ids2.get(&t);
+                        let id = s.worker_ids.get(&t);
                         if let Some(id) = id {
                             s.local_queues[*id].push(c);
                             s.get_selector().wakeup(*id);
@@ -132,8 +132,7 @@ fn init_scheduler() {
             println!("init worker {:?}", std::thread::current().id());
             let s = unsafe { &*SCHED };
             s.sleeps.insert(std::thread::current().id(), AtomicBool::new(false));
-            s.worker_ids.insert(id, std::thread::current().id());
-            s.worker_ids2.insert(std::thread::current().id(), id);
+            s.worker_ids.insert(std::thread::current().id(),id);
             s.event_loop.run(id as usize).unwrap_or_else(|e| {
                 panic!("event_loop failed running, err={}", e);
             });
@@ -198,8 +197,7 @@ pub struct Scheduler {
     stealers: Vec<Vec<(usize, deque::Stealer<CoroutineImpl>)>>,
     workers_len: usize,
     pub(crate) sleeps: dark_std::sync::SyncHashMap<ThreadId, AtomicBool>,
-    pub(crate) worker_ids: dark_std::sync::SyncHashMap<usize, ThreadId>,
-    pub(crate) worker_ids2: dark_std::sync::SyncHashMap<ThreadId, usize>,
+    pub(crate) worker_ids: dark_std::sync::SyncHashMap<ThreadId, usize>,
 }
 
 impl Scheduler {
@@ -231,10 +229,6 @@ impl Scheduler {
                 v
             },
             worker_ids: {
-                let v = dark_std::sync::SyncHashMap::new();
-                v
-            },
-            worker_ids2: {
                 let v = dark_std::sync::SyncHashMap::new();
                 v
             },

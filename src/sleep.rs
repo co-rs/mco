@@ -3,11 +3,9 @@ use std::sync::Arc;
 use std::sync::atomic::Ordering;
 use std::thread;
 use std::time::Duration;
-use parking_lot::Mutex;
 
 use crate::coroutine_impl::{co_cancel_data, is_coroutine, CoroutineImpl, EventSource};
 use crate::scheduler::get_scheduler;
-use crate::std::lazy::sync::Lazy;
 use crate::yield_now::{get_co_para, yield_with};
 
 struct Sleep {
