@@ -6,11 +6,9 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 // default stack size, in usize
 // windows has a minimal size as 0x4a8!!!!
 const DEFAULT_STACK_SIZE: usize = 6 * 1024 * 1024;
-const DEFAULT_POOL_CAPACITY: usize = 100;
 
 static WORKERS: AtomicUsize = AtomicUsize::new(0);
 static STACK_SIZE: AtomicUsize = AtomicUsize::new(DEFAULT_STACK_SIZE);
-static POOL_CAPACITY: AtomicUsize = AtomicUsize::new(DEFAULT_POOL_CAPACITY);
 
 /// `mco` Configuration type
 pub struct Config;
@@ -43,25 +41,6 @@ impl Config {
             let num = num_cpus::get();
             WORKERS.store(num, Ordering::Relaxed);
             num
-        }
-    }
-
-    /// set cached coroutine pool number
-    ///
-    /// if you pass 0 to it, will use internal default
-    pub fn set_pool_capacity(&self, capacity: usize) -> &Self {
-        info!("set pool capacity={:?}", capacity);
-        POOL_CAPACITY.store(capacity, Ordering::Release);
-        self
-    }
-
-    /// get the coroutine pool capacity
-    pub fn get_pool_capacity(&self) -> usize {
-        let size = POOL_CAPACITY.load(Ordering::Acquire);
-        if size != 0 {
-            size
-        } else {
-            DEFAULT_POOL_CAPACITY
         }
     }
 

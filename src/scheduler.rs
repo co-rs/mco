@@ -7,7 +7,6 @@ use std::time::Duration;
 use crate::config::config;
 use crate::coroutine_impl::{run_coroutine, CoroutineImpl};
 use crate::io::{EventLoop, Selector};
-use crate::pool::CoroutinePool;
 use crate::std::sync::AtomicOption;
 use crate::timeout_list;
 use crate::yield_now::set_co_para;
@@ -183,7 +182,6 @@ fn steal_local<T>(stealer: &deque::Stealer<T>, local: &deque::Worker<T>) -> Opti
 
 #[repr(align(128))]
 pub struct Scheduler {
-    pub pool: CoroutinePool,
     event_loop: EventLoop,
     global_queue: dark_std::sync::SyncVec<CoroutineImpl>,
     local_queues: Vec<deque::Worker<CoroutineImpl>>,
@@ -210,7 +208,6 @@ impl Scheduler {
             stealers.push(stealers_l);
         }
         Box::new(Scheduler {
-            pool: CoroutinePool::new(),
             event_loop: EventLoop::new(workers).expect("can't create event_loop"),
             global_queue: dark_std::sync::SyncVec::new(),
             local_queues,

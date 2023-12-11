@@ -78,10 +78,6 @@ impl Done {
                 name, size, used
             );
         }
-
-        if size == config().get_stack_size() {
-            get_scheduler().pool.put(co);
-        }
     }
 }
 
@@ -296,15 +292,7 @@ impl Builder {
     {
         static DONE: Done = Done {};
 
-        let sched = get_scheduler();
         let stack_size = self.stack_size.unwrap_or_else(|| config().get_stack_size());
-        let _co = if stack_size == config().get_stack_size() {
-            let co = sched.pool.get();
-            co.prefetch();
-            Some(co)
-        } else {
-            None
-        };
 
         // create a join resource, shared by waited coroutine and *this* coroutine
         let panic = Arc::new(AtomicCell::new(None));
@@ -330,15 +318,9 @@ impl Builder {
             subscriber
         };
 
-        let mut co = if let Some(mut c) = _co {
-            // re-init the closure
-            c.init_code(closure);
-            c
-        } else {
-            CoroutineImpl {
-                worker_thread_id: None,
-                inner: Gn::new_opt(stack_size, closure),
-            }
+        let mut co =   CoroutineImpl {
+            worker_thread_id: None,
+            inner: Gn::new_opt(stack_size, closure),
         };
 
         let handle = Coroutine::new(self.name, stack_size);

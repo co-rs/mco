@@ -21,7 +21,7 @@ impl CoroutinePool {
     }
 
     pub fn new() -> Self {
-        let capacity = config().get_pool_capacity();
+        let capacity = 100;
         let pool = Queue::new(capacity);
         for _ in 0..capacity {
             let co = Self::create_dummy_coroutine();
