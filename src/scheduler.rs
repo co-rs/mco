@@ -145,39 +145,39 @@ pub fn get_scheduler() -> &'static Scheduler {
     unsafe { &*SCHED }
 }
 
-#[inline]
-fn steal_global<T>(global: &deque::Injector<T>, local: &deque::Worker<T>) -> Option<T> {
-    static GLOBABLE_LOCK: AtomicUsize = AtomicUsize::new(0);
-    if GLOBABLE_LOCK
-        .compare_exchange(0, 1, Ordering::Relaxed, Ordering::Relaxed)
-        .is_err()
-    {
-        return None;
-    }
+// #[inline]
+// fn steal_global<T>(global: &deque::Injector<T>, local: &deque::Worker<T>) -> Option<T> {
+//     static GLOBABLE_LOCK: AtomicUsize = AtomicUsize::new(0);
+//     if GLOBABLE_LOCK
+//         .compare_exchange(0, 1, Ordering::Relaxed, Ordering::Relaxed)
+//         .is_err()
+//     {
+//         return None;
+//     }
+//
+//     let backoff = Backoff::new();
+//     let ret = loop {
+//         match global.steal_batch_and_pop(local) {
+//             deque::Steal::Success(t) => break Some(t),
+//             deque::Steal::Empty => break None,
+//             deque::Steal::Retry => backoff.snooze(),
+//         }
+//     };
+//     GLOBABLE_LOCK.store(0, Ordering::Relaxed);
+//     ret
+// }
 
-    let backoff = Backoff::new();
-    let ret = loop {
-        match global.steal_batch_and_pop(local) {
-            deque::Steal::Success(t) => break Some(t),
-            deque::Steal::Empty => break None,
-            deque::Steal::Retry => backoff.snooze(),
-        }
-    };
-    GLOBABLE_LOCK.store(0, Ordering::Relaxed);
-    ret
-}
-
-#[inline]
-fn steal_local<T>(stealer: &deque::Stealer<T>, local: &deque::Worker<T>) -> Option<T> {
-    let backoff = Backoff::new();
-    loop {
-        match stealer.steal_batch_and_pop(local) {
-            deque::Steal::Success(t) => return Some(t),
-            deque::Steal::Empty => return None,
-            deque::Steal::Retry => backoff.snooze(),
-        }
-    }
-}
+// #[inline]
+// fn steal_local<T>(stealer: &deque::Stealer<T>, local: &deque::Worker<T>) -> Option<T> {
+//     let backoff = Backoff::new();
+//     loop {
+//         match stealer.steal_batch_and_pop(local) {
+//             deque::Steal::Success(t) => return Some(t),
+//             deque::Steal::Empty => return None,
+//             deque::Steal::Retry => backoff.snooze(),
+//         }
+//     }
+// }
 
 #[repr(align(128))]
 pub struct Scheduler {
@@ -246,7 +246,7 @@ impl Scheduler {
                 //             steal_global(&self.global_queue, local)
                 //         }
                 //     })
-                let f = self.steal_g();
+                let f = self.steal_global();
                 f
             });
             if let Some(mut co) = co {
@@ -261,7 +261,7 @@ impl Scheduler {
         }
     }
 
-    fn steal_g(&self) -> Option<CoroutineImpl> {
+    fn steal_global(&self) -> Option<CoroutineImpl> {
         let current_id = std::thread::current().id();
         if self.global_queue.is_empty() {
             None
