@@ -1,10 +1,13 @@
 use crate::std::sync::AtomicOption;
 use std::sync::Arc;
+use std::sync::atomic::Ordering;
 use std::thread;
 use std::time::Duration;
+use parking_lot::Mutex;
 
 use crate::coroutine_impl::{co_cancel_data, is_coroutine, CoroutineImpl, EventSource};
 use crate::scheduler::get_scheduler;
+use crate::std::lazy::sync::Lazy;
 use crate::yield_now::{get_co_para, yield_with};
 
 struct Sleep {
@@ -33,7 +36,10 @@ pub fn sleep(dur: Duration) {
     if !is_coroutine() {
         return thread::sleep(dur);
     }
-
+    let s= get_scheduler().sleeps.get(&thread::current().id());
+    if let Some(s)=s{
+        s.store(true,Ordering::Relaxed);
+    };
     let sleeper = Sleep { dur };
     yield_with(&sleeper);
     // consume the timeout error

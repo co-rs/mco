@@ -1,5 +1,6 @@
+use std::collections::HashMap;
 use std::io;
-use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Once};
 use std::thread;
 use std::time::Duration;
@@ -16,6 +17,7 @@ use crossbeam::utils::Backoff;
 
 #[cfg(nightly)]
 use std::intrinsics::likely;
+use std::thread::ThreadId;
 
 #[cfg(not(nightly))]
 #[inline]
@@ -95,8 +97,10 @@ fn init_scheduler() {
     }
     filter_cancel_panic();
 
+
     // timer thread
     thread::spawn(move || {
+        println!("init timer worker {:?}", std::thread::current().id());
         let s = unsafe { &*SCHED };
         // timer function
         let timer_event_handler = |co: Arc<AtomicOption<CoroutineImpl>>| {
@@ -105,17 +109,31 @@ fn init_scheduler() {
                 // set the timeout result for the coroutine
                 set_co_para(&mut c, io::Error::new(io::ErrorKind::TimedOut, "timeout"));
                 // s.schedule_global(c);
-                run_coroutine(c);
+                // run_coroutine(c);
+                for (t, b) in s.sleeps.iter() {
+                    if b.load(Ordering::Relaxed) {
+                        let id = s.worker_ids2.get(&t);
+                        if let Some(id) = id {
+                            s.local_queues[*id].push(c);
+                            s.get_selector().wakeup(*id);
+                            break;
+                        }
+                    }
+                }
             }
         };
-
         s.timer_thread.run(&timer_event_handler);
     });
 
+    println!("init workers {}", workers);
     // io event loop thread
     for id in 0..workers {
         thread::spawn(move || {
+            println!("init worker {:?}", std::thread::current().id());
             let s = unsafe { &*SCHED };
+            s.sleeps.insert(std::thread::current().id(), AtomicBool::new(false));
+            s.worker_ids.insert(id, std::thread::current().id());
+            s.worker_ids2.insert(std::thread::current().id(), id);
             s.event_loop.run(id as usize).unwrap_or_else(|e| {
                 panic!("event_loop failed running, err={}", e);
             });
@@ -179,6 +197,9 @@ pub struct Scheduler {
     timer_thread: TimerThread,
     stealers: Vec<Vec<(usize, deque::Stealer<CoroutineImpl>)>>,
     workers_len: usize,
+    pub(crate) sleeps: dark_std::sync::SyncHashMap<ThreadId, AtomicBool>,
+    pub(crate) worker_ids: dark_std::sync::SyncHashMap<usize, ThreadId>,
+    pub(crate) worker_ids2: dark_std::sync::SyncHashMap<ThreadId, usize>,
 }
 
 impl Scheduler {
@@ -205,6 +226,18 @@ impl Scheduler {
             workers: ParkStatus::new(workers as u64),
             stealers,
             workers_len: workers,
+            sleeps: {
+                let v = dark_std::sync::SyncHashMap::new();
+                v
+            },
+            worker_ids: {
+                let v = dark_std::sync::SyncHashMap::new();
+                v
+            },
+            worker_ids2: {
+                let v = dark_std::sync::SyncHashMap::new();
+                v
+            },
         })
     }
 
@@ -250,9 +283,9 @@ impl Scheduler {
     #[inline]
     pub fn schedule(&self, co: CoroutineImpl) {
         #[cfg(nightly)]
-        let id = WORKER_ID.load(Ordering::Relaxed);
+            let id = WORKER_ID.load(Ordering::Relaxed);
         #[cfg(not(nightly))]
-        let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
+            let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
 
         if id == !1 {
             self.schedule_global(co);
