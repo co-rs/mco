@@ -5,7 +5,7 @@ members = [
 
 [package]
 name = "mco"
-version = "0.1.47"
+version = "0.1.48"
 edition = "2018"
 authors = ["zhuxiujia@qq.com", "Xudong Huang <huangxu008@hotmail.com>"]
 license = "MIT/Apache-2.0"
@@ -29,7 +29,8 @@ log = "0.4"
 socket2 = { version = "0.5.5", features = ["all"] }
 num_cpus = "1.13"
 smallvec = "1.9"
-mco-gen  = {version = "0.7",path="mco-gen"}
+#mco-gen  = {version = "0.7",path="mco-gen"}
+generator = "0.7"
 crossbeam = "0.8"
 crossbeam-utils = { version = "0.8", features = ["std"] }
 once_cell = "1.18"
