@@ -1,0 +1,44 @@
+[package]
+name = "mco-gen"
+version = "0.7.5"
+edition = "2021"
+authors = ["zhuxiujia@qq.com","Xudong Huang <huangxu008@hotmail.com>"]
+license = "MIT/Apache-2.0"
+documentation = "https://docs.rs/generator"
+description = "Stackfull Generator Library in Rust"
+readme = "README.md"
+keywords = ["generator", "coroutine", "green", "thread", "fiber"]
+categories = ["data-structures", "algorithms"]
+exclude = [
+    ".gitignore",
+    ".travis.yml",
+    "appveyor.yml",
+    "benches/**/*",
+]
+
+
+[target.'cfg(windows)'.dependencies.windows]
+version = "0.51.1"
+features = [
+    "Win32_System_Memory",
+    "Win32_System_Kernel",
+    "Win32_Foundation",
+    "Win32_System_SystemInformation",
+    "Win32_System_Diagnostics_Debug"
+]
+
+[target.'cfg(unix)'.dependencies]
+libc = "0.2"
+
+[dependencies]
+log = "0.4"
+cfg-if = "1.0.0"
+
+
+[build-dependencies]
+cc = "1.0"
+rustversion = "1.0"
+
+# release build
+[profile.release]
+lto = true
