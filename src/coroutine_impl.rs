@@ -99,6 +99,25 @@ pub struct CoroutineImpl {
     pub inner: Generator<'static, EventResult, EventSubscriber>,
 }
 
+impl CoroutineImpl{
+    pub fn stack_reduce(&self){
+         if self.inner.gen.context.child.is_null(){
+             println!("[s]null child");
+         }else{
+             println!("[s]have child");
+         }
+        if self.inner.gen.context.parent.is_null(){
+            println!("[s]null parent");
+        }else{
+            println!("[s]have parent");
+        }
+    }
+
+    pub fn stack_restore(&self){
+
+    }
+}
+
 impl Deref for CoroutineImpl {
     type Target = Generator<'static, EventResult, EventSubscriber>;
 
@@ -539,6 +558,7 @@ pub fn park_timeout(dur: Duration) {
 /// run the coroutine
 #[inline]
 pub(crate) fn run_coroutine(mut co: CoroutineImpl) {
+    co.stack_restore();
     match co.resume() {
         Some(ev) => ev.subscribe(co),
         None => {

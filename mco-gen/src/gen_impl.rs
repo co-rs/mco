@@ -21,7 +21,7 @@ pub const DEFAULT_STACK_SIZE: usize = 0x1000;
 
 /// the generator obj type, the functor passed to it must be Send
 pub struct GeneratorObj<'a, A, T, const LOCAL: bool> {
-    gen: StackBox<GeneratorImpl<'a, A, T>>,
+    pub gen: StackBox<GeneratorImpl<'a, A, T>>,
 }
 
 /// the generator type, the functor passed to it must be Send
@@ -251,11 +251,11 @@ impl<A: Any> Gn<A> {
 
 /// `GeneratorImpl`
 #[repr(C)]
-struct GeneratorImpl<'a, A, T> {
+pub struct GeneratorImpl<'a, A, T> {
     // run time context
-    context: Context,
+    pub context: Context,
     // stack
-    stack: Stack,
+    pub stack: Stack,
     // save the input
     para: Option<A>,
     // save the output

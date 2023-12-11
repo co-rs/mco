@@ -49,7 +49,7 @@ pub struct Context {
     /// generator regs context
     pub regs: RegContext,
     /// child context
-    child: *mut Context,
+    pub child: *mut Context,
     /// parent context
     pub parent: *mut Context,
     /// passed in para for send
