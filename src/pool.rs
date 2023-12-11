@@ -12,9 +12,12 @@ pub struct CoroutinePool {
 
 impl CoroutinePool {
     fn create_dummy_coroutine() -> CoroutineImpl {
-        Gn::new_opt(config().get_stack_size(), move || {
-            unreachable!("dummy coroutine should never be called");
-        })
+        CoroutineImpl{
+            thread: None,
+            inner:Gn::new_opt(config().get_stack_size(), move || {
+                unreachable!("dummy coroutine should never be called");
+            })
+        }
     }
 
     pub fn new() -> Self {

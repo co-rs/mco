@@ -1,6 +1,8 @@
 use std::fmt;
 use std::io;
+use std::ops::{Deref, DerefMut};
 use std::sync::Arc;
+use std::thread::ThreadId;
 use std::time::Duration;
 
 use crate::cancel::Cancel;
@@ -91,7 +93,25 @@ impl EventSource for Done {
 
 /// coroutines are static generator
 /// the para type is EventResult, the result type is EventSubscriber
-pub type CoroutineImpl = Generator<'static, EventResult, EventSubscriber>;
+#[derive(Debug)]
+pub struct  CoroutineImpl{
+    pub thread:Option<ThreadId>,
+    pub inner:Generator<'static, EventResult, EventSubscriber>
+}
+impl Deref for CoroutineImpl{
+    type Target = Generator<'static, EventResult, EventSubscriber>;
+
+    fn deref(&self) -> &Self::Target {
+         &self.inner
+    }
+}
+
+impl DerefMut for CoroutineImpl{
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
+    }
+}
+
 
 #[inline]
 #[allow(clippy::cast_ptr_alignment)]
@@ -295,7 +315,10 @@ impl Builder {
             c.init_code(closure);
             c
         } else {
-            Gn::new_opt(stack_size, closure)
+            CoroutineImpl{
+                thread: None,
+                inner:Gn::new_opt(stack_size, closure)
+            }
         };
 
         let handle = Coroutine::new(self.name, stack_size);

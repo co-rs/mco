@@ -110,14 +110,11 @@ fn init_scheduler() {
                 set_co_para(&mut c, io::Error::new(io::ErrorKind::TimedOut, "timeout"));
                 // s.schedule_global(c);
                 // run_coroutine(c);
-                for (t, b) in s.sleeps.iter() {
-                    if b.load(Ordering::Relaxed) {
-                        let id = s.worker_ids.get(&t);
-                        if let Some(id) = id {
-                            s.local_queues[*id].push(c);
-                            s.get_selector().wakeup(*id);
-                            break;
-                        }
+                if let Some(t)=&c.thread{
+                    let id = s.worker_ids.get(t);
+                    if let Some(id) = id {
+                        s.local_queues[*id].push(c);
+                        s.get_selector().wakeup(*id);
                     }
                 }
             }
@@ -131,8 +128,7 @@ fn init_scheduler() {
         thread::spawn(move || {
             println!("init worker {:?}", std::thread::current().id());
             let s = unsafe { &*SCHED };
-            s.sleeps.insert(std::thread::current().id(), AtomicBool::new(false));
-            s.worker_ids.insert(std::thread::current().id(),id);
+            s.worker_ids.insert(std::thread::current().id(), id);
             s.event_loop.run(id as usize).unwrap_or_else(|e| {
                 panic!("event_loop failed running, err={}", e);
             });
@@ -190,13 +186,12 @@ fn steal_local<T>(stealer: &deque::Stealer<T>, local: &deque::Worker<T>) -> Opti
 pub struct Scheduler {
     pub pool: CoroutinePool,
     event_loop: EventLoop,
-    global_queue: deque::Injector<CoroutineImpl>,
+    global_queue: dark_std::sync::SyncVec<CoroutineImpl>,
     local_queues: Vec<deque::Worker<CoroutineImpl>>,
     pub(crate) workers: ParkStatus,
     timer_thread: TimerThread,
     stealers: Vec<Vec<(usize, deque::Stealer<CoroutineImpl>)>>,
     workers_len: usize,
-    pub(crate) sleeps: dark_std::sync::SyncHashMap<ThreadId, AtomicBool>,
     pub(crate) worker_ids: dark_std::sync::SyncHashMap<ThreadId, usize>,
 }
 
@@ -218,16 +213,12 @@ impl Scheduler {
         Box::new(Scheduler {
             pool: CoroutinePool::new(),
             event_loop: EventLoop::new(workers).expect("can't create event_loop"),
-            global_queue: deque::Injector::new(),
+            global_queue: dark_std::sync::SyncVec::new(),
             local_queues,
             timer_thread: TimerThread::new(),
             workers: ParkStatus::new(workers as u64),
             stealers,
             workers_len: workers,
-            sleeps: {
-                let v = dark_std::sync::SyncHashMap::new();
-                v
-            },
             worker_ids: {
                 let v = dark_std::sync::SyncHashMap::new();
                 v
@@ -237,32 +228,34 @@ impl Scheduler {
 
     pub fn run_queued_tasks(&self, id: usize) {
         let local = unsafe { self.local_queues.get_unchecked(id) };
-        let stealers = unsafe { self.stealers.get_unchecked(id) };
+        // let stealers = unsafe { self.stealers.get_unchecked(id) };
         loop {
             // Pop a task from the local queue
             let co = local.pop().or_else(|| {
                 // Try stealing a of task from other local queues.
-                let parked_threads = self.workers.parked.load(Ordering::Relaxed);
-                stealers
-                    .iter()
-                    .map(|s| {
-                        if parked_threads & (self.workers_len + s.0) as u64 != 0 {
-                            return None;
-                        }
-                        steal_local(&s.1, local)
-                    })
-                    .find_map(|r| r)
-                    // Try stealing a batch of tasks from the global queue.
-                    .or_else(|| {
-                        if self.global_queue.is_empty() {
-                            None
-                        } else {
-                            steal_global(&self.global_queue, local)
-                        }
-                    })
+                // let parked_threads = self.workers.parked.load(Ordering::Relaxed);
+                // stealers
+                //     .iter()
+                //     .map(|s| {
+                //         if parked_threads & (self.workers_len + s.0) as u64 != 0 {
+                //             return None;
+                //         }
+                //         steal_local(&s.1, local)
+                //     })
+                //     .find_map(|r| r)
+                //     // Try stealing a batch of tasks from the global queue.
+                //     .or_else(|| {
+                //         if self.global_queue.is_empty() {
+                //             None
+                //         } else {
+                //             steal_global(&self.global_queue, local)
+                //         }
+                //     })
+                let f = self.steal_g();
+                f
             });
-
-            if let Some(co) = co {
+            if let Some(mut co) = co {
+                co.thread = Some(std::thread::current().id());
                 run_coroutine(co);
             } else {
                 // do a re-check
@@ -270,6 +263,46 @@ impl Scheduler {
                     break;
                 }
             }
+        }
+    }
+
+    fn steal_g(&self) -> Option<CoroutineImpl> {
+        let current_id = std::thread::current().id();
+        if self.global_queue.is_empty() {
+            None
+        } else {
+            let mut index = 0;
+            for x in self.global_queue.iter() {
+                if let Some(v) = &x.thread {
+                    if &current_id == v {
+                        let item = self.global_queue.remove(index);
+                        //recheck
+                        if let Some(v) = item {
+                            if v.thread == None {
+                                return Some(v);
+                            } else {
+                                if v.thread.as_ref().unwrap() != &current_id {
+                                    self.global_queue.push(v);
+                                }
+                            }
+                        }
+                    }
+                } else {
+                    let item = self.global_queue.pop();
+                    //recheck
+                    if let Some(v) = item {
+                        if v.thread == None {
+                            return Some(v);
+                        } else {
+                            if v.thread.as_ref().unwrap() != &current_id {
+                                self.global_queue.push(v);
+                            }
+                        }
+                    }
+                }
+                index += 1;
+            }
+            return None;
         }
     }
 
@@ -315,3 +348,5 @@ impl Scheduler {
         self.event_loop.get_selector()
     }
 }
+
+

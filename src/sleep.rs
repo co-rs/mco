@@ -34,10 +34,6 @@ pub fn sleep(dur: Duration) {
     if !is_coroutine() {
         return thread::sleep(dur);
     }
-    let s= get_scheduler().sleeps.get(&thread::current().id());
-    if let Some(s)=s{
-        s.store(true,Ordering::Relaxed);
-    };
     let sleeper = Sleep { dur };
     yield_with(&sleeper);
     // consume the timeout error
