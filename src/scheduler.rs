@@ -110,7 +110,7 @@ fn init_scheduler() {
                 set_co_para(&mut c, io::Error::new(io::ErrorKind::TimedOut, "timeout"));
                 // s.schedule_global(c);
                 // run_coroutine(c);
-                if let Some(t)=&c.thread{
+                if let Some(t)=&c.thread_id {
                     let id = s.worker_ids.get(t);
                     if let Some(id) = id {
                         s.local_queues[*id].push(c);
@@ -255,7 +255,7 @@ impl Scheduler {
                 f
             });
             if let Some(mut co) = co {
-                co.thread = Some(std::thread::current().id());
+                co.thread_id = Some(std::thread::current().id());
                 run_coroutine(co);
             } else {
                 // do a re-check
@@ -273,15 +273,15 @@ impl Scheduler {
         } else {
             let mut index = 0;
             for x in self.global_queue.iter() {
-                if let Some(v) = &x.thread {
+                if let Some(v) = &x.thread_id {
                     if &current_id == v {
                         let item = self.global_queue.remove(index);
                         //recheck
                         if let Some(v) = item {
-                            if v.thread == None {
+                            if v.thread_id == None {
                                 return Some(v);
                             } else {
-                                if v.thread.as_ref().unwrap() != &current_id {
+                                if v.thread_id.as_ref().unwrap() != &current_id {
                                     self.global_queue.push(v);
                                 }
                             }
@@ -291,10 +291,10 @@ impl Scheduler {
                     let item = self.global_queue.pop();
                     //recheck
                     if let Some(v) = item {
-                        if v.thread == None {
+                        if v.thread_id == None {
                             return Some(v);
                         } else {
-                            if v.thread.as_ref().unwrap() != &current_id {
+                            if v.thread_id.as_ref().unwrap() != &current_id {
                                 self.global_queue.push(v);
                             }
                         }

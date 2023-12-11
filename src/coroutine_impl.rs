@@ -95,7 +95,7 @@ impl EventSource for Done {
 /// the para type is EventResult, the result type is EventSubscriber
 #[derive(Debug)]
 pub struct CoroutineImpl {
-    pub thread: Option<ThreadId>,
+    pub thread_id: Option<ThreadId>,
     pub inner: Generator<'static, EventResult, EventSubscriber>,
 }
 
@@ -317,7 +317,7 @@ impl Builder {
             c
         } else {
             CoroutineImpl {
-                thread: None,
+                thread_id: None,
                 inner: Gn::new_opt(stack_size, closure),
             }
         };
