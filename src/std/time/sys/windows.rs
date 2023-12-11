@@ -12,10 +12,10 @@ use super::Tm;
 use std::io;
 use std::mem;
 use windows_sys::Win32::Foundation::{FILETIME, SYSTEMTIME};
-use windows_sys::Win32::System::Time::{GetTimeZoneInformation, SystemTimeToFileTime};
 use windows_sys::Win32::System::Time::FileTimeToSystemTime;
 use windows_sys::Win32::System::Time::SystemTimeToTzSpecificLocalTime;
 use windows_sys::Win32::System::Time::TzSpecificLocalTimeToSystemTime;
+use windows_sys::Win32::System::Time::{GetTimeZoneInformation, SystemTimeToFileTime};
 
 const HECTONANOSECS_IN_SEC: i64 = 10_000_000;
 const HECTONANOSEC_TO_UNIX_EPOCH: i64 = 11_644_473_600 * HECTONANOSECS_IN_SEC;

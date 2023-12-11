@@ -12,7 +12,6 @@ use crate::std::sync::delay_drop::DelayDrop;
 use miow::net::{SocketAddrBuf, UdpSocketExt};
 use windows_sys::Win32::Foundation::HANDLE;
 
-
 pub struct UdpRecvFrom<'a> {
     io_data: EventData,
     buf: &'a mut [u8],
@@ -66,7 +65,7 @@ impl<'a> EventSource for UdpRecvFrom<'a> {
         cancel.set_io(CancelIoData::new(&self.io_data));
         // re-check the cancel status
         if cancel.is_canceled() {
-            _ =  cancel.cancel();
+            _ = cancel.cancel();
         }
     }
 }

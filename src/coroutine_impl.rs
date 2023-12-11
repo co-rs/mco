@@ -95,23 +95,21 @@ pub struct CoroutineImpl {
     pub inner: Generator<'static, EventResult, EventSubscriber>,
 }
 
-impl CoroutineImpl{
-    pub fn stack_reduce(&self){
-         if self.inner.gen.context.child.is_null(){
-             println!("[s]null child");
-         }else{
-             println!("[s]have child");
-         }
-        if self.inner.gen.context.parent.is_null(){
+impl CoroutineImpl {
+    pub fn stack_reduce(&self) {
+        if self.inner.gen.context.child.is_null() {
+            println!("[s]null child");
+        } else {
+            println!("[s]have child");
+        }
+        if self.inner.gen.context.parent.is_null() {
             println!("[s]null parent");
-        }else{
+        } else {
             println!("[s]have parent");
         }
     }
 
-    pub fn stack_restore(&self){
-
-    }
+    pub fn stack_restore(&self) {}
 }
 
 impl Deref for CoroutineImpl {
@@ -127,7 +125,6 @@ impl DerefMut for CoroutineImpl {
         &mut self.inner
     }
 }
-
 
 #[inline]
 #[allow(clippy::cast_ptr_alignment)]
@@ -286,9 +283,9 @@ impl Builder {
     /// The join handle can be used to block on
     /// termination of the child coroutine, including recovering its panics.
     fn spawn_impl<F, T>(self, f: F) -> (CoroutineImpl, JoinHandle<T>)
-        where
-            F: FnOnce() -> T + Send + 'static,
-            T: Send + 'static,
+    where
+        F: FnOnce() -> T + Send + 'static,
+        T: Send + 'static,
     {
         static DONE: Done = Done {};
 
@@ -318,7 +315,7 @@ impl Builder {
             subscriber
         };
 
-        let mut co =   CoroutineImpl {
+        let mut co = CoroutineImpl {
             worker_thread_id: None,
             inner: Gn::new_opt(stack_size, closure),
         };
@@ -372,9 +369,9 @@ impl Builder {
     /// [`go!`]: ../macro.go.html
     /// [`spawn`]: ./fn.spawn.html
     pub fn spawn<F, T>(self, f: F) -> JoinHandle<T>
-        where
-            F: FnOnce() -> T + Send + 'static,
-            T: Send + 'static,
+    where
+        F: FnOnce() -> T + Send + 'static,
+        T: Send + 'static,
     {
         let (co, handle) = self.spawn_impl(f);
         let s = get_scheduler();
@@ -391,9 +388,9 @@ impl Builder {
     /// Normally this is safe but for some cases you should
     /// take care of the side effect
     pub fn spawn_local<F, T>(self, f: F) -> JoinHandle<T>
-        where
-            F: FnOnce() -> T + Send + 'static,
-            T: Send + 'static,
+    where
+        F: FnOnce() -> T + Send + 'static,
+        T: Send + 'static,
     {
         // we will still get optimizations in spawn_impl
         let (co, handle) = self.spawn_impl(f);
@@ -454,9 +451,9 @@ impl Builder {
 /// [`Builder::spawn`]: struct.Builder.html#method.spawn
 /// [`Builder`]: struct.Builder.html
 pub fn spawn<F, T>(f: F) -> JoinHandle<T>
-    where
-        F: FnOnce() -> T + Send + 'static,
-        T: Send + 'static,
+where
+    F: FnOnce() -> T + Send + 'static,
+    T: Send + 'static,
 {
     Builder::new().spawn(f)
 }

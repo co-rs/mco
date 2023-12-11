@@ -12,7 +12,6 @@ use std::fs::File;
 use std::io::{Read, Write};
 use std::sync::Arc;
 
-
 // This example is for demonstration only and is suitable for production environment please move on
 // example see https://github.com/co-rs/mco-http/tree/main/examples
 fn main() {
@@ -73,7 +72,6 @@ fn main() {
         });
     }
 }
-
 
 fn req_done(buf: &[u8], path: &mut String) -> Option<usize> {
     let mut headers = [httparse::EMPTY_HEADER; 16];

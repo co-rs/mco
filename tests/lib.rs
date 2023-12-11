@@ -5,7 +5,7 @@ extern crate mco;
 
 use crate::coroutine::yield_now;
 use mco::coroutine;
-use mco::mco_gen as mco_gen;
+use mco::mco_gen;
 use mco_gen::Gn;
 
 #[test]
@@ -189,7 +189,6 @@ fn scoped_coroutine() {
     assert_eq!(array[1], 3);
     assert_eq!(array[2], 4);
 }
-
 
 #[test]
 #[allow(unused_assignments)]

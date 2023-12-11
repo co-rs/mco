@@ -10,7 +10,6 @@ use crate::scheduler::get_scheduler;
 use miow::net::UdpSocketExt;
 use windows_sys::Win32::Foundation::HANDLE;
 
-
 pub struct UdpSendTo<'a> {
     io_data: EventData,
     buf: &'a [u8],

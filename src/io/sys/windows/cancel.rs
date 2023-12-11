@@ -22,10 +22,10 @@ impl CancelIoData {
     fn cancel(&self) -> Result<(), io::Error> {
         use windows_sys::Win32::System::IO::CancelIoEx;
 
-        let ev = unsafe{&mut *self.ev_data};
+        let ev = unsafe { &mut *self.ev_data };
         let handle = ev.handle;
         let overlapped = ev.get_overlapped();
-        let ret = unsafe{CancelIoEx(handle, overlapped)};
+        let ret = unsafe { CancelIoEx(handle, overlapped) };
         if ret == 0 {
             let err = io::Error::last_os_error();
             error!("cancel err={:?}", err);
@@ -56,7 +56,7 @@ impl CancelIo for CancelIoImpl {
         *self.0.lock().expect("failed to get CancelIo lock") = None;
     }
 
-    fn cancel(&self)  -> Result<(), std::io::Error> {
+    fn cancel(&self) -> Result<(), std::io::Error> {
         match self.0.lock() {
             Ok(mut v) => {
                 v.take().map(|d| match d.cancel() {

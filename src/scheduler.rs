@@ -95,7 +95,6 @@ fn init_scheduler() {
     }
     filter_cancel_panic();
 
-
     // timer thread
     thread::spawn(move || {
         println!("init timer worker {:?}", std::thread::current().id());
@@ -108,7 +107,7 @@ fn init_scheduler() {
                 set_co_para(&mut c, io::Error::new(io::ErrorKind::TimedOut, "timeout"));
                 // s.schedule_global(c);
                 // run_coroutine(c);
-                if let Some(t)=&c.worker_thread_id {
+                if let Some(t) = &c.worker_thread_id {
                     let id = s.worker_ids.get(t);
                     if let Some(id) = id {
                         s.local_queues[*id].push(c);
@@ -306,9 +305,9 @@ impl Scheduler {
     #[inline]
     pub fn schedule(&self, co: CoroutineImpl) {
         #[cfg(nightly)]
-            let id = WORKER_ID.load(Ordering::Relaxed);
+        let id = WORKER_ID.load(Ordering::Relaxed);
         #[cfg(not(nightly))]
-            let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
+        let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
 
         if id == !1 {
             self.schedule_global(co);
@@ -344,5 +343,3 @@ impl Scheduler {
         self.event_loop.get_selector()
     }
 }
-
-

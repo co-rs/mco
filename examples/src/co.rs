@@ -1,5 +1,5 @@
+use mco::co;
 use std::time::Duration;
-use mco::{co};
 
 fn main() {
     println!("thread {:?}", std::thread::current().id());

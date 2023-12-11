@@ -12,11 +12,11 @@ pub struct CoroutinePool {
 
 impl CoroutinePool {
     fn create_dummy_coroutine() -> CoroutineImpl {
-        CoroutineImpl{
+        CoroutineImpl {
             worker_thread_id: None,
-            inner:Gn::new_opt(config().get_stack_size(), move || {
+            inner: Gn::new_opt(config().get_stack_size(), move || {
                 unreachable!("dummy coroutine should never be called");
-            })
+            }),
         }
     }
 
