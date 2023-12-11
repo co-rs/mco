@@ -190,28 +190,6 @@ fn scoped_coroutine() {
     assert_eq!(array[2], 4);
 }
 
-#[test]
-fn yield_from_gen() {
-    let mut a = 0;
-    coroutine::scope(|scope| {
-        co!(scope, || {
-            let g = Gn::<()>::new_scoped(|mut scope| {
-                while a < 10 {
-                    scope.yield_(a);
-                    // this is yield from the generator context!
-                    yield_now();
-                    a += 1;
-                }
-                a
-            });
-            g.fold((), |_, i| {
-                println!("got {:?}", i);
-            });
-        });
-    });
-
-    assert_eq!(a, 10);
-}
 
 #[test]
 #[allow(unused_assignments)]

@@ -1,6 +1,5 @@
-use std::collections::HashMap;
 use std::io;
-use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Once};
 use std::thread;
 use std::time::Duration;
@@ -190,7 +189,7 @@ pub struct Scheduler {
     local_queues: Vec<deque::Worker<CoroutineImpl>>,
     pub(crate) workers: ParkStatus,
     timer_thread: TimerThread,
-    stealers: Vec<Vec<(usize, deque::Stealer<CoroutineImpl>)>>,
+    // stealers: Vec<Vec<(usize, deque::Stealer<CoroutineImpl>)>>,
     workers_len: usize,
     pub(crate) worker_ids: dark_std::sync::SyncHashMap<ThreadId, usize>,
 }
@@ -217,7 +216,7 @@ impl Scheduler {
             local_queues,
             timer_thread: TimerThread::new(),
             workers: ParkStatus::new(workers as u64),
-            stealers,
+            //stealers,
             workers_len: workers,
             worker_ids: {
                 let v = dark_std::sync::SyncHashMap::new();

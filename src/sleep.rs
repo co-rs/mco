@@ -1,6 +1,5 @@
 use crate::std::sync::AtomicOption;
 use std::sync::Arc;
-use std::sync::atomic::Ordering;
 use std::thread;
 use std::time::Duration;
 
