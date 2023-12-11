@@ -94,19 +94,20 @@ impl EventSource for Done {
 /// coroutines are static generator
 /// the para type is EventResult, the result type is EventSubscriber
 #[derive(Debug)]
-pub struct  CoroutineImpl{
-    pub thread:Option<ThreadId>,
-    pub inner:Generator<'static, EventResult, EventSubscriber>
+pub struct CoroutineImpl {
+    pub thread: Option<ThreadId>,
+    pub inner: Generator<'static, EventResult, EventSubscriber>,
 }
-impl Deref for CoroutineImpl{
+
+impl Deref for CoroutineImpl {
     type Target = Generator<'static, EventResult, EventSubscriber>;
 
     fn deref(&self) -> &Self::Target {
-         &self.inner
+        &self.inner
     }
 }
 
-impl DerefMut for CoroutineImpl{
+impl DerefMut for CoroutineImpl {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.inner
     }
@@ -270,9 +271,9 @@ impl Builder {
     /// The join handle can be used to block on
     /// termination of the child coroutine, including recovering its panics.
     fn spawn_impl<F, T>(self, f: F) -> (CoroutineImpl, JoinHandle<T>)
-    where
-        F: FnOnce() -> T + Send + 'static,
-        T: Send + 'static,
+        where
+            F: FnOnce() -> T + Send + 'static,
+            T: Send + 'static,
     {
         static DONE: Done = Done {};
 
@@ -315,9 +316,9 @@ impl Builder {
             c.init_code(closure);
             c
         } else {
-            CoroutineImpl{
+            CoroutineImpl {
                 thread: None,
-                inner:Gn::new_opt(stack_size, closure)
+                inner: Gn::new_opt(stack_size, closure),
             }
         };
 
@@ -370,9 +371,9 @@ impl Builder {
     /// [`go!`]: ../macro.go.html
     /// [`spawn`]: ./fn.spawn.html
     pub fn spawn<F, T>(self, f: F) -> JoinHandle<T>
-    where
-        F: FnOnce() -> T + Send + 'static,
-        T: Send + 'static,
+        where
+            F: FnOnce() -> T + Send + 'static,
+            T: Send + 'static,
     {
         let (co, handle) = self.spawn_impl(f);
         let s = get_scheduler();
@@ -389,9 +390,9 @@ impl Builder {
     /// Normally this is safe but for some cases you should
     /// take care of the side effect
     pub fn spawn_local<F, T>(self, f: F) -> JoinHandle<T>
-    where
-        F: FnOnce() -> T + Send + 'static,
-        T: Send + 'static,
+        where
+            F: FnOnce() -> T + Send + 'static,
+            T: Send + 'static,
     {
         // we will still get optimizations in spawn_impl
         let (co, handle) = self.spawn_impl(f);
@@ -452,9 +453,9 @@ impl Builder {
 /// [`Builder::spawn`]: struct.Builder.html#method.spawn
 /// [`Builder`]: struct.Builder.html
 pub fn spawn<F, T>(f: F) -> JoinHandle<T>
-where
-    F: FnOnce() -> T + Send + 'static,
-    T: Send + 'static,
+    where
+        F: FnOnce() -> T + Send + 'static,
+        T: Send + 'static,
 {
     Builder::new().spawn(f)
 }
