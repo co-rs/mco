@@ -5,9 +5,11 @@
 
 use crate::detail::gen_init;
 use std::any::Any;
+use std::cell::UnsafeCell;
 use std::fmt;
 use std::marker::PhantomData;
 use std::panic;
+use std::sync::atomic::AtomicPtr;
 use std::thread;
 
 use crate::reg_context::RegContext;
@@ -33,10 +35,10 @@ unsafe impl<A: Send, T: Send> Send for Generator<'static, A, T> {}
 impl<'a, A, T> Generator<'a, A, T> {
     /// init a heap based generator with scoped closure
     pub fn scoped_init<F>(&mut self, f: F)
-    where
-        for<'scope> F: FnOnce(Scope<'scope, 'a, A, T>) -> T + Send + 'a,
-        T: Send + 'a,
-        A: Send + 'a,
+        where
+                for<'scope> F: FnOnce(Scope<'scope, 'a, A, T>) -> T + Send + 'a,
+                T: Send + 'a,
+                A: Send + 'a,
     {
         self.gen.scoped_init(f);
     }
@@ -44,8 +46,8 @@ impl<'a, A, T> Generator<'a, A, T> {
     /// init a heap based generator
     // it's can be used to re-init a 'done' generator before it's get dropped
     pub fn init_code<F: FnOnce() -> T + Send + 'a>(&mut self, f: F)
-    where
-        T: Send + 'a,
+        where
+            T: Send + 'a,
     {
         self.gen.init_code(f);
     }
@@ -57,10 +59,10 @@ pub type LocalGenerator<'a, A, T> = GeneratorObj<'a, A, T, true>;
 impl<'a, A, T> LocalGenerator<'a, A, T> {
     /// init a heap based generator with scoped closure
     pub fn scoped_init<F>(&mut self, f: F)
-    where
-        for<'scope> F: FnOnce(Scope<'scope, 'a, A, T>) -> T + 'a,
-        T: 'a,
-        A: 'a,
+        where
+                for<'scope> F: FnOnce(Scope<'scope, 'a, A, T>) -> T + 'a,
+                T: 'a,
+                A: 'a,
     {
         self.gen.scoped_init(f);
     }
@@ -182,30 +184,30 @@ pub struct Gn<A = ()> {
 impl<A> Gn<A> {
     /// create a scoped generator with default stack size
     pub fn new_scoped<'a, T, F>(f: F) -> Generator<'a, A, T>
-    where
-        for<'scope> F: FnOnce(Scope<'scope, 'a, A, T>) -> T + Send + 'a,
-        T: Send + 'a,
-        A: Send + 'a,
+        where
+                for<'scope> F: FnOnce(Scope<'scope, 'a, A, T>) -> T + Send + 'a,
+                T: Send + 'a,
+                A: Send + 'a,
     {
         Self::new_scoped_opt(DEFAULT_STACK_SIZE, f)
     }
 
     /// create a scoped local generator with default stack size
     pub fn new_scoped_local<'a, T, F>(f: F) -> LocalGenerator<'a, A, T>
-    where
-        F: FnOnce(Scope<A, T>) -> T + 'a,
-        T: 'a,
-        A: 'a,
+        where
+            F: FnOnce(Scope<A, T>) -> T + 'a,
+            T: 'a,
+            A: 'a,
     {
         Self::new_scoped_opt_local(DEFAULT_STACK_SIZE, f)
     }
 
     /// create a scoped generator with specified stack size
     pub fn new_scoped_opt<'a, T, F>(size: usize, f: F) -> Generator<'a, A, T>
-    where
-        for<'scope> F: FnOnce(Scope<'scope, 'a, A, T>) -> T + Send + 'a,
-        T: Send + 'a,
-        A: Send + 'a,
+        where
+                for<'scope> F: FnOnce(Scope<'scope, 'a, A, T>) -> T + Send + 'a,
+                T: Send + 'a,
+                A: Send + 'a,
     {
         let mut gen = GeneratorImpl::<A, T>::new(Stack::new(size));
         gen.scoped_init(f);
@@ -214,10 +216,10 @@ impl<A> Gn<A> {
 
     /// create a scoped local generator with specified stack size
     pub fn new_scoped_opt_local<'a, T, F>(size: usize, f: F) -> LocalGenerator<'a, A, T>
-    where
-        F: FnOnce(Scope<A, T>) -> T + 'a,
-        T: 'a,
-        A: 'a,
+        where
+            F: FnOnce(Scope<A, T>) -> T + 'a,
+            T: 'a,
+            A: 'a,
     {
         let mut gen = GeneratorImpl::<A, T>::new(Stack::new(size));
         gen.scoped_init(f);
@@ -230,8 +232,8 @@ impl<A: Any> Gn<A> {
     #[cfg_attr(feature = "cargo-clippy", allow(clippy::new_ret_no_self))]
     #[deprecated(since = "0.6.18", note = "please use `scope` version instead")]
     pub fn new<'a, T: Any, F>(f: F) -> Generator<'a, A, T>
-    where
-        F: FnOnce() -> T + Send + 'a,
+        where
+            F: FnOnce() -> T + Send + 'a,
     {
         Self::new_opt(DEFAULT_STACK_SIZE, f)
     }
@@ -239,8 +241,8 @@ impl<A: Any> Gn<A> {
     /// create a new generator with specified stack size
     // the `may` library use this API so we can't deprecated it yet.
     pub fn new_opt<'a, T: Any, F>(size: usize, f: F) -> Generator<'a, A, T>
-    where
-        F: FnOnce() -> T + Send + 'a,
+        where
+            F: FnOnce() -> T + Send + 'a,
     {
         let mut gen = GeneratorImpl::<A, T>::new(Stack::new(size));
         gen.init_context();
@@ -255,7 +257,7 @@ pub struct GeneratorImpl<'a, A, T> {
     // run time context
     pub context: Context,
     // stack
-    pub stack: Stack,
+    pub stack: UnsafeCell<Stack>,
     // save the input
     para: Option<A>,
     // save the output
@@ -287,7 +289,7 @@ impl<'a, A, T> GeneratorImpl<'a, A, T> {
             let mut stack_box = stack.alloc_uninit_box::<GeneratorImpl<'a, A, T>>();
             (*stack_box.as_mut_ptr()).init(GeneratorImpl {
                 para: None,
-                stack,
+                stack: UnsafeCell::new(stack),
                 ret: None,
                 f: None,
                 context: Context::new(),
@@ -305,10 +307,10 @@ impl<'a, A, T> GeneratorImpl<'a, A, T> {
 
     /// init a heap based generator with scoped closure
     fn scoped_init<F>(&mut self, f: F)
-    where
-        for<'scope> F: FnOnce(Scope<'scope, 'a, A, T>) -> T + 'a,
-        T: 'a,
-        A: 'a,
+        where
+                for<'scope> F: FnOnce(Scope<'scope, 'a, A, T>) -> T + 'a,
+                T: 'a,
+                A: 'a,
     {
         use std::mem::transmute;
         let scope = unsafe { transmute(Scope::new(&mut self.para, &mut self.ret)) };
@@ -318,8 +320,8 @@ impl<'a, A, T> GeneratorImpl<'a, A, T> {
     /// init a heap based generator
     // it's can be used to re-init a 'done' generator before it's get dropped
     fn init_code<F: FnOnce() -> T + 'a>(&mut self, f: F)
-    where
-        T: 'a,
+        where
+            T: 'a,
     {
         // make sure the last one is finished
         if self.f.is_none() && self.context._ref == 0 {
@@ -335,20 +337,20 @@ impl<'a, A, T> GeneratorImpl<'a, A, T> {
         self.context._ref = 0;
         let ret = &mut self.ret as *mut _;
         // alloc the function on stack
-        let func = StackBox::new_fn_once(&mut self.stack, move || {
+        let func = StackBox::new_fn_once(self.stack.get_mut(), move || {
             let r = f();
             unsafe { *ret = Some(r) };
         });
 
         self.f = Some(func);
 
-        let guard = (self.stack.begin() as usize, self.stack.end() as usize);
+        let guard = (self.stack.get_mut().begin() as usize, self.stack.get_mut().end() as usize);
         self.context.stack_guard = guard;
         self.context.regs.init_with(
             gen_init,
             0,
             &mut self.f as *mut _ as *mut usize,
-            &self.stack,
+            unsafe { &*self.stack.get() },
         );
     }
 
@@ -492,7 +494,8 @@ impl<'a, A, T> GeneratorImpl<'a, A, T> {
 
     /// get stack total size and used size in word
     fn stack_usage(&self) -> (usize, usize) {
-        (self.stack.size(), self.stack.get_used_size())
+        let stack = unsafe { &*self.stack.get() };
+        (stack.size(), stack.get_used_size())
     }
 }
 

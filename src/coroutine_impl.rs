@@ -97,16 +97,6 @@ pub struct CoroutineImpl {
 
 impl CoroutineImpl {
     pub fn stack_reduce(&self) {
-        if self.inner.gen.context.child.is_null() {
-            println!("[s]null child");
-        } else {
-            println!("[s]have child");
-        }
-        if self.inner.gen.context.parent.is_null() {
-            println!("[s]null parent");
-        } else {
-            println!("[s]have parent");
-        }
     }
 
     pub fn stack_restore(&self) {}
