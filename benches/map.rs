@@ -1,7 +1,4 @@
-#![cfg(nightly)]
 #![feature(test)]
-#[macro_use]
-extern crate mco;
 extern crate test;
 
 use mco::std::sync::{Mutex, SyncHashMap};

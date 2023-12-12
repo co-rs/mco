@@ -25,3 +25,5 @@ pub use crate::scope::Scope;
 pub use crate::yield_::{
     co_get_yield, co_set_para, co_yield_with, done, get_yield, yield_, yield_from, yield_with,
 };
+
+pub use stack::Stack;

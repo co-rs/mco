@@ -2,6 +2,7 @@ use mco::co;
 use std::time::Duration;
 
 fn main() {
+    mco::config().set_workers(1);
     println!("thread {:?}", std::thread::current().id());
     co!(|| {
         println!("coroutine run on thread {:?}", std::thread::current().id());

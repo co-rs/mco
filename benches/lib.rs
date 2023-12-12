@@ -1,13 +1,9 @@
-#![cfg(nightly)]
 #![feature(test)]
-
-#[macro_use]
-extern crate mco;
 extern crate test;
 
-use crate::coroutine::*;
-use mco::{config, coroutine};
+use mco::{co};
 use test::Bencher;
+use mco::coroutine::scope;
 
 #[bench]
 fn yield_bench(b: &mut Bencher) {
