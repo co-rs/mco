@@ -120,4 +120,29 @@ mod test {
             assert!(VAL);
         }
     }
+
+    #[test]
+    fn test_swap_context_auto_reduce() {
+        static mut VAL: bool = false;
+        let mut cur = RegContext::empty();
+
+        fn callback() {
+            unsafe {
+                VAL = true;
+            }
+        }
+
+        let stk = Stack::new(MIN_STACK);
+        let ctx = RegContext::new(
+            init_fn,
+            unsafe { transmute(&cur) },
+            callback as *mut usize,
+            &stk,
+        );
+
+        RegContext::swap(&mut cur, &ctx);
+        unsafe {
+            assert!(VAL);
+        }
+    }
 }
