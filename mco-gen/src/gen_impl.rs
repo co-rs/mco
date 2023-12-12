@@ -279,6 +279,14 @@ impl<'a, A: Any, T: Any> GeneratorImpl<'a, A, T> {
             std::ptr::write(self.context.ret.as_mut_ptr(), &mut self.ret as &mut dyn Any);
         }
     }
+
+    pub fn swap_stack(&self, in_stack: Stack) -> Stack {
+        unsafe {
+            let s = &mut *self.stack.get();
+            let out =  std::mem::replace(s,in_stack);
+            out
+        }
+    }
 }
 
 impl<'a, A, T> GeneratorImpl<'a, A, T> {

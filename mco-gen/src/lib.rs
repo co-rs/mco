@@ -5,7 +5,7 @@
 
 #![cfg_attr(nightly, feature(thread_local))]
 //#![cfg_attr(test, deny(warnings))]
-#![deny(missing_docs)]
+// #![deny(missing_docs)]
 #![allow(deprecated)]
 
 #[macro_use]
@@ -27,3 +27,4 @@ pub use crate::yield_::{
 };
 
 pub use stack::Stack;
+pub use gen_impl::GeneratorImpl;
