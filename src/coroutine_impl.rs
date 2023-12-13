@@ -324,7 +324,7 @@ impl Builder {
 
         let mut co = CoroutineImpl {
             worker_thread_id: None,
-            inner: Gn::new_opt_stack(closure, Stack::new(2048)),
+            inner: Gn::new_opt_stack(closure, Stack::new(config().get_stack_size())),
             reduce: None,
         };
 
