@@ -307,7 +307,7 @@ unsafe impl Send for SysStack {}
 /// this struct will not dealloc the memory
 /// instead StackBox<> would track it's usage and dealloc it
 pub struct Stack {
-    buf: SysStack,
+    pub(crate) buf: SysStack,
 }
 
 impl Stack {
@@ -387,7 +387,7 @@ impl Stack {
     }
 
     // dealloc the stack
-    fn drop_stack(&self) {
+    pub(crate) fn drop_stack(&self) {
         if self.buf.len() == 0 {
             return;
         }
@@ -399,7 +399,7 @@ impl Stack {
         }
     }
 
-    fn shadow_clone(&self) -> Self {
+    pub fn shadow_clone(&self) -> Self {
         Stack {
             buf: SysStack {
                 top: self.buf.top,
@@ -407,11 +407,103 @@ impl Stack {
             },
         }
     }
+
+    /// return stack vec date
+    pub fn get_stack_data(&self) -> Vec<u8> {
+        let used_size = self.size();
+        let mut data = vec![0; used_size];
+        let src = self.buf.top as *const u8;
+        let dst = data.as_mut_ptr();
+        unsafe {
+            ptr::copy(src.offset(-(used_size as isize)), dst, used_size);
+        }
+        data
+    }
+
+    /// write_stack_data
+    pub fn write_stack_data(&mut self, data: Vec<u8>) {
+        let used_size = self.size();
+        let size = data.len();
+        assert!(size <= used_size, "write_stack_data data is larger than stack size");
+        let src = self.buf.top as *mut u8;
+        unsafe {
+            ptr::copy(data.as_ptr(), src.offset(-(size as isize)), size);
+        }
+    }
+
+
+    pub fn stack_restore(&self, max: usize) -> Vec<u8> {
+        if self.size() < max {
+            let mut data = self.get_stack_data();
+            let left = max - data.len();
+            for _ in 0..left {
+                data.insert(0, 0u8);
+            }
+            let mut idx = 0;
+            for x in &data {
+                if *x != 0 {
+                    break;
+                }
+                idx += 1;
+            }
+            return data;
+        }
+        return vec![];
+    }
+
+    #[inline]
+    pub fn stack_reduce(&self, max: usize) -> Vec<u8> {
+        let data = self.get_stack_data();
+        if data.len() == max {
+            let mut idx = 0;
+            for x in &data {
+                if *x != 0 {
+                    break;
+                }
+                idx += 1;
+            }
+            let mut new_data = vec![];
+            for x in &data[idx..] {
+                new_data.push(*x);
+            }
+            if new_data.len() != new_data.len().next_power_of_two() {
+                let v = new_data.len().next_power_of_two() - new_data.len();
+                for _ in 0..v {
+                    new_data.insert(0, 0u8);
+                }
+            }
+            return new_data;
+        }
+        return vec![];
+    }
 }
 
 impl fmt::Debug for Stack {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         let offset = self.get_offset();
         write!(f, "Stack<{:?}, Offset={}>", self.buf, unsafe { *offset })
+    }
+}
+
+
+#[cfg(test)]
+mod test {
+    use crate::Stack;
+
+    #[test]
+    fn test_reduce() {
+        let s = Stack::new(4096);
+        println!("len={}",s.size());
+        let raw = s.get_stack_data();
+        let reduce = s.stack_reduce(4096);
+        drop(s);
+        let mut new = Stack::new(reduce.len());
+        new.write_stack_data(reduce);
+        let restore_data= new.stack_restore(4096);
+        drop(new);
+        let mut new_4096 = Stack::new(restore_data.len());
+        new_4096.write_stack_data(restore_data);
+        let new_data = new_4096.get_stack_data();
+        assert_eq!(new_data, raw);
     }
 }

@@ -527,7 +527,6 @@ pub fn park_timeout(dur: Duration) {
 /// run the coroutine
 #[inline]
 pub(crate) fn run_coroutine(mut co: CoroutineImpl) {
-    co.stack_restore();
     match co.resume() {
         Some(ev) => ev.subscribe(co),
         None => {
