@@ -4,7 +4,7 @@ use std::sync::{Arc, Once};
 use std::thread;
 use std::time::Duration;
 
-use crate::config::{config, DEFAULT_STACK_SIZE};
+use crate::config::{config};
 use crate::coroutine_impl::{run_coroutine, CoroutineImpl};
 use crate::io::{EventLoop, Selector};
 use crate::std::sync::AtomicOption;
@@ -127,7 +127,7 @@ fn init_scheduler() {
             println!("init worker {:?}", std::thread::current().id());
             let s = unsafe { &*SCHED };
             s.worker_ids.insert(std::thread::current().id(), id);
-            s.stacks.insert(std::thread::current().id(), Stack::new(DEFAULT_STACK_SIZE));
+            s.stacks.insert(std::thread::current().id(), Stack::new(crate::config().get_stack_size()));
             s.event_loop.run(id as usize).unwrap_or_else(|e| {
                 panic!("event_loop failed running, err={}", e);
             });
@@ -351,9 +351,9 @@ impl Scheduler {
     pub fn get_stack(&self,key:std::thread::ThreadId) -> Stack{
         match self.stacks.get(&key){
             None => {
-                let v=Stack::new(DEFAULT_STACK_SIZE);
+                let v=Stack::new(crate::config().get_stack_size());
                 let r= v.shadow_clone();
-                self.stacks.insert(key,Stack::new(DEFAULT_STACK_SIZE));
+                self.stacks.insert(key,Stack::new(crate::config().get_stack_size()));
                 r
             }
             Some(v) => {

@@ -7,7 +7,7 @@ use std::thread::ThreadId;
 use std::time::Duration;
 
 use crate::cancel::Cancel;
-use crate::config::{config, DEFAULT_STACK_SIZE};
+use crate::config::{config};
 use crate::err;
 use crate::join::{make_join_handle, Join, JoinHandle};
 use crate::local::get_co_local_data;
@@ -101,7 +101,7 @@ pub struct CoroutineImpl {
 impl CoroutineImpl {
     pub fn stack_reduce(&mut self) {
         if self.reduce.is_none() {
-            let reduce_data = unsafe { &*self.gen.stack.get() }.stack_reduce(DEFAULT_STACK_SIZE);
+            let reduce_data = unsafe { &*self.gen.stack.get() }.stack_reduce(crate::config().get_stack_size());
             if reduce_data.len() != 0 {
                 self.reduce = Some(reduce_data);
                 //alloc a small stack
