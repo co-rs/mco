@@ -235,6 +235,16 @@ impl<A: Any> Gn<A> {
         gen.init_code(f);
         Generator { gen }
     }
+
+    pub fn new_opt2<'a, T: Any, F>(size: usize, f: F,stack:Stack) -> Generator<'a, A, T>
+        where
+            F: FnOnce() -> T + Send + 'a,
+    {
+        let mut gen = GeneratorImpl::<A, T>::new(stack);
+        gen.init_context();
+        gen.init_code(f);
+        Generator { gen }
+    }
 }
 
 /// `GeneratorImpl`
