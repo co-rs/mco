@@ -123,6 +123,7 @@ should follow when writing programs that use coroutines:
 > but it's **safe** if your code is not sensitive about the previous state of TLS. Or there is no coroutines scheduling between **set** TLS and **use** TLS.
 
 * Don't run CPU bound tasks for long time, but it's ok if you don't care about fairness;
+* Don't run thread::sleep() on mco coroutine
 * In most modern operating systems, when starting a process, the standard Thread stack size is usually 8 MB, and mco provides a maximum stack space of 6MB. Typically, operating systems load memory pages on demand, such as starting about 1 million processes on my Mac/Unix system, which requires 15GB of memory space. 
 * Don't exceed the coroutine stack. There is a guard page for each coroutine stack. When stack overflow occurs, it will
   trigger segment fault error.
