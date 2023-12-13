@@ -1,20 +1,20 @@
 #![allow(deprecated)]
 #![allow(unused_assignments)]
 
-extern crate generator;
+extern crate mco_gen;
 
-use generator::*;
+use mco_gen::*;
 
 #[test]
 fn test_return() {
-    let mut g = Gn::new_scoped(|_s| 42u32);
+    let mut g = Gn::new_scoped(4096,|_s| 42u32);
     assert_eq!(g.next(), Some(42));
     assert!(g.is_done());
 }
 
 #[test]
 fn generator_is_done() {
-    let mut g = Gn::<()>::new(|| {
+    let mut g = Gn::<()>::new_opt(4096,|| {
         yield_with(());
     });
 
@@ -26,7 +26,7 @@ fn generator_is_done() {
 
 #[test]
 fn generator_is_done1() {
-    let mut g = Gn::new_scoped(|mut s| {
+    let mut g = Gn::new_scoped(4096,|mut s| {
         s.yield_(2);
         done!();
     });
@@ -39,7 +39,7 @@ fn generator_is_done1() {
 
 #[test]
 fn generator_is_done_with_drop() {
-    let mut g = Gn::new_scoped(|mut s| {
+    let mut g = Gn::new_scoped(4096,|mut s| {
         s.yield_(String::from("string"));
         done!();
     });
@@ -52,7 +52,7 @@ fn generator_is_done_with_drop() {
 
 #[test]
 fn test_yield_a() {
-    let mut g = Gn::<i32>::new(|| {
+    let mut g = Gn::<i32>::new_opt(4096,|| {
         let r: i32 = yield_(10).unwrap();
         r * 2
     });
@@ -67,7 +67,7 @@ fn test_yield_a() {
 
 #[test]
 fn test_yield_with() {
-    let mut g = Gn::new(|| {
+    let mut g = Gn::new_opt(4096,|| {
         yield_with(10);
         20
     });
@@ -83,7 +83,7 @@ fn test_yield_with() {
 #[test]
 #[should_panic]
 fn test_yield_with_type_error() {
-    let mut g = Gn::<()>::new(|| {
+    let mut g = Gn::<()>::new_opt(4096,|| {
         // yield_with::<i32>(10);
         yield_with(10u32);
         20i32
@@ -95,7 +95,7 @@ fn test_yield_with_type_error() {
 #[test]
 #[should_panic]
 fn test_get_yield_type_error() {
-    let mut g = Gn::<u32>::new(|| {
+    let mut g = Gn::<u32>::new_opt(4096,|| {
         get_yield::<i32>();
     });
 
@@ -105,8 +105,8 @@ fn test_get_yield_type_error() {
 #[test]
 #[should_panic]
 fn test_deep_yield_with_type_error() {
-    let mut g = Gn::<()>::new(|| {
-        let mut g = Gn::<()>::new(|| {
+    let mut g = Gn::<()>::new_opt(4096,|| {
+        let mut g = Gn::<()>::new_opt(4096,|| {
             yield_with(0);
         });
         g.next();
@@ -123,7 +123,7 @@ fn test_scoped() {
     let x = Rc::new(RefCell::new(10));
 
     let x1 = x.clone();
-    let mut g = Gn::<()>::new_scoped_local(move |mut s| {
+    let mut g = Gn::<()>::new_scoped_local(4096,move |mut s| {
         *x1.borrow_mut() = 20;
         s.yield_with(());
         *x1.borrow_mut() = 5;
@@ -142,7 +142,7 @@ fn test_scoped() {
 fn test_scoped_1() {
     let mut x = 10;
     {
-        let mut g = Gn::<()>::new(|| {
+        let mut g = Gn::<()>::new_opt(4096,|| {
             x = 5;
         });
         g.next();
@@ -153,7 +153,7 @@ fn test_scoped_1() {
 
 #[test]
 fn test_scoped_yield() {
-    let mut g = Gn::new_scoped(|mut s| {
+    let mut g = Gn::new_scoped(4096,|mut s| {
         let mut i = 0;
         loop {
             let v = s.yield_(i);
@@ -186,7 +186,7 @@ fn test_scoped_yield() {
 
 #[test]
 fn test_inner_ref() {
-    let mut g = Gn::<()>::new_scoped(|mut s| {
+    let mut g = Gn::<()>::new_scoped(4096,|mut s| {
         use std::mem;
         // setup something
         let mut x: u32 = 10;
@@ -223,7 +223,7 @@ fn test_inner_ref() {
 fn test_drop() {
     let mut x = 10;
     {
-        let mut g = Gn::<()>::new(|| {
+        let mut g = Gn::<()>::new_opt(4096,|| {
             x = 1;
             yield_with(());
             x = 5;
@@ -238,7 +238,7 @@ fn test_drop() {
 fn test_ill_drop() {
     let mut x = 10u32;
     {
-        Gn::<u32>::new(|| {
+        Gn::<u32>::new_opt(4096,|| {
             x = 5;
             // here we got None from drop
             x = get_yield().unwrap_or(0);
@@ -253,7 +253,7 @@ fn test_ill_drop() {
 fn test_loop_drop() {
     let mut x = 10u32;
     {
-        let mut g = Gn::<()>::new(|| {
+        let mut g = Gn::<()>::new_opt(4096,|| {
             x = 5;
             loop {
                 yield_with(());
@@ -273,7 +273,7 @@ fn test_panic_inside() {
     {
         let mut wrapper = AssertUnwindSafe(&mut x);
         if let Err(panic) = catch_unwind(move || {
-            let mut g = Gn::<()>::new(|| {
+            let mut g = Gn::<()>::new_opt(4096,|| {
                 **wrapper = 5;
                 panic!("panic inside!");
             });
@@ -294,7 +294,7 @@ fn test_panic_inside() {
 #[test]
 #[allow(unreachable_code)]
 fn test_cancel() {
-    let mut g = Gn::<()>::new(|| {
+    let mut g = Gn::<()>::new_opt(4096,|| {
         let mut i = 0;
         loop {
             yield_with(i);
@@ -330,8 +330,8 @@ fn test_yield_with_from_functor_context() {
 
 #[test]
 fn test_yield_from_generator_context() {
-    let mut g = Gn::<()>::new(|| {
-        let mut g1 = Gn::<()>::new(|| {
+    let mut g = Gn::<()>::new_opt(4096,|| {
+        let mut g1 = Gn::<()>::new_opt(4096,|| {
             yield_with(5);
             10
         });
@@ -350,8 +350,8 @@ fn test_yield_from_generator_context() {
 
 #[test]
 fn test_yield_from() {
-    let mut g = Gn::<()>::new(|| {
-        let g1 = Gn::<()>::new(|| {
+    let mut g = Gn::<()>::new_opt(4096,|| {
+        let g1 = Gn::<()>::new_opt(4096,|| {
             yield_with(5);
             10
         });
@@ -371,8 +371,8 @@ fn test_yield_from() {
 
 #[test]
 fn test_yield_from_send() {
-    let mut g = Gn::<u32>::new(|| {
-        let g1 = Gn::<u32>::new(|| {
+    let mut g = Gn::<u32>::new_opt(4096,|| {
+        let g1 = Gn::<u32>::new_opt(4096,|| {
             let mut i: u32 = yield_(1u32).unwrap();
             i = yield_(i * 2).unwrap();
             i * 2
@@ -401,8 +401,8 @@ fn test_yield_from_send() {
 #[test]
 #[should_panic]
 fn test_yield_from_send_type_miss_match() {
-    let mut g = Gn::<u32>::new(|| {
-        let g1 = Gn::<u32>::new(|| {
+    let mut g = Gn::<u32>::new_opt(4096,|| {
+        let g1 = Gn::<u32>::new_opt(4096,|| {
             let mut i: u32 = yield_(1u32).unwrap();
             i = yield_(i * 2).unwrap();
             i * 2
@@ -441,7 +441,7 @@ fn test_yield_from_send_type_miss_match() {
 #[test]
 fn test_scope_gen() {
     // now we can even deduce the input para type
-    let mut g = Gn::new_scoped(|mut s| {
+    let mut g = Gn::new_scoped(4096,|mut s| {
         let i = s.yield_(0).unwrap();
         // below would have a compile error, nice!
         // s.yield_(Box::new(0));
@@ -455,8 +455,8 @@ fn test_scope_gen() {
 
 #[test]
 fn test_scope_yield_from_send() {
-    let mut g = Gn::new_scoped(|mut s| {
-        let g1 = Gn::new_scoped(|mut s| {
+    let mut g = Gn::new_scoped(4096,|mut s| {
+        let g1 = Gn::new_scoped(4096,|mut s| {
             let mut i: u32 = s.yield_(1u32).unwrap();
             i = s.yield_(i * 2).unwrap();
             i * 2
@@ -515,7 +515,7 @@ fn done_in_normal() {
 #[test]
 #[should_panic]
 fn invalid_yield_in_scope() {
-    let g = Gn::new_scoped(|_| {
+    let g = Gn::new_scoped(4096,|_| {
         // invalid use raw yield API with scope
         yield_::<String, _>(());
     });
@@ -525,7 +525,7 @@ fn invalid_yield_in_scope() {
 
 #[test]
 fn test_yield_float() {
-    let mut g = Gn::<f64>::new(|| {
+    let mut g = Gn::<f64>::new_opt(4096,|| {
         let r: f64 = yield_(10.0).unwrap();
         let x = r * 2.0; // 6
         let y = x * 9.0; // 54

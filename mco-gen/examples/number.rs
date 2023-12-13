@@ -1,7 +1,7 @@
-use generator::*;
+use mco_gen::*;
 
 fn factors(n: u32) -> Generator<'static, (), u32> {
-    Gn::new_scoped(move |mut s| {
+    Gn::new_scoped(4096,move |mut s| {
         if n == 0 {
             return 0;
         }

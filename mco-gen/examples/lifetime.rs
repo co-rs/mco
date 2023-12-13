@@ -1,7 +1,7 @@
 fn main() {
     let str = "foo".to_string();
 
-    let mut gen = generator::Gn::new_scoped(|mut s| {
+    let mut gen = mco_gen::Gn::new_scoped(4096,|mut s| {
         std::thread::scope(|s2| {
             s2.spawn(|| {
                 std::thread::sleep(std::time::Duration::from_millis(500));
@@ -12,7 +12,7 @@ fn main() {
             // s.yield_(());
             unsafe { s.yield_unsafe(()) };
         });
-        generator::done!();
+        mco_gen::done!();
     });
 
     gen.next();

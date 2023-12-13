@@ -1,4 +1,4 @@
-use generator::*;
+use mco_gen::*;
 
 #[derive(Debug)]
 enum Action {
@@ -16,7 +16,7 @@ use crate::Action::*;
 use crate::State::*;
 
 fn main() {
-    let mut cd_player = Gn::new_scoped(|mut s| {
+    let mut cd_player = Gn::new_scoped(4096,|mut s| {
         let mut state = Stopped;
         loop {
             // println!("{:?}", *state);
