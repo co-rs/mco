@@ -96,10 +96,13 @@ pub struct CoroutineImpl {
 }
 
 impl CoroutineImpl {
-    pub fn stack_reduce(&self) {
+    pub fn stack_reduce(&mut self) {
+
     }
 
-    pub fn stack_restore(&self) {}
+    pub fn stack_restore(&mut self) {
+
+    }
 }
 
 impl Deref for CoroutineImpl {
@@ -527,8 +530,12 @@ pub fn park_timeout(dur: Duration) {
 /// run the coroutine
 #[inline]
 pub(crate) fn run_coroutine(mut co: CoroutineImpl) {
+    co.stack_restore();
     match co.resume() {
-        Some(ev) => ev.subscribe(co),
+        Some(ev) => {
+            co.stack_reduce();
+            ev.subscribe(co)
+        },
         None => {
             // panic happened here
             let local = unsafe { &mut *get_co_local(&co) };
