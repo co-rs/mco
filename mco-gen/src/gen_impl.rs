@@ -19,7 +19,7 @@ use crate::stack::{Func, Stack, StackBox};
 
 /// The default stack size for generators, in bytes.
 // windows has a minimal size as 0x4a8!!!!
-pub const DEFAULT_STACK_SIZE: usize = 0x1000;
+pub const DEFAULT_STACK_SIZE: usize = 6 * 1024 * 1024;
 
 /// the generator obj type, the functor passed to it must be Send
 pub struct GeneratorObj<'a, A, T, const LOCAL: bool> {

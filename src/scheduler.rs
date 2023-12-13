@@ -318,7 +318,7 @@ impl Scheduler {
 
     /// put the coroutine to global queue so that next time it can be scheduled
     #[inline]
-    pub fn schedule_global(&self, co: CoroutineImpl) {
+    pub fn schedule_global(&self, mut co: CoroutineImpl) {
         self.global_queue.push(co);
         // signal one waiting thread if any
         self.workers.wake_one(self);

@@ -387,7 +387,7 @@ impl Stack {
     }
 
     // dealloc the stack
-    pub(crate) fn drop_stack(&self) {
+    pub fn drop_stack(&self) {
         if self.buf.len() == 0 {
             return;
         }
@@ -430,7 +430,6 @@ impl Stack {
             ptr::copy(data.as_ptr(), src.offset(-(size as isize)), size);
         }
     }
-
 
     pub fn stack_restore(&self, max: usize) -> Vec<u8> {
         if self.size() < max {
@@ -493,13 +492,13 @@ mod test {
     #[test]
     fn test_reduce() {
         let s = Stack::new(4096);
-        println!("len={}",s.size());
+        println!("len={}", s.size());
         let raw = s.get_stack_data();
         let reduce = s.stack_reduce(4096);
         drop(s);
         let mut new = Stack::new(reduce.len());
         new.write_stack_data(reduce);
-        let restore_data= new.stack_restore(4096);
+        let restore_data = new.stack_restore(4096);
         drop(new);
         let mut new_4096 = Stack::new(restore_data.len());
         new_4096.write_stack_data(restore_data);

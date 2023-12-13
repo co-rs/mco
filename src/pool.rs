@@ -17,6 +17,7 @@ impl CoroutinePool {
             inner: Gn::new_opt(config().get_stack_size(), move || {
                 unreachable!("dummy coroutine should never be called");
             }),
+            reduce: None,
         }
     }
 

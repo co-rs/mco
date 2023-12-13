@@ -1,3 +1,4 @@
+use std::cell::UnsafeCell;
 use std::fmt;
 use std::io;
 use std::ops::{Deref, DerefMut};
@@ -14,7 +15,8 @@ use crate::local::CoroutineLocal;
 use crate::park::Park;
 use crate::scheduler::get_scheduler;
 use crossbeam::atomic::AtomicCell;
-use mco_gen::{Generator, Gn};
+use once_cell::sync::Lazy;
+use mco_gen::{DEFAULT_STACK_SIZE, Generator, Gn, Stack};
 
 /// /////////////////////////////////////////////////////////////////////////////
 /// Coroutine framework types
@@ -93,15 +95,28 @@ impl EventSource for Done {
 pub struct CoroutineImpl {
     pub worker_thread_id: Option<ThreadId>,
     pub inner: Generator<'static, EventResult, EventSubscriber>,
+    pub reduce: Option<Vec<u8>>,
 }
 
 impl CoroutineImpl {
     pub fn stack_reduce(&mut self) {
-
+        if self.reduce.is_none(){
+            let reduce_data = unsafe { &*self.gen.stack.get() }.stack_reduce(DEFAULT_STACK_SIZE);
+            if reduce_data.len() != 0 {
+                self.reduce = Some(reduce_data);
+                //alloc a small stack
+                // unsafe { &*self.gen.stack.get() }.drop_stack();
+                self.gen.stack = UnsafeCell::new(Stack::new(0));
+            }
+        }
     }
 
     pub fn stack_restore(&mut self) {
-
+        if let Some(v) = self.reduce.take() {
+            let mut s = Stack::new(DEFAULT_STACK_SIZE);
+            s.write_stack_data(v);
+            self.gen.stack = UnsafeCell::new(s);
+        }
     }
 }
 
@@ -276,9 +291,9 @@ impl Builder {
     /// The join handle can be used to block on
     /// termination of the child coroutine, including recovering its panics.
     fn spawn_impl<F, T>(self, f: F) -> (CoroutineImpl, JoinHandle<T>)
-    where
-        F: FnOnce() -> T + Send + 'static,
-        T: Send + 'static,
+        where
+            F: FnOnce() -> T + Send + 'static,
+            T: Send + 'static,
     {
         static DONE: Done = Done {};
 
@@ -311,6 +326,7 @@ impl Builder {
         let mut co = CoroutineImpl {
             worker_thread_id: None,
             inner: Gn::new_opt(stack_size, closure),
+            reduce: None,
         };
 
         let handle = Coroutine::new(self.name, stack_size);
@@ -362,9 +378,9 @@ impl Builder {
     /// [`go!`]: ../macro.go.html
     /// [`spawn`]: ./fn.spawn.html
     pub fn spawn<F, T>(self, f: F) -> JoinHandle<T>
-    where
-        F: FnOnce() -> T + Send + 'static,
-        T: Send + 'static,
+        where
+            F: FnOnce() -> T + Send + 'static,
+            T: Send + 'static,
     {
         let (co, handle) = self.spawn_impl(f);
         let s = get_scheduler();
@@ -381,9 +397,9 @@ impl Builder {
     /// Normally this is safe but for some cases you should
     /// take care of the side effect
     pub fn spawn_local<F, T>(self, f: F) -> JoinHandle<T>
-    where
-        F: FnOnce() -> T + Send + 'static,
-        T: Send + 'static,
+        where
+            F: FnOnce() -> T + Send + 'static,
+            T: Send + 'static,
     {
         // we will still get optimizations in spawn_impl
         let (co, handle) = self.spawn_impl(f);
@@ -444,9 +460,9 @@ impl Builder {
 /// [`Builder::spawn`]: struct.Builder.html#method.spawn
 /// [`Builder`]: struct.Builder.html
 pub fn spawn<F, T>(f: F) -> JoinHandle<T>
-where
-    F: FnOnce() -> T + Send + 'static,
-    T: Send + 'static,
+    where
+        F: FnOnce() -> T + Send + 'static,
+        T: Send + 'static,
 {
     Builder::new().spawn(f)
 }
@@ -534,8 +550,8 @@ pub(crate) fn run_coroutine(mut co: CoroutineImpl) {
     match co.resume() {
         Some(ev) => {
             co.stack_reduce();
-            ev.subscribe(co)
-        },
+            ev.subscribe(co);
+        }
         None => {
             // panic happened here
             let local = unsafe { &mut *get_co_local(&co) };
