@@ -106,7 +106,7 @@ impl CoroutineImpl {
                 self.reduce = Some(reduce_data);
                 //alloc a small stack
                 // unsafe { &*self.gen.stack.get() }.drop_stack();
-                self.gen.stack = UnsafeCell::new(Stack::new(0));
+                self.gen.stack = UnsafeCell::new(Stack::new(2048));
             }
         }
     }
@@ -324,7 +324,7 @@ impl Builder {
 
         let mut co = CoroutineImpl {
             worker_thread_id: None,
-            inner: Gn::new_opt2(stack_size, closure, Stack::new(0)),
+            inner: Gn::new_opt2(stack_size, closure, Stack::new(2048)),
             reduce: None,
         };
 
