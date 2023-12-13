@@ -7,7 +7,7 @@ use std::thread::ThreadId;
 use std::time::Duration;
 
 use crate::cancel::Cancel;
-use crate::config::config;
+use crate::config::{config, DEFAULT_STACK_SIZE};
 use crate::err;
 use crate::join::{make_join_handle, Join, JoinHandle};
 use crate::local::get_co_local_data;
@@ -16,7 +16,7 @@ use crate::park::Park;
 use crate::scheduler::get_scheduler;
 use crossbeam::atomic::AtomicCell;
 use once_cell::sync::Lazy;
-use mco_gen::{DEFAULT_STACK_SIZE, Generator, Gn, Stack};
+use mco_gen::{Generator, Gn, Stack};
 
 /// /////////////////////////////////////////////////////////////////////////////
 /// Coroutine framework types
@@ -100,7 +100,7 @@ pub struct CoroutineImpl {
 
 impl CoroutineImpl {
     pub fn stack_reduce(&mut self) {
-        if self.reduce.is_none(){
+        if self.reduce.is_none() {
             let reduce_data = unsafe { &*self.gen.stack.get() }.stack_reduce(DEFAULT_STACK_SIZE);
             if reduce_data.len() != 0 {
                 self.reduce = Some(reduce_data);
@@ -111,11 +111,10 @@ impl CoroutineImpl {
         }
     }
 
-    pub fn stack_restore(&mut self) {
+    pub fn stack_restore(&mut self, mut stack: Stack) {
         if let Some(v) = self.reduce.take() {
-            let mut s = Stack::new(DEFAULT_STACK_SIZE);
-            s.write_stack_data(v);
-            self.gen.stack = UnsafeCell::new(s);
+            stack.write_stack_data(v);
+            self.gen.stack = UnsafeCell::new(stack);
         }
     }
 }
@@ -546,7 +545,8 @@ pub fn park_timeout(dur: Duration) {
 /// run the coroutine
 #[inline]
 pub(crate) fn run_coroutine(mut co: CoroutineImpl) {
-    co.stack_restore();
+    let s = get_scheduler();
+    co.stack_restore(s.get_stack(std::thread::current().id()));
     match co.resume() {
         Some(ev) => {
             co.stack_reduce();

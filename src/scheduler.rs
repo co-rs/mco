@@ -4,7 +4,7 @@ use std::sync::{Arc, Once};
 use std::thread;
 use std::time::Duration;
 
-use crate::config::config;
+use crate::config::{config, DEFAULT_STACK_SIZE};
 use crate::coroutine_impl::{run_coroutine, CoroutineImpl};
 use crate::io::{EventLoop, Selector};
 use crate::std::sync::AtomicOption;
@@ -16,6 +16,7 @@ use crossbeam::utils::Backoff;
 #[cfg(nightly)]
 use std::intrinsics::likely;
 use std::thread::ThreadId;
+use mco_gen::{Stack};
 
 #[cfg(not(nightly))]
 #[inline]
@@ -126,6 +127,7 @@ fn init_scheduler() {
             println!("init worker {:?}", std::thread::current().id());
             let s = unsafe { &*SCHED };
             s.worker_ids.insert(std::thread::current().id(), id);
+            s.stacks.insert(std::thread::current().id(), Stack::new(DEFAULT_STACK_SIZE));
             s.event_loop.run(id as usize).unwrap_or_else(|e| {
                 panic!("event_loop failed running, err={}", e);
             });
@@ -189,6 +191,7 @@ pub struct Scheduler {
     // stealers: Vec<Vec<(usize, deque::Stealer<CoroutineImpl>)>>,
     workers_len: usize,
     pub(crate) worker_ids: dark_std::sync::SyncHashMap<ThreadId, usize>,
+    pub(crate) stacks: dark_std::sync::SyncHashMap<ThreadId, Stack>,
 }
 
 impl Scheduler {
@@ -218,6 +221,7 @@ impl Scheduler {
                 let v = dark_std::sync::SyncHashMap::new();
                 v
             },
+            stacks: dark_std::sync::SyncHashMap::new(),
         })
     }
 
@@ -341,5 +345,20 @@ impl Scheduler {
     #[inline]
     pub fn get_selector(&self) -> &Selector {
         self.event_loop.get_selector()
+    }
+
+    #[inline]
+    pub fn get_stack(&self,key:std::thread::ThreadId) -> Stack{
+        match self.stacks.get(&key){
+            None => {
+                let v=Stack::new(DEFAULT_STACK_SIZE);
+                let r= v.shadow_clone();
+                self.stacks.insert(key,Stack::new(DEFAULT_STACK_SIZE));
+                r
+            }
+            Some(v) => {
+                v.shadow_clone()
+            }
+        }
     }
 }

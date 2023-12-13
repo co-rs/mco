@@ -17,10 +17,6 @@ use crate::rt::{Context, ContextStack, Error};
 use crate::scope::Scope;
 use crate::stack::{Func, Stack, StackBox};
 
-/// The default stack size for generators, in bytes.
-// windows has a minimal size as 0x4a8!!!!
-pub const DEFAULT_STACK_SIZE: usize = 6 * 1024 * 1024;
-
 /// the generator obj type, the functor passed to it must be Send
 pub struct GeneratorObj<'a, A, T, const LOCAL: bool> {
     pub gen: StackBox<GeneratorImpl<'a, A, T>>,
@@ -183,23 +179,23 @@ pub struct Gn<A = ()> {
 
 impl<A> Gn<A> {
     /// create a scoped generator with default stack size
-    pub fn new_scoped<'a, T, F>(f: F) -> Generator<'a, A, T>
+    pub fn new_scoped<'a, T, F>(size: usize,f: F) -> Generator<'a, A, T>
         where
                 for<'scope> F: FnOnce(Scope<'scope, 'a, A, T>) -> T + Send + 'a,
                 T: Send + 'a,
                 A: Send + 'a,
     {
-        Self::new_scoped_opt(DEFAULT_STACK_SIZE, f)
+        Self::new_scoped_opt(size, f)
     }
 
     /// create a scoped local generator with default stack size
-    pub fn new_scoped_local<'a, T, F>(f: F) -> LocalGenerator<'a, A, T>
+    pub fn new_scoped_local<'a, T, F>(size: usize,f: F) -> LocalGenerator<'a, A, T>
         where
             F: FnOnce(Scope<A, T>) -> T + 'a,
             T: 'a,
             A: 'a,
     {
-        Self::new_scoped_opt_local(DEFAULT_STACK_SIZE, f)
+        Self::new_scoped_opt_local(size, f)
     }
 
     /// create a scoped generator with specified stack size
@@ -228,16 +224,6 @@ impl<A> Gn<A> {
 }
 
 impl<A: Any> Gn<A> {
-    /// create a new generator with default stack size
-    #[cfg_attr(feature = "cargo-clippy", allow(clippy::new_ret_no_self))]
-    #[deprecated(since = "0.6.18", note = "please use `scope` version instead")]
-    pub fn new<'a, T: Any, F>(f: F) -> Generator<'a, A, T>
-        where
-            F: FnOnce() -> T + Send + 'a,
-    {
-        Self::new_opt(DEFAULT_STACK_SIZE, f)
-    }
-
     /// create a new generator with specified stack size
     // the `may` library use this API so we can't deprecated it yet.
     pub fn new_opt<'a, T: Any, F>(size: usize, f: F) -> Generator<'a, A, T>
