@@ -236,7 +236,7 @@ impl<A: Any> Gn<A> {
         Generator { gen }
     }
 
-    pub fn new_opt2<'a, T: Any, F>(size: usize, f: F,stack:Stack) -> Generator<'a, A, T>
+    pub fn new_opt_stack<'a, T: Any, F>( f: F,stack:Stack) -> Generator<'a, A, T>
         where
             F: FnOnce() -> T + Send + 'a,
     {
