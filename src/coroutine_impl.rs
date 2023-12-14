@@ -328,11 +328,18 @@ impl Builder {
             stack = Some(x.1.shadow_clone());
             break;
         }
+        let c: fn() -> EventSubscriber = unsafe { std::mem::transmute_copy(&closure) };
+        let mut stack = stack.unwrap();
+        stack.reset();
+        // let s = Stack::new(stack_size);
+        // let stack_data = s.get_stack_data();
+        //
         let mut co = CoroutineImpl {
             worker_thread_id: tid,
-            inner: Gn::new_opt_stack(closure, stack.unwrap()),
+            inner: Gn::new_opt_stack(c, stack),
             reduce: None,
         };
+        co.init_code(closure);
         let handle = Coroutine::new(self.name, stack_size);
         // create the local storage
         let local = CoroutineLocal::new(handle.clone(), join.clone());

@@ -341,6 +341,38 @@ impl Stack {
         stk
     }
 
+    pub fn reset(&mut self) {
+        let size = self.size();
+        let track = (size & 1) != 0;
+
+        self.write_stack_data({
+            let mut v = Vec::with_capacity(size);
+            for _ in 0..size {
+                v.push(0u8);
+            }
+            v
+        });
+        // if size is not even we do the full foot print test
+        let count = if track {
+            self.size()
+        } else {
+            // we only check the last few words
+            8
+        };
+
+        unsafe {
+            let buf = self.buf.bottom as *mut usize;
+            ptr::write_bytes(buf, 0xEE, count);
+        }
+        unsafe {
+            self.buf.top = self.buf.bottom.add(size); // 重置 top 的值为 bottom + size
+        }
+        // init the stack box usage
+        let offset = self.get_offset();
+        unsafe { *offset = 1 };
+    }
+
+
     /// get used stack size
     pub fn get_used_size(&self) -> usize {
         let mut offset: usize = 0;
