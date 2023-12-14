@@ -321,10 +321,21 @@ impl Builder {
             their_join.trigger();
             subscriber
         };
-
+        let s = get_scheduler();
+        std::thread::sleep(Duration::from_secs(1));
+        println!("getschedule ");
+        let s = get_scheduler();
+        let mut tid = None;
+        let mut stack = None;
+        for x in &s.stacks {
+            tid = Some(x.0.clone());
+            stack = Some(x.1.shadow_clone());
+            println!(" spawn tid={:?}",tid);
+            break;
+        }
         let mut co = CoroutineImpl {
-            worker_thread_id: None,
-            inner: Gn::new_opt_stack(closure, Stack::new(config().get_stack_size())),
+            worker_thread_id: tid,
+            inner: Gn::new_opt_stack(closure, stack.unwrap()),
             reduce: None,
         };
 

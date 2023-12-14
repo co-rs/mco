@@ -282,6 +282,8 @@ impl Scheduler {
                             } else {
                                 if v.worker_thread_id.as_ref().unwrap() != &current_id {
                                     self.global_queue.push(v);
+                                }else{
+                                    return Some(v);
                                 }
                             }
                         }
@@ -295,6 +297,8 @@ impl Scheduler {
                         } else {
                             if v.worker_thread_id.as_ref().unwrap() != &current_id {
                                 self.global_queue.push(v);
+                            }else{
+                                return Some(v);
                             }
                         }
                     }
