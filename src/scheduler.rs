@@ -1,5 +1,5 @@
 use std::io;
-use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicU64, AtomicUsize, Ordering};
 use std::sync::{Arc, Once};
 use std::thread;
 use std::time::Duration;
@@ -87,6 +87,8 @@ impl ParkStatus {
     }
 }
 
+static SCHEDULER_INITED: AtomicBool = AtomicBool::new(false);
+
 #[inline(never)]
 fn init_scheduler() {
     let workers = config().get_workers();
@@ -121,18 +123,23 @@ fn init_scheduler() {
     });
 
     println!("init workers {}", workers);
+    let wg = crossbeam::sync::WaitGroup::new();
     // io event loop thread
     for id in 0..workers {
+        let w = wg.clone();
         thread::spawn(move || {
             println!("init worker {:?}", std::thread::current().id());
             let s = unsafe { &*SCHED };
             s.worker_ids.insert(std::thread::current().id(), id);
             s.stacks.insert(std::thread::current().id(), Stack::new(crate::config().get_stack_size()));
+            drop(w);
             s.event_loop.run(id as usize).unwrap_or_else(|e| {
                 panic!("event_loop failed running, err={}", e);
             });
         });
     }
+    wg.wait();
+    SCHEDULER_INITED.store(true, Ordering::Relaxed);
 }
 
 #[inline]
@@ -144,6 +151,13 @@ pub fn get_scheduler() -> &'static Scheduler {
     }
     static ONCE: Once = Once::new();
     ONCE.call_once(init_scheduler);
+
+    loop {
+        let v = SCHEDULER_INITED.load(Ordering::Relaxed);
+        if v == true {
+            break;
+        }
+    }
     unsafe { &*SCHED }
 }
 
@@ -282,7 +296,7 @@ impl Scheduler {
                             } else {
                                 if v.worker_thread_id.as_ref().unwrap() != &current_id {
                                     self.global_queue.push(v);
-                                }else{
+                                } else {
                                     return Some(v);
                                 }
                             }
@@ -297,7 +311,7 @@ impl Scheduler {
                         } else {
                             if v.worker_thread_id.as_ref().unwrap() != &current_id {
                                 self.global_queue.push(v);
-                            }else{
+                            } else {
                                 return Some(v);
                             }
                         }
@@ -313,9 +327,9 @@ impl Scheduler {
     #[inline]
     pub fn schedule(&self, co: CoroutineImpl) {
         #[cfg(nightly)]
-        let id = WORKER_ID.load(Ordering::Relaxed);
+            let id = WORKER_ID.load(Ordering::Relaxed);
         #[cfg(not(nightly))]
-        let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
+            let id = WORKER_ID.with(|id| id.load(Ordering::Relaxed));
 
         if id == !1 {
             self.schedule_global(co);
@@ -352,12 +366,12 @@ impl Scheduler {
     }
 
     #[inline]
-    pub fn get_stack(&self,key:std::thread::ThreadId) -> Stack{
-        match self.stacks.get(&key){
+    pub fn get_stack(&self, key: std::thread::ThreadId) -> Stack {
+        match self.stacks.get(&key) {
             None => {
-                let v=Stack::new(crate::config().get_stack_size());
-                let r= v.shadow_clone();
-                self.stacks.insert(key,Stack::new(crate::config().get_stack_size()));
+                let v = Stack::new(crate::config().get_stack_size());
+                let r = v.shadow_clone();
+                self.stacks.insert(key, v);
                 r
             }
             Some(v) => {

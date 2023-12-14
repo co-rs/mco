@@ -104,9 +104,8 @@ impl CoroutineImpl {
             let reduce_data = unsafe { &*self.gen.stack.get() }.stack_reduce(crate::config().get_stack_size());
             if reduce_data.len() != 0 {
                 self.reduce = Some(reduce_data);
-                //alloc a small stack
-                // unsafe { &*self.gen.stack.get() }.drop_stack();
-                self.gen.stack = UnsafeCell::new(Stack::new(2048));
+                //unsafe { &*self.gen.stack.get() }.drop_stack();
+                //self.gen.stack = UnsafeCell::new(Stack::new(4096));
             }
         }
     }
@@ -322,15 +321,11 @@ impl Builder {
             subscriber
         };
         let s = get_scheduler();
-        std::thread::sleep(Duration::from_secs(1));
-        println!("getschedule ");
-        let s = get_scheduler();
         let mut tid = None;
         let mut stack = None;
         for x in &s.stacks {
             tid = Some(x.0.clone());
             stack = Some(x.1.shadow_clone());
-            println!(" spawn tid={:?}",tid);
             break;
         }
         let mut co = CoroutineImpl {
@@ -338,7 +333,6 @@ impl Builder {
             inner: Gn::new_opt_stack(closure, stack.unwrap()),
             reduce: None,
         };
-
         let handle = Coroutine::new(self.name, stack_size);
         // create the local storage
         let local = CoroutineLocal::new(handle.clone(), join.clone());
