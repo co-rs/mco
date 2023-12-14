@@ -484,8 +484,8 @@ impl Stack {
 
     #[inline]
     pub fn stack_reduce(&self, max: usize) -> Vec<u8> {
-        let data = self.get_stack_data();
-        if data.len() == max {
+        if self.size() == max {
+            let data = self.get_stack_data();
             let mut idx = 0;
             for x in &data {
                 if *x != 0 {
