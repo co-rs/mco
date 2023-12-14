@@ -8,7 +8,7 @@ massive concurrent programs. It can be thought as the Rust version of the popula
 # way mco?
 * Elegant coding,No need for async await
 * Simple concurrency(CSP model), learning Golang
-* Default MAX 6MB Stack Size(Reuse the stack owned by threads)
+* Default MAX 6MB Stack Size
 * many std like API
 
 > Initial code frok from [May](https://github.com/Xudong-Huang/may) and we add Many improvements(Inspired by [Golang](https://golang.google.cn/),  [parking_lot](https://github.com/Amanieu/parking_lot)  and [crossbeam](https://github.com/crossbeam-rs/crossbeam)) and more...
