@@ -484,28 +484,25 @@ impl Stack {
 
     #[inline]
     pub fn stack_reduce(&self, max: usize) -> Vec<u8> {
-        if self.size() == max {
-            let data = self.get_stack_data();
-            let mut idx = 0;
-            for x in &data {
-                if *x != 0 {
-                    break;
-                }
-                idx += 1;
+        let data = self.get_stack_data();
+        let mut idx = 0;
+        for x in &data {
+            if *x != 0 {
+                break;
             }
-            let mut new_data = vec![];
-            for x in &data[idx..] {
-                new_data.push(*x);
-            }
-            if new_data.len() != new_data.len().next_power_of_two() {
-                let v = new_data.len().next_power_of_two() - new_data.len();
-                for _ in 0..v {
-                    new_data.insert(0, 0u8);
-                }
-            }
-            return new_data;
+            idx += 1;
         }
-        return vec![];
+        let mut new_data = vec![];
+        for x in &data[idx..] {
+            new_data.push(*x);
+        }
+        if new_data.len() != new_data.len().next_power_of_two() {
+            let v = new_data.len().next_power_of_two() - new_data.len();
+            for _ in 0..v {
+                new_data.insert(0, 0u8);
+            }
+        }
+        return new_data;
     }
 }
 
