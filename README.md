@@ -5,6 +5,10 @@
 mco is a high-performance library for programming stackful coroutines with which you can easily develop and maintain
 massive concurrent programs. It can be thought as the Rust version of the popular [Goroutine][go].
 
+- [x] Most commonly used APIs
+- [ ] The current version support stack expansion
+
+
 # way mco?
 * Elegant coding,No need for async await
 * Simple concurrency(CSP model), learning Golang
